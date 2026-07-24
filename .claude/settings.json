@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:unilag-communication-review.vercel.app)",
+      "WebSearch",
+      "WebFetch(domain:www.exordo.com)",
+      "Skill(artifact-design)",
+      "Skill(artifact-design:*)"
+    ]
+  }
+}

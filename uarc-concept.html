@@ -1,0 +1,1144 @@
+<style>
+  :root {
+    --bg: #F5EFE2;
+    --bg-raised: #FBF8F1;
+    --bg-sunken: #EAE0CB;
+    --text: #241D16;
+    --text-muted: #5B5245;
+    --accent-fill: #6E1220;
+    --accent-fill-text: #F5EFE2;
+    --accent-text: #6E1220;
+    --gold: #8C6423;
+    --line: rgba(36,29,22,0.18);
+    --line-strong: rgba(36,29,22,0.32);
+    --focus-ring: #6E1220;
+    --status-open: #3E6B47;
+    --status-closed: #8A3A2C;
+    --status-upcoming: #8C6423;
+    --shadow-none: none;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1A1210;
+      --bg-raised: #241A17;
+      --bg-sunken: #130D0B;
+      --text: #F1E7D8;
+      --text-muted: #BDAC97;
+      --accent-fill: #8F2635;
+      --accent-fill-text: #F5EFE2;
+      --accent-text: #E2919A;
+      --gold: #D8A94D;
+      --line: rgba(241,231,216,0.16);
+      --line-strong: rgba(241,231,216,0.28);
+      --focus-ring: #D8A94D;
+      --status-open: #7FB88C;
+      --status-closed: #D98C7B;
+      --status-upcoming: #D8A94D;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1A1210;
+    --bg-raised: #241A17;
+    --bg-sunken: #130D0B;
+    --text: #F1E7D8;
+    --text-muted: #BDAC97;
+    --accent-fill: #8F2635;
+    --accent-fill-text: #F5EFE2;
+    --accent-text: #E2919A;
+    --gold: #D8A94D;
+    --line: rgba(241,231,216,0.16);
+    --line-strong: rgba(241,231,216,0.28);
+    --focus-ring: #D8A94D;
+    --status-open: #7FB88C;
+    --status-closed: #D98C7B;
+    --status-upcoming: #D8A94D;
+  }
+  :root[data-theme="light"] {
+    --bg: #F5EFE2;
+    --bg-raised: #FBF8F1;
+    --bg-sunken: #EAE0CB;
+    --text: #241D16;
+    --text-muted: #5B5245;
+    --accent-fill: #6E1220;
+    --accent-fill-text: #F5EFE2;
+    --accent-text: #6E1220;
+    --gold: #8C6423;
+    --line: rgba(36,29,22,0.18);
+    --line-strong: rgba(36,29,22,0.32);
+    --focus-ring: #6E1220;
+    --status-open: #3E6B47;
+    --status-closed: #8A3A2C;
+    --status-upcoming: #8C6423;
+  }
+
+  * { box-sizing: border-box; }
+  html { color-scheme: light dark; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Seravek, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+    font-weight: 600;
+    color: var(--text);
+    text-wrap: balance;
+    margin: 0;
+  }
+  p { margin: 0; }
+  a { color: var(--accent-text); }
+  ul { margin: 0; padding: 0; list-style: none; }
+  img, svg { display: block; max-width: 100%; }
+  .tnum { font-variant-numeric: tabular-nums; }
+  .mono { font-family: ui-monospace, 'Cascadia Mono', 'SF Mono', Consolas, monospace; }
+
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 3px;
+  }
+
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    background: var(--accent-fill);
+    color: var(--accent-fill-text);
+    padding: 0.75rem 1.25rem;
+    z-index: 200;
+    font-size: 0.875rem;
+  }
+  .skip-link:focus { left: 1rem; top: 1rem; }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 1.5rem; }
+
+  .eyebrow {
+    font-family: ui-monospace, 'Cascadia Mono', 'SF Mono', Consolas, monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 1.5rem;
+    height: 1px;
+    background: var(--gold);
+    display: inline-block;
+  }
+
+  /* utility strip */
+  .utility {
+    background: var(--bg-sunken);
+    border-bottom: 1px solid var(--line);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+  .utility .wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.45rem;
+    padding-bottom: 0.45rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .utility a { color: var(--text-muted); text-decoration: none; }
+  .utility a:hover { color: var(--accent-text); }
+  .utility .contact-links { display: flex; gap: 1.25rem; flex-wrap: wrap; }
+
+  /* header */
+  header.site {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+  }
+  .site-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 0.85rem 0;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: var(--text);
+  }
+  .brand .seal { color: var(--accent-text); width: 40px; height: 40px; flex: none; }
+  .brand-word { line-height: 1.2; }
+  .brand-word .full { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; font-size: 1rem; font-weight: 600; display: block; }
+  .brand-word .sub { font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+
+  nav.primary { display: flex; align-items: center; gap: 1.6rem; }
+  nav.primary a {
+    font-size: 0.875rem;
+    text-decoration: none;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  nav.primary a:hover { color: var(--accent-text); }
+  .nav-ctas { display: flex; gap: 0.6rem; align-items: center; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 3px;
+    border: 1px solid var(--accent-fill);
+    padding: 0.6rem 1.1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    background: transparent;
+    color: var(--accent-text);
+    font-family: inherit;
+  }
+  .btn.solid { background: var(--accent-fill); color: var(--accent-fill-text); }
+  .btn.solid:hover { opacity: 0.88; }
+  .btn.ghost:hover { background: var(--bg-sunken); }
+  .btn.small { padding: 0.4rem 0.8rem; font-size: 0.8125rem; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .nav-toggle { display: none; }
+
+  /* hero */
+  .hero { padding: 3.5rem 0 4.5rem; border-bottom: 1px solid var(--line); }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+  .edition-badge {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    border: 1px solid var(--line-strong);
+    padding: 0.3rem 0.7rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 1.25rem;
+  }
+  .edition-badge strong { color: var(--accent-text); font-family: ui-monospace, monospace; }
+  h1.headline {
+    font-size: clamp(2.1rem, 1.4rem + 3vw, 3.6rem);
+    line-height: 1.08;
+    margin-bottom: 1.25rem;
+  }
+  .headline .theme-word { color: var(--accent-text); }
+  .dek {
+    font-size: 1.125rem;
+    color: var(--text-muted);
+    max-width: 46rem;
+    margin-bottom: 1.75rem;
+  }
+  .hero-ctas { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 2rem; }
+
+  .ledger-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--line-strong);
+    border-bottom: 1px solid var(--line-strong);
+  }
+  .ledger-strip div { padding: 0.9rem 1.1rem; border-left: 1px solid var(--line); }
+  .ledger-strip div:first-child { border-left: none; padding-left: 0; }
+  .ledger-strip .k { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 0.3rem; }
+  .ledger-strip .v { font-size: 1rem; font-weight: 600; }
+
+  .countdown-box {
+    margin-top: 1.75rem;
+    border: 1px solid var(--line-strong);
+    padding: 1.1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .countdown-box .label { font-size: 0.8125rem; color: var(--text-muted); }
+  .countdown-nums { display: flex; gap: 1.25rem; }
+  .countdown-nums div { text-align: center; }
+  .countdown-nums .num { font-family: ui-monospace, monospace; font-size: 1.6rem; font-weight: 600; color: var(--accent-text); }
+  .countdown-nums .unit { font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); }
+
+  /* contents box */
+  .contents-box { border: 1px solid var(--line-strong); background: var(--bg-raised); }
+  .contents-box .head { padding: 1rem 1.25rem; border-bottom: 1px solid var(--line); font-family: 'Iowan Old Style', Palatino, Georgia, serif; font-size: 1rem; }
+  .contents-box ol { counter-reset: toc; padding: 0.4rem 0; }
+  .contents-box li { counter-increment: toc; }
+  .contents-box a {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.55rem 1.25rem;
+    text-decoration: none;
+    color: var(--text);
+    font-size: 0.9rem;
+  }
+  .contents-box a:hover { color: var(--accent-text); background: var(--bg-sunken); }
+  .contents-box .num { font-family: ui-monospace, monospace; color: var(--gold); font-size: 0.8rem; flex: none; width: 1.6rem; }
+  .contents-box .leader { flex: 1; border-bottom: 1px dotted var(--line-strong); position: relative; top: -0.3em; }
+  .contents-box .pg { font-family: ui-monospace, monospace; font-size: 0.75rem; color: var(--text-muted); flex: none; }
+
+  /* generic section */
+  section { padding: 4.5rem 0; border-bottom: 1px solid var(--line); }
+  section:last-of-type { border-bottom: none; }
+  .section-head { max-width: 44rem; margin-bottom: 2.5rem; }
+  .section-head h2 { font-size: clamp(1.6rem, 1.3rem + 1.2vw, 2.25rem); margin-top: 0.6rem; }
+  .section-head p { color: var(--text-muted); margin-top: 0.9rem; font-size: 1.0625rem; }
+
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line-strong); margin-top: 2.5rem; }
+  .stat-row div { padding: 1.25rem 1.5rem 0; border-left: 1px solid var(--line); }
+  .stat-row div:first-child { border-left: none; padding-left: 0; }
+  .stat-row .n { font-family: ui-monospace, monospace; font-size: 2rem; color: var(--accent-text); font-weight: 600; }
+  .stat-row .l { font-size: 0.8125rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+  /* subthemes as index */
+  .index-list { border-top: 1px solid var(--line-strong); }
+  .index-row {
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    gap: 1.5rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .index-row .roman { font-family: ui-monospace, monospace; color: var(--gold); font-size: 1rem; padding-top: 0.15rem; }
+  .index-row h3 { font-size: 1.1875rem; margin-bottom: 0.4rem; }
+  .index-row p { color: var(--text-muted); font-size: 0.9375rem; max-width: 42rem; }
+
+  /* timeline / dates */
+  .timeline { border-top: 1px solid var(--line-strong); }
+  .tl-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 1rem;
+    align-items: center;
+    padding: 1.1rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .tl-row .phase { font-weight: 600; }
+  .tl-row .phase .sub { display: block; font-size: 0.8125rem; color: var(--text-muted); font-weight: 400; margin-top: 0.15rem; }
+  .tl-row .date { font-family: ui-monospace, monospace; font-size: 0.9375rem; color: var(--text-muted); white-space: nowrap; }
+  .status-chip {
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.28rem 0.55rem;
+    border-left: 3px solid;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  .status-chip.open { color: var(--status-open); border-color: var(--status-open); }
+  .status-chip.closed { color: var(--status-closed); border-color: var(--status-closed); }
+  .status-chip.upcoming { color: var(--status-upcoming); border-color: var(--status-upcoming); }
+
+  /* fees table */
+  .fee-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+  .fee-table th, .fee-table td { text-align: left; padding: 0.9rem 1rem; border-bottom: 1px solid var(--line); }
+  .fee-table thead th { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--line-strong); font-weight: 600; }
+  .fee-table td.amount { font-family: ui-monospace, monospace; font-size: 1.0625rem; font-weight: 600; color: var(--accent-text); }
+  .fee-table tbody tr:hover { background: var(--bg-sunken); }
+  .table-scroll { overflow-x: auto; }
+  .fee-note { margin-top: 1rem; font-size: 0.875rem; color: var(--text-muted); }
+
+  /* forms */
+  .panel { border: 1px solid var(--line-strong); background: var(--bg-raised); padding: 2rem; }
+  .status-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 1.25rem;
+    border: 1px solid var(--line-strong);
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  .status-banner.is-open { border-left: 3px solid var(--status-open); }
+  .status-banner.is-closed { border-left: 3px solid var(--status-closed); }
+  .status-banner .txt { font-size: 0.9375rem; }
+  .status-banner .txt strong { display: block; margin-bottom: 0.15rem; }
+
+  .preview-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+  }
+
+  .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .field { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.25rem; }
+  .field.full { grid-column: 1 / -1; }
+  .field label { font-size: 0.8125rem; font-weight: 600; }
+  .field .hint { font-size: 0.75rem; color: var(--text-muted); }
+  .field input, .field select, .field textarea {
+    font-family: inherit;
+    font-size: 0.9375rem;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--line-strong);
+    background: var(--bg);
+    color: var(--text);
+    border-radius: 3px;
+  }
+  .field textarea { resize: vertical; min-height: 7rem; }
+  .counter-row { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem; }
+  .counter-row.over { color: var(--status-closed); }
+
+  .upload-zone {
+    border: 1px dashed var(--line-strong);
+    padding: 1.75rem;
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+  .upload-zone strong { color: var(--text); display: block; margin-bottom: 0.35rem; font-size: 0.9375rem; }
+
+  .confirm-panel { display: none; border: 1px solid var(--status-open); padding: 1.5rem; margin-top: 1.5rem; }
+  .confirm-panel.show { display: block; }
+  .confirm-panel .ref { font-family: ui-monospace, monospace; font-size: 1.25rem; font-weight: 600; color: var(--status-open); }
+
+  .tracker-row { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: flex-end; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--line); }
+  .tracker-row .field { margin-bottom: 0; flex: 1; min-width: 12rem; }
+
+  .price-out { border: 1px solid var(--line-strong); padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+  .price-out .amt { font-family: ui-monospace, monospace; font-size: 1.5rem; font-weight: 600; color: var(--accent-text); }
+  .pay-methods { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .pay-methods label {
+    border: 1px solid var(--line-strong);
+    padding: 0.6rem 1rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .pay-methods input { accent-color: var(--accent-fill); }
+
+  /* past editions */
+  .past-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 2.5rem; }
+  .past-card { border: 1px solid var(--line-strong); }
+  .past-card .plate {
+    aspect-ratio: 4/3;
+    background: var(--bg-sunken);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--line-strong);
+  }
+  .past-card .plate .mono { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; }
+  .past-card .body { padding: 1.1rem 1.25rem 1.4rem; }
+  .past-card .yr { font-family: ui-monospace, monospace; color: var(--gold); font-size: 0.8125rem; }
+  .past-card h3 { font-size: 1.0625rem; margin-top: 0.4rem; }
+  .past-card p { color: var(--text-muted); font-size: 0.875rem; margin-top: 0.5rem; }
+  .archive-note { margin-top: 1.5rem; font-size: 0.875rem; color: var(--text-muted); border-left: 3px solid var(--gold); padding-left: 0.9rem; }
+
+  /* committee */
+  .committee-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line-strong); margin-top: 2.5rem; }
+  .committee-card { background: var(--bg); padding: 1.5rem; }
+  .committee-card .role { font-weight: 600; font-size: 0.9375rem; }
+  .committee-card .slot { font-size: 0.8125rem; color: var(--text-muted); margin-top: 0.3rem; }
+
+  /* faq */
+  .faq-item { border-bottom: 1px solid var(--line); }
+  .faq-item summary {
+    padding: 1.1rem 0;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9688rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    list-style: none;
+  }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item summary::after { content: "+"; font-family: ui-monospace, monospace; color: var(--gold); font-size: 1.1rem; }
+  .faq-item[open] summary::after { content: "\2212"; }
+  .faq-item .a { padding-bottom: 1.25rem; color: var(--text-muted); font-size: 0.9375rem; max-width: 42rem; }
+
+  /* admin */
+  .admin-shell { border: 1px solid var(--line-strong); }
+  .admin-note { background: var(--bg-sunken); padding: 0.9rem 1.25rem; font-size: 0.8125rem; color: var(--text-muted); border-bottom: 1px solid var(--line-strong); }
+  .admin-login { padding: 2.5rem; max-width: 24rem; }
+  .admin-dash { display: none; padding: 2rem; }
+  .admin-dash.show { display: block; }
+  .admin-stats { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line-strong); margin-bottom: 2rem; }
+  .admin-stats div { padding: 1.1rem 1.25rem; border-left: 1px solid var(--line); }
+  .admin-stats div:first-child { border-left: none; }
+  .admin-stats .n { font-family: ui-monospace, monospace; font-size: 1.375rem; font-weight: 600; }
+  .admin-stats .l { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; }
+  .admin-table-wrap { border: 1px solid var(--line-strong); }
+  table.admin-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+  table.admin-table th, table.admin-table td { text-align: left; padding: 0.65rem 0.9rem; border-bottom: 1px solid var(--line); }
+  table.admin-table thead th { background: var(--bg-sunken); font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-muted); }
+  .pill-status { font-size: 0.75rem; padding: 0.2rem 0.5rem; border-left: 3px solid; font-weight: 600; }
+  .pill-status.pending { color: var(--status-upcoming); border-color: var(--status-upcoming); }
+  .pill-status.accepted { color: var(--status-open); border-color: var(--status-open); }
+  .pill-status.rejected { color: var(--status-closed); border-color: var(--status-closed); }
+  .admin-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap; }
+
+  /* footer */
+  footer.site {
+    background: var(--bg-sunken);
+    padding: 4rem 0 2rem;
+  }
+  .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 2.5rem; }
+  .footer-grid h4 { font-size: 0.8125rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; }
+  .footer-grid a { display: block; color: var(--text); text-decoration: none; font-size: 0.9375rem; margin-bottom: 0.65rem; }
+  .footer-grid a:hover { color: var(--accent-text); }
+  .footer-grid p { font-size: 0.9375rem; color: var(--text-muted); margin-bottom: 0.65rem; }
+  .footer-bottom {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line-strong);
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .reveal { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal-init { opacity: 0; transform: translateY(14px); transition: opacity 0.5s ease, transform 0.5s ease; }
+  }
+
+  @media (max-width: 920px) {
+    nav.primary, .nav-ctas .btn.ghost { display: none; }
+    .nav-toggle { display: inline-flex; }
+    .hero-grid { grid-template-columns: 1fr; }
+    .stat-row { grid-template-columns: repeat(2, 1fr); row-gap: 1.5rem; }
+    .stat-row div:nth-child(3) { border-left: none; }
+    .index-row { grid-template-columns: 2.2rem 1fr; }
+    .field-grid { grid-template-columns: 1fr; }
+    .past-grid { grid-template-columns: 1fr 1fr; }
+    .committee-grid { grid-template-columns: 1fr 1fr; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .admin-stats { grid-template-columns: 1fr 1fr; }
+    .admin-stats div:nth-child(3) { border-left: none; }
+  }
+  @media (max-width: 600px) {
+    .past-grid, .committee-grid, .footer-grid, .admin-stats, .stat-row { grid-template-columns: 1fr; }
+    .stat-row div, .admin-stats div, .committee-grid > div { border-left: none !important; padding-left: 0 !important; }
+    .ledger-strip { grid-template-columns: 1fr; }
+    .ledger-strip div { border-left: none; border-top: 1px solid var(--line); padding-left: 0; }
+    .ledger-strip div:first-child { border-top: none; }
+  }
+</style>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="utility">
+  <div class="wrap">
+    <span>19th UNILAG Annual Research Conference &middot; October 20&ndash;22, 2026 &middot; Jelili Adebisi Omotola Hall</span>
+    <span class="contact-links">
+      <a href="tel:+2347042015134">+234 704 201 5134</a>
+      <a href="mailto:unilagconf@unilag.edu.ng">unilagconf@unilag.edu.ng</a>
+    </span>
+  </div>
+</div>
+
+<header class="site">
+  <div class="wrap site-nav">
+    <a class="brand" href="#main">
+      <svg class="seal" viewBox="0 0 120 120" role="img" aria-label="University of Lagos seal">
+        <circle cx="60" cy="60" r="56" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
+        <circle cx="60" cy="60" r="47" fill="none" stroke="currentColor" stroke-width="1"></circle>
+        <path id="arcTop" d="M 16 64 A 44 44 0 0 1 104 64" fill="none"></path>
+        <path id="arcBottom" d="M 104 60 A 44 44 0 0 1 16 60" fill="none"></path>
+        <text font-size="7.2" letter-spacing="1.4" fill="currentColor"><textPath href="#arcTop" startOffset="50%" text-anchor="middle">UNIVERSITY OF LAGOS</textPath></text>
+        <text font-size="6.6" letter-spacing="2" fill="currentColor"><textPath href="#arcBottom" startOffset="50%" text-anchor="middle">EST. 1962 &middot; NIGERIA</textPath></text>
+        <g stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M60 40 L60 76"></path>
+          <path d="M60 44 C 50 40, 39 42, 33 46 L33 70 C 39 66, 50 64, 60 68"></path>
+          <path d="M60 44 C 70 40, 81 42, 87 46 L87 70 C 81 66, 70 64, 60 68"></path>
+        </g>
+      </svg>
+      <span class="brand-word">
+        <span class="full">Annual Research Conference</span>
+        <span class="sub">University of Lagos</span>
+      </span>
+    </a>
+    <nav class="primary" aria-label="Primary">
+      <a href="#about">Theme</a>
+      <a href="#subthemes">Subthemes</a>
+      <a href="#dates">Dates &amp; Fees</a>
+      <a href="#past">Past Editions</a>
+      <a href="#committee">Committee</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="nav-ctas">
+      <a class="btn ghost small" href="#submit">Submit Abstract</a>
+      <a class="btn solid small" href="#register">Register</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="edition-badge">19th Edition <strong class="mono">&middot;</strong> October 20&ndash;22, 2026</div>
+        <h1 class="headline">Sustainable Frontiers: integrating systems for <span class="theme-word">food security, health, housing</span> and humanity</h1>
+        <p class="dek">The University of Lagos convenes researchers, policymakers and practitioners to confront global challenges through eight interdisciplinary tracks, from biotechnology to social policy. Held in person at the Jelili Adebisi Omotola Hall.</p>
+        <div class="hero-ctas">
+          <a class="btn solid" href="#submit">Submit an Abstract</a>
+          <a class="btn ghost" href="#register">Register &amp; Pay</a>
+        </div>
+        <div class="ledger-strip">
+          <div><span class="k">Dates</span><span class="v tnum">Oct 20&ndash;22, 2026</span></div>
+          <div><span class="k">Venue</span><span class="v">Omotola Hall, UNILAG</span></div>
+          <div><span class="k">Format</span><span class="v">In person, 3 days</span></div>
+        </div>
+        <div class="countdown-box">
+          <span class="label">Time remaining to submit an abstract</span>
+          <div class="countdown-nums tnum" id="heroCountdown">
+            <div><div class="num" id="cd-d">00</div><div class="unit">Days</div></div>
+            <div><div class="num" id="cd-h">00</div><div class="unit">Hrs</div></div>
+            <div><div class="num" id="cd-m">00</div><div class="unit">Min</div></div>
+            <div><div class="num" id="cd-s">00</div><div class="unit">Sec</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="contents-box">
+        <div class="head">In this edition</div>
+        <ol>
+          <li><a href="#about"><span class="num">I</span><span>Conference Theme</span><span class="leader"></span><span class="pg">Theme</span></a></li>
+          <li><a href="#subthemes"><span class="num">II</span><span>Subthemes</span><span class="leader"></span><span class="pg">8 tracks</span></a></li>
+          <li><a href="#dates"><span class="num">III</span><span>Key Dates</span><span class="leader"></span><span class="pg">Timeline</span></a></li>
+          <li><a href="#fees"><span class="num">IV</span><span>Registration Fees</span><span class="leader"></span><span class="pg">Pricing</span></a></li>
+          <li><a href="#submit"><span class="num">V</span><span>Submit an Abstract</span><span class="leader"></span><span class="pg">Portal</span></a></li>
+          <li><a href="#register"><span class="num">VI</span><span>Register &amp; Pay</span><span class="leader"></span><span class="pg">Portal</span></a></li>
+          <li><a href="#past"><span class="num">VII</span><span>Past Editions</span><span class="leader"></span><span class="pg">Archive</span></a></li>
+          <li><a href="#committee"><span class="num">VIII</span><span>Committee</span><span class="leader"></span><span class="pg">Roles</span></a></li>
+          <li><a href="#faq"><span class="num">IX</span><span>Questions</span><span class="leader"></span><span class="pg">FAQ</span></a></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">I. Conference Theme</div>
+        <h2>Why Sustainable Frontiers</h2>
+        <p>Food systems, public health, housing and human security are converging crises rather than separate fields. The 19th edition asks researchers across the sciences, humanities and policy schools to bring evidence to bear on problems that no single discipline can solve alone, and to publish that evidence where it can be used.</p>
+      </div>
+      <div class="stat-row">
+        <div><div class="n tnum">19th</div><div class="l">Edition since inception</div></div>
+        <div><div class="n tnum">8</div><div class="l">Subtheme tracks</div></div>
+        <div><div class="n tnum">3</div><div class="l">Days of sessions</div></div>
+        <div><div class="n tnum">2</div><div class="l">Unilag Journals open to accepted abstracts</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="subthemes">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">II. Subthemes</div>
+        <h2>Eight tracks for the call for papers</h2>
+        <p>Every submission is assigned to one track at the point of submission. Reviewers and session chairs are organised along these same lines, so choose the track closest to your contribution.</p>
+      </div>
+      <div class="index-list">
+        <div class="index-row">
+          <div class="roman">I</div>
+          <div><h3>Cultural Heritage, Human Rights, Humanities and Sustainable Development</h3><p>Indigenous knowledge systems, rights based approaches and the humanities in service of inclusive development.</p></div>
+        </div>
+        <div class="index-row">
+          <div class="roman">II</div>
+          <div><h3>Biotechnology and Genomic Innovations for Food and Health Security</h3><p>Applied genomics, crop science and biotechnology addressing nutrition and disease burden.</p></div>
+        </div>
+        <div class="index-row">
+          <div class="roman">III</div>
+          <div><h3>AI, Data Science, Cybersecurity and Clean Tech Innovation</h3><p>Computational and digital approaches to infrastructure, information security and low carbon technology.</p></div>
+        </div>
+        <div class="index-row">
+          <div class="roman">IV</div>
+          <div><h3>Leadership and Policy Strategies for Sustainable Development</h3><p>Governance frameworks and institutional leadership models aligned to the Sustainable Development Goals.</p></div>
+        </div>
+        <div class="index-row">
+          <div class="roman">V</div>
+          <div><h3>Public Health, Drug Discovery, Therapeutics and Global Preparedness</h3><p>Pharmaceutical research, epidemiology and health systems readiness for emerging threats.</p></div>
+        </div>
+        <div class="index-row">
+          <div class="roman">VI</div>
+          <div><h3>Transformative Education and Capacity Building for Future Sustainability</h3><p>Pedagogical innovation and skills development for a changing labour market.</p></div>
+        </div>
+        <div class="index-row">
+          <div class="roman">VII</div>
+          <div><h3>Smart Cities, Human Centered Urban Design and Environmental Resilience</h3><p>Urban planning, housing and infrastructure that withstand climate and population pressure.</p></div>
+        </div>
+        <div class="index-row">
+          <div class="roman">VIII</div>
+          <div><h3>Social Policy and Human Security in Emerging Economies</h3><p>Social protection, conflict prevention and human security frameworks in developing economies.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="dates">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">III. Key Dates</div>
+        <h2>Timeline to the conference</h2>
+        <p>Status updates automatically against today's date. The Secretariat can extend any deadline from the admin panel without a developer.</p>
+      </div>
+      <div class="timeline" id="timeline">
+        <div class="tl-row" data-open="2026-06-15" data-close="2026-08-24T23:59:00+01:00">
+          <div class="phase">Abstract submission window<span class="sub">Open now through the portal below</span></div>
+          <div class="date tnum">15 Jun &ndash; 24 Aug 2026</div>
+          <div class="status-chip"></div>
+        </div>
+        <div class="tl-row" data-open="2026-08-25" data-close="2026-09-21T23:59:00+01:00">
+          <div class="phase">Review and notification of acceptance<span class="sub">Decisions sent by email with reference code</span></div>
+          <div class="date tnum">Mon, 21 Sep 2026</div>
+          <div class="status-chip"></div>
+        </div>
+        <div class="tl-row" data-open="2026-06-15" data-close="2026-09-25T23:59:00+01:00">
+          <div class="phase">Early bird registration<span class="sub">Discounted fee, see pricing below</span></div>
+          <div class="date tnum">Closes 25 Sep 2026</div>
+          <div class="status-chip"></div>
+        </div>
+        <div class="tl-row" data-open="2026-09-26" data-close="2026-10-16T23:59:00+01:00">
+          <div class="phase">Regular registration<span class="sub">Standard fee applies</span></div>
+          <div class="date tnum">Closes 16 Oct 2026</div>
+          <div class="status-chip"></div>
+        </div>
+        <div class="tl-row" data-open="2026-10-20" data-close="2026-10-22T23:59:00+01:00">
+          <div class="phase">Conference sessions<span class="sub">Jelili Adebisi Omotola Hall, UNILAG</span></div>
+          <div class="date tnum">20 &ndash; 22 Oct 2026</div>
+          <div class="status-chip"></div>
+        </div>
+      </div>
+      <p class="fee-note">Provisional dates for early bird and regular registration cutoffs are shown above for design purposes and should be confirmed by the Secretariat before launch.</p>
+    </div>
+  </section>
+
+  <section id="fees">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">IV. Registration Fees</div>
+        <h2>Conference fee schedule</h2>
+        <p>Fees cover conference materials, session access and meals during sessions. Payment is completed on this site by card, bank transfer or USSD, in naira or dollars depending on category.</p>
+      </div>
+      <div class="table-scroll">
+        <table class="fee-table">
+          <thead>
+            <tr><th>Category</th><th>Applies to</th><th>Amount</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Early bird</td><td>General delegates, registering before 25 Sep 2026</td><td class="amount tnum">&#8358;30,000</td></tr>
+            <tr><td>Regular</td><td>General delegates, registering after early bird closes</td><td class="amount tnum">&#8358;40,000</td></tr>
+            <tr><td>Student early bird</td><td>Full time students, valid ID required, before 25 Sep 2026</td><td class="amount tnum">&#8358;10,000</td></tr>
+            <tr><td>Student regular</td><td>Full time students, valid ID required, after early bird closes</td><td class="amount tnum">&#8358;20,000</td></tr>
+            <tr><td>International participant</td><td>Delegates registering from outside Nigeria</td><td class="amount tnum">$50</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="submit">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">V. Submit an Abstract</div>
+        <h2>Abstract submission portal</h2>
+        <p>Replaces email and paper form submission. Manuscripts upload directly to secure storage, and every submission receives an emailed and texted reference code the moment it is received.</p>
+      </div>
+
+      <div class="status-banner is-open" id="submitBanner">
+        <div class="txt"><strong id="submitBannerTitle">Submissions are open</strong><span id="submitBannerBody">The window closes 24 August 2026 at 11:59 pm. Late submissions are not accepted.</span></div>
+        <label class="preview-toggle"><input type="checkbox" id="previewToggle"> Secretariat preview: simulate after deadline</label>
+      </div>
+
+      <div class="panel" id="submitPanel">
+        <form id="abstractForm">
+          <div class="field-grid">
+            <div class="field"><label for="pname">Presenting author</label><input id="pname" type="text" required></div>
+            <div class="field"><label for="pemail">Email address</label><input id="pemail" type="email" required></div>
+            <div class="field"><label for="pphone">Phone number</label><input id="pphone" type="tel" required><span class="hint">Confirmation and status updates are sent here by SMS.</span></div>
+            <div class="field"><label for="pinst">Institution</label><input id="pinst" type="text" required></div>
+            <div class="field"><label for="ptrack">Subtheme track</label>
+              <select id="ptrack" required>
+                <option value="">Select a track</option>
+                <option>I. Cultural Heritage, Human Rights, Humanities and Sustainable Development</option>
+                <option>II. Biotechnology and Genomic Innovations for Food and Health Security</option>
+                <option>III. AI, Data Science, Cybersecurity and Clean Tech Innovation</option>
+                <option>IV. Leadership and Policy Strategies for Sustainable Development</option>
+                <option>V. Public Health, Drug Discovery, Therapeutics and Global Preparedness</option>
+                <option>VI. Transformative Education and Capacity Building for Future Sustainability</option>
+                <option>VII. Smart Cities, Human Centered Urban Design and Environmental Resilience</option>
+                <option>VIII. Social Policy and Human Security in Emerging Economies</option>
+              </select>
+            </div>
+            <div class="field"><label for="pformat">Presentation preference</label>
+              <select id="pformat"><option>Oral presentation</option><option>Poster presentation</option><option>No preference</option></select>
+            </div>
+            <div class="field full"><label for="ptitle">Abstract title</label><input id="ptitle" type="text" required></div>
+            <div class="field full">
+              <label for="pabstract">Abstract (300 to 500 words)</label>
+              <textarea id="pabstract" required></textarea>
+              <div class="counter-row" id="wordCounter">0 words &middot; 500 max</div>
+            </div>
+            <div class="field full">
+              <label>Full manuscript, optional at this stage</label>
+              <div class="upload-zone">
+                <strong>Drag a PDF or Word file here, or click to browse</strong>
+                Uploads stream directly to cloud storage, so nothing sits on the conference server. 10 MB limit.
+              </div>
+            </div>
+          </div>
+          <button class="btn solid" type="submit" id="submitBtn">Submit Abstract</button>
+        </form>
+
+        <div class="confirm-panel" id="confirmPanel">
+          <p><strong>Submission received.</strong> Your reference code is:</p>
+          <p class="ref" id="refCode">UARC26-0000</p>
+          <p style="margin-top: 0.75rem; color: var(--text-muted); font-size: 0.9375rem;">A copy of this reference has been sent to your email and phone number. Use it below to track your status at any time, or quote it in correspondence with the Secretariat.</p>
+        </div>
+      </div>
+
+      <div class="tracker-row">
+        <div class="field"><label for="trackEmail">Track a submission &middot; email</label><input id="trackEmail" type="email" placeholder="you@institution.edu"></div>
+        <div class="field"><label for="trackRef">Reference code</label><input id="trackRef" type="text" placeholder="UARC26-0000"></div>
+        <button class="btn ghost" type="button">Check Status</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="register">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">VI. Register &amp; Pay</div>
+        <h2>Registration and payment</h2>
+        <p>Select a category to see the fee update in real time, then complete payment by card, bank transfer or USSD. A receipt and access confirmation follow immediately by email and SMS.</p>
+      </div>
+
+      <div class="panel">
+        <form id="regForm">
+          <div class="field-grid">
+            <div class="field"><label for="rname">Full name</label><input id="rname" type="text" required></div>
+            <div class="field"><label for="remail">Email address</label><input id="remail" type="email" required></div>
+            <div class="field"><label for="rphone">Phone number</label><input id="rphone" type="tel" required></div>
+            <div class="field"><label for="rinst">Institution or organisation</label><input id="rinst" type="text" required></div>
+            <div class="field full"><label for="rcat">Category</label>
+              <select id="rcat">
+                <option value="30000" data-cur="NGN">Early bird, &#8358;30,000</option>
+                <option value="40000" data-cur="NGN">Regular, &#8358;40,000</option>
+                <option value="10000" data-cur="NGN">Student early bird, &#8358;10,000</option>
+                <option value="20000" data-cur="NGN">Student regular, &#8358;20,000</option>
+                <option value="50" data-cur="USD">International participant, $50</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="price-out">
+            <span>Amount due</span>
+            <span class="amt tnum" id="priceOut">&#8358;30,000</span>
+          </div>
+
+          <div class="pay-methods">
+            <label><input type="radio" name="pay" checked> Card</label>
+            <label><input type="radio" name="pay"> Bank transfer</label>
+            <label><input type="radio" name="pay"> USSD</label>
+          </div>
+
+          <button class="btn solid" type="submit">Pay and Complete Registration</button>
+        </form>
+
+        <div class="confirm-panel" id="regConfirmPanel">
+          <p><strong>Payment confirmed.</strong> Registration reference:</p>
+          <p class="ref" id="regRefCode">UARC26-REG-0000</p>
+          <p style="margin-top: 0.75rem; color: var(--text-muted); font-size: 0.9375rem;">A receipt has been emailed and texted to you. Bring this reference, or the email, to the registration desk at Omotola Hall.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="past">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">VII. Past Editions</div>
+        <h2>The archive</h2>
+        <p>A running record of prior editions. Photographs and figures stream from cloud storage so this page stays fast regardless of how many editions are added.</p>
+      </div>
+      <div class="past-grid">
+        <div class="past-card"><div class="plate"><span class="mono">Gallery pending</span></div><div class="body"><div class="yr tnum">18th Edition &middot; 2025</div><h3>Theme to be added by the Secretariat</h3><p>Attendance, papers presented and highlight photographs to be added from the archive.</p></div></div>
+        <div class="past-card"><div class="plate"><span class="mono">Gallery pending</span></div><div class="body"><div class="yr tnum">17th Edition &middot; 2024</div><h3>Theme to be added by the Secretariat</h3><p>Attendance, papers presented and highlight photographs to be added from the archive.</p></div></div>
+        <div class="past-card"><div class="plate"><span class="mono">Gallery pending</span></div><div class="body"><div class="yr tnum">16th Edition &middot; 2023</div><h3>Theme to be added by the Secretariat</h3><p>Attendance, papers presented and highlight photographs to be added from the archive.</p></div></div>
+      </div>
+      <p class="archive-note">This layout is illustrative. Once built, each card pulls its year, theme, statistics and photographs from the same archive the admin panel manages, so adding the 19th edition here next year is a form, not a redesign.</p>
+    </div>
+  </section>
+
+  <section id="committee">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">VIII. Organising Committee</div>
+        <h2>Who to contact</h2>
+        <p>Names to be supplied by the Local Organising Committee. Roles are fixed so delegates always know who handles what.</p>
+      </div>
+      <div class="committee-grid">
+        <div class="committee-card"><div class="role">Conference Chair</div><div class="slot">Name to be announced</div></div>
+        <div class="committee-card"><div class="role">Vice Chair</div><div class="slot">Name to be announced</div></div>
+        <div class="committee-card"><div class="role">Secretary</div><div class="slot">Name to be announced</div></div>
+        <div class="committee-card"><div class="role">Treasurer</div><div class="slot">Name to be announced</div></div>
+        <div class="committee-card"><div class="role">Scientific Review Lead</div><div class="slot">Name to be announced</div></div>
+        <div class="committee-card"><div class="role">Publications Liaison</div><div class="slot">Unilag Journals</div></div>
+        <div class="committee-card"><div class="role">Logistics and Venue</div><div class="slot">Name to be announced</div></div>
+        <div class="committee-card"><div class="role">Sponsorship and Protocol</div><div class="slot">Name to be announced</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">IX. Questions</div>
+        <h2>Frequently asked</h2>
+      </div>
+      <div>
+        <details class="faq-item" open>
+          <summary>What format should my abstract follow?</summary>
+          <div class="a">Between 300 and 500 words, structured under Background, Methods, Results and Conclusion, submitted as a Word or PDF document through the portal above.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Will accepted abstracts be published?</summary>
+          <div class="a">Abstracts accepted for oral or poster presentation will be considered for publication in the University of Lagos Journals, subject to that journal's own peer review process.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Can international presenters get a letter of invitation?</summary>
+          <div class="a">Yes. Once registration and payment are confirmed, an invitation letter for visa purposes can be requested from the Secretariat by email.</div>
+        </details>
+        <details class="faq-item">
+          <summary>What is the refund policy?</summary>
+          <div class="a">Registration fees are non refundable after 6 October 2026, but are fully transferable to another delegate from the same institution at no charge.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Is this edition in person?</summary>
+          <div class="a">Yes, all sessions run in person at the Jelili Adebisi Omotola Hall. Contact the Secretariat directly if you require special accommodation.</div>
+        </details>
+        <details class="faq-item">
+          <summary>How do I track my submission status?</summary>
+          <div class="a">Use the reference code emailed and texted to you at the time of submission in the tracker beneath the abstract portal, or contact the Secretariat directly.</div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section id="admin">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Secretariat</div>
+        <h2>Admin panel, design preview</h2>
+        <p>Delegates never see this section. It previews what the Secretariat will use to review abstracts, track payments and extend deadlines without asking a developer. Sign in is illustrative only, real access will be password protected on the server, not in this page's code.</p>
+      </div>
+      <div class="admin-shell">
+        <div class="admin-note">Preview mode. No credentials are checked here, and no real data is stored.</div>
+        <div class="admin-login" id="adminLogin">
+          <div class="field"><label for="adminUser">Administrator email</label><input id="adminUser" type="email" placeholder="secretariat@unilag.edu.ng"></div>
+          <div class="field"><label for="adminPass">Password</label><input id="adminPass" type="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"></div>
+          <button class="btn solid" type="button" id="adminSignIn">View Dashboard Preview</button>
+        </div>
+        <div class="admin-dash" id="adminDash">
+          <div class="admin-stats">
+            <div><div class="n tnum">312</div><div class="l">Abstracts submitted</div></div>
+            <div><div class="n tnum">248</div><div class="l">Registrations paid</div></div>
+            <div><div class="n tnum">&#8358;7,940,000</div><div class="l">Revenue, naira</div></div>
+            <div><div class="n tnum" id="adminDaysLeft">--</div><div class="l">Days to abstract deadline</div></div>
+          </div>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead><tr><th>Reference</th><th>Author</th><th>Track</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">UARC26-1042</td><td>A. Chukwu</td><td>III. AI &amp; Data Science</td><td><span class="pill-status pending">Pending</span></td></tr>
+                <tr><td class="mono">UARC26-1041</td><td>F. Adeyemi</td><td>V. Public Health</td><td><span class="pill-status accepted">Accepted</span></td></tr>
+                <tr><td class="mono">UARC26-1040</td><td>M. Ibrahim</td><td>II. Biotechnology</td><td><span class="pill-status accepted">Accepted</span></td></tr>
+                <tr><td class="mono">UARC26-1039</td><td>O. Bello</td><td>VII. Smart Cities</td><td><span class="pill-status rejected">Rejected</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="admin-actions">
+            <button class="btn ghost small" type="button">Export CSV</button>
+            <button class="btn ghost small" type="button">Extend Deadline</button>
+            <button class="btn ghost small" type="button">Send Reminder to Pending</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site" id="contact">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <h4>University of Lagos</h4>
+        <p>19th Annual Research Conference. Sustainable Frontiers: integrating systems for food security, health, housing and humanity for combating global challenges.</p>
+        <p>Jelili Adebisi Omotola Hall, University of Lagos, Akoka, Yaba, Lagos.</p>
+      </div>
+      <div>
+        <h4>Conference</h4>
+        <a href="#about">Theme</a>
+        <a href="#subthemes">Subthemes</a>
+        <a href="#dates">Key dates</a>
+        <a href="#fees">Fees</a>
+      </div>
+      <div>
+        <h4>Take part</h4>
+        <a href="#submit">Submit an abstract</a>
+        <a href="#register">Register and pay</a>
+        <a href="#past">Past editions</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <a href="mailto:unilagconf@unilag.edu.ng">unilagconf@unilag.edu.ng</a>
+        <a href="tel:+2347042015134">+234 704 201 5134</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; <span id="year"></span> University of Lagos. All abstracts accepted for oral presentation will be considered for publication in the Unilag Journals.</span>
+      <span>Design concept, not the live site</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduceMotion && 'IntersectionObserver' in window) {
+    document.querySelectorAll('section').forEach(function (el) { el.classList.add('reveal-init'); });
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('reveal'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('section').forEach(function (el) { io.observe(el); });
+  }
+
+  var ABSTRACT_DEADLINE = new Date('2026-08-24T23:59:00+01:00');
+  function tick() {
+    var now = new Date();
+    var diff = ABSTRACT_DEADLINE - now;
+    if (diff < 0) diff = 0;
+    var d = Math.floor(diff / 86400000);
+    var h = Math.floor((diff % 86400000) / 3600000);
+    var m = Math.floor((diff % 3600000) / 60000);
+    var s = Math.floor((diff % 60000) / 1000);
+    var pad = function (n) { return String(n).padStart(2, '0'); };
+    document.getElementById('cd-d').textContent = pad(d);
+    document.getElementById('cd-h').textContent = pad(h);
+    document.getElementById('cd-m').textContent = pad(m);
+    document.getElementById('cd-s').textContent = pad(s);
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  function computeStatus(row) {
+    var now = new Date();
+    var open = new Date(row.dataset.open);
+    var close = new Date(row.dataset.close);
+    if (now < open) return 'upcoming';
+    if (now > close) return 'closed';
+    return 'open';
+  }
+  function paintTimeline() {
+    document.querySelectorAll('#timeline .tl-row').forEach(function (row) {
+      var status = computeStatus(row);
+      var chip = row.querySelector('.status-chip');
+      chip.className = 'status-chip ' + status;
+      chip.textContent = status === 'open' ? 'Open' : status === 'closed' ? 'Closed' : 'Upcoming';
+    });
+  }
+  paintTimeline();
+
+  var previewToggle = document.getElementById('previewToggle');
+  function paintSubmitBanner() {
+    var simulateClosed = previewToggle.checked;
+    var now = new Date();
+    var isClosed = simulateClosed || now > ABSTRACT_DEADLINE;
+    var banner = document.getElementById('submitBanner');
+    var title = document.getElementById('submitBannerTitle');
+    var body = document.getElementById('submitBannerBody');
+    var submitBtn = document.getElementById('submitBtn');
+    var fields = document.querySelectorAll('#abstractForm input, #abstractForm select, #abstractForm textarea');
+    if (isClosed) {
+      banner.className = 'status-banner is-closed';
+      title.textContent = 'Submissions are closed';
+      body.textContent = 'The window closed 24 August 2026 at 11:59 pm. Contact the Secretariat directly for exceptions.';
+      submitBtn.disabled = true;
+      fields.forEach(function (f) { f.disabled = true; });
+    } else {
+      banner.className = 'status-banner is-open';
+      title.textContent = 'Submissions are open';
+      body.textContent = 'The window closes 24 August 2026 at 11:59 pm. Late submissions are not accepted.';
+      submitBtn.disabled = false;
+      fields.forEach(function (f) { f.disabled = false; });
+    }
+  }
+  previewToggle.addEventListener('change', paintSubmitBanner);
+  paintSubmitBanner();
+
+  var abstractField = document.getElementById('pabstract');
+  var wordCounter = document.getElementById('wordCounter');
+  abstractField.addEventListener('input', function () {
+    var words = abstractField.value.trim().split(/\s+/).filter(Boolean).length;
+    wordCounter.textContent = words + ' words · 500 max';
+    wordCounter.className = 'counter-row' + (words > 500 ? ' over' : '');
+  });
+
+  document.getElementById('abstractForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var ref = 'UARC26-' + Math.floor(1000 + Math.random() * 9000);
+    document.getElementById('refCode').textContent = ref;
+    document.getElementById('confirmPanel').classList.add('show');
+    document.getElementById('confirmPanel').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
+  });
+
+  var rcat = document.getElementById('rcat');
+  var priceOut = document.getElementById('priceOut');
+  function paintPrice() {
+    var opt = rcat.options[rcat.selectedIndex];
+    var cur = opt.dataset.cur;
+    var val = Number(opt.value);
+    priceOut.textContent = cur === 'USD' ? ('$' + val) : ('₦' + val.toLocaleString('en-NG'));
+  }
+  rcat.addEventListener('change', paintPrice);
+  paintPrice();
+
+  document.getElementById('regForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var ref = 'UARC26-REG-' + Math.floor(1000 + Math.random() * 9000);
+    document.getElementById('regRefCode').textContent = ref;
+    document.getElementById('regConfirmPanel').classList.add('show');
+    document.getElementById('regConfirmPanel').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'nearest' });
+  });
+
+  document.getElementById('adminSignIn').addEventListener('click', function () {
+    document.getElementById('adminLogin').style.display = 'none';
+    document.getElementById('adminDash').classList.add('show');
+  });
+  var daysLeft = Math.max(0, Math.ceil((ABSTRACT_DEADLINE - new Date()) / 86400000));
+  document.getElementById('adminDaysLeft').textContent = daysLeft;
+</script>

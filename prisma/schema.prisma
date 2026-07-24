@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SubmissionStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum RegistrationStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+model Submission {
+  id                 String            @id @default(cuid())
+  reference          String            @unique
+  authorName         String
+  email              String
+  phone              String
+  institution        String
+  track              String
+  format             String
+  title              String
+  abstractText       String
+  manuscriptUrl      String?
+  manuscriptPublicId String?
+  status             SubmissionStatus  @default(PENDING)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@index([email])
+  @@index([status])
+}
+
+model Registration {
+  id           String              @id @default(cuid())
+  reference    String              @unique
+  fullName     String
+  email        String
+  phone        String
+  institution  String
+  category     String
+  amount       Int
+  currency     String
+  paystackRef  String?             @unique
+  status       RegistrationStatus  @default(PENDING)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  @@index([email])
+  @@index([status])
+}
+
+model Setting {
+  key   String @id
+  value String
+}
