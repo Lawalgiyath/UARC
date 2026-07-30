@@ -14,9 +14,15 @@
     "prisma:deploy": "prisma migrate deploy",
     "hash-password": "tsx scripts/hash-password.ts"
   },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "dependencies": {
     "@prisma/client": "^5.20.0",
+    "@types/bcryptjs": "^2.4.6",
+    "bcryptjs": "^3.0.3",
     "cookie": "^2.0.1",
+    "fast-xml-parser": "^5.10.1",
     "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.2.0",
@@ -32,8 +38,10 @@
   },
   "devDependencies": {
     "@types/node": "^22.7.4",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "dotenv": "^17.4.2",
     "prisma": "^5.20.0",
     "tsx": "^4.19.1",
     "typescript": "^5.6.2"

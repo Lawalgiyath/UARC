@@ -1,33 +1,51 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ZodError } from "zod";
+import { AdminRole } from "@prisma/client";
+
 import {
-  verifyRegistrationSchema,
-} from "@/lib/registration/registration.validation";
+  requireAdmin,
+  requireAnyRole,
+} from "@/lib/auth/rbac";
 
 import {
   registrationService,
   RegistrationServiceError,
 } from "@/lib/registration/registration.service";
 
-export async function POST(
-  request: NextRequest
+const ALLOWED_ROLES = [
+  AdminRole.SUPER_ADMIN,
+  AdminRole.SECRETARIAT,
+  AdminRole.FINANCE,
+] as const;
+
+
+export async function GET(
+  _: NextRequest,
+  {
+    params,
+  }: {
+    params: Promise<{
+      registrationId: string;
+    }>;
+  }
 ): Promise<NextResponse> {
   try {
-    const body = await request.json();
+    const admin = await requireAdmin();
 
-    const input =
-      verifyRegistrationSchema.parse(body);
+    requireAnyRole(admin, ALLOWED_ROLES);
+
+    const { registrationId } = await params;
 
     const registration =
-      await registrationService.verifyRegistration(
-        input
+      await registrationService.getRegistrationById(
+        registrationId
       );
 
     return NextResponse.json(
       {
         success: true,
         message:
-          "Registration verified successfully.",
+          "Registration retrieved successfully.",
         data: registration,
       },
       {
@@ -69,13 +87,14 @@ function handleError(
   }
 
   console.error(
-    "[POST /api/registrations/verify]",
+    "[GET /api/admin/registrations/[registrationId]]",
     error
   );
 
   return NextResponse.json(
     {
       success: false,
+      code: "INTERNAL_SERVER_ERROR",
       message:
         "An unexpected server error occurred.",
     },

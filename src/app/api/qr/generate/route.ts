@@ -1,25 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ZodError } from "zod";
-import {
-  verifyRegistrationSchema,
-} from "@/lib/registration/registration.validation";
 
 import {
-  registrationService,
-  RegistrationServiceError,
-} from "@/lib/registration/registration.service";
+  generateQrSchema,
+} from "@/lib/qrcode/qr.validation";
+
+import {
+  qrService,
+} from "@/lib/qrcode/qr.service";
+
+import {
+  QRCodeServiceError,
+} from "@/lib/qrcode/qr.errors";
 
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse> {
   try {
-    const body = await request.json();
+    let body: unknown;
+
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        {
+          success: false,
+          code: "INVALID_JSON",
+          message: "Invalid JSON payload.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
 
     const input =
-      verifyRegistrationSchema.parse(body);
+      generateQrSchema.parse(body);
 
-    const registration =
-      await registrationService.verifyRegistration(
+    const qr =
+      await qrService.generateQr(
         input
       );
 
@@ -27,11 +46,11 @@ export async function POST(
       {
         success: true,
         message:
-          "Registration verified successfully.",
-        data: registration,
+          "QR code generated successfully.",
+        data: qr,
       },
       {
-        status: 200,
+        status: 201,
       }
     );
   } catch (error) {
@@ -46,8 +65,10 @@ function handleError(
     return NextResponse.json(
       {
         success: false,
-        message: "Validation failed.",
-        errors: error.flatten(),
+        code: "VALIDATION_ERROR",
+        message:
+          "Validation failed.",
+        errors: error.issues,
       },
       {
         status: 400,
@@ -55,7 +76,7 @@ function handleError(
     );
   }
 
-  if (error instanceof RegistrationServiceError) {
+  if (error instanceof QRCodeServiceError) {
     return NextResponse.json(
       {
         success: false,
@@ -69,13 +90,18 @@ function handleError(
   }
 
   console.error(
-    "[POST /api/registrations/verify]",
-    error
+    "[POST /api/qr/generate]",
+    {
+      timestamp:
+        new Date().toISOString(),
+      error,
+    }
   );
 
   return NextResponse.json(
     {
       success: false,
+      code: "INTERNAL_SERVER_ERROR",
       message:
         "An unexpected server error occurred.",
     },

@@ -1,13 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { ZodError } from "zod";
-import {
-  verifyRegistrationSchema,
-} from "@/lib/registration/registration.validation";
 
 import {
-  registrationService,
-  RegistrationServiceError,
-} from "@/lib/registration/registration.service";
+  createPaymentSchema,
+} from "@/lib/payment/payment.validation";
+
+import {
+  paymentService,
+} from "@/lib/payment/payment.service";
+
+import {
+  PaymentServiceError,
+} from "@/lib/payment/payment.errors";
+
+import {
+  TranzgateError,
+} from "@/lib/payment/tranzgate.errors";
 
 export async function POST(
   request: NextRequest
@@ -16,22 +25,24 @@ export async function POST(
     const body = await request.json();
 
     const input =
-      verifyRegistrationSchema.parse(body);
+      createPaymentSchema.parse(body);
 
-    const registration =
-      await registrationService.verifyRegistration(
+    const payment =
+      await paymentService.initializePayment(
         input
       );
 
     return NextResponse.json(
       {
         success: true,
+
         message:
-          "Registration verified successfully.",
-        data: registration,
+          "Payment initialized successfully.",
+
+        data: payment,
       },
       {
-        status: 200,
+        status: 201,
       }
     );
   } catch (error) {
@@ -42,11 +53,17 @@ export async function POST(
 function handleError(
   error: unknown
 ): NextResponse {
+
   if (error instanceof ZodError) {
     return NextResponse.json(
       {
         success: false,
-        message: "Validation failed.",
+
+        code: "VALIDATION_ERROR",
+
+        message:
+          "Request validation failed.",
+
         errors: error.flatten(),
       },
       {
@@ -55,11 +72,15 @@ function handleError(
     );
   }
 
-  if (error instanceof RegistrationServiceError) {
+  if (
+    error instanceof PaymentServiceError
+  ) {
     return NextResponse.json(
       {
         success: false,
+
         code: error.code,
+
         message: error.message,
       },
       {
@@ -68,16 +89,33 @@ function handleError(
     );
   }
 
-  console.error(
-    "[POST /api/registrations/verify]",
-    error
-  );
+  if (
+    error instanceof TranzgateError
+  ) {
+    return NextResponse.json(
+      {
+        success: false,
+
+        code: error.code,
+
+        message: error.message,
+      },
+      {
+        status: error.statusCode,
+      }
+    );
+  }
+
+  console.error(error);
 
   return NextResponse.json(
     {
       success: false,
+
+      code: "INTERNAL_SERVER_ERROR",
+
       message:
-        "An unexpected server error occurred.",
+        "An unexpected error occurred.",
     },
     {
       status: 500,

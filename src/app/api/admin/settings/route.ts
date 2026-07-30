@@ -1,23 +1,66 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
-import { getAbstractDeadline, setAbstractDeadline } from "@/lib/settings";
+
+import { AdminRole } from "@prisma/client";
+
+import {
+  requireAdmin,
+  requireAnyRole,
+} from "@/lib/auth/rbac";
+
+import {
+  settingsService,
+  SettingsServiceError,
+} from "@/lib/settings/settings.service";
 
 export async function GET() {
-  const deadline = await getAbstractDeadline();
-  return NextResponse.json({ abstractDeadline: deadline.toISOString() });
+  try {
+    const admin = await requireAdmin();
+
+    requireAnyRole(admin, [
+      AdminRole.SUPER_ADMIN,
+      AdminRole.SECRETARIAT,
+    ]);
+
+    const settings = await settingsService.getSettings();
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Conference settings retrieved successfully.",
+        data: settings,
+      },
+      {
+        status: 200,
+      }
+    );
+  } catch (error) {
+    return handleError(error);
+  }
 }
 
-const patchSchema = z.object({
-  abstractDeadline: z.string().refine((v) => !Number.isNaN(new Date(v).getTime()), {
-    message: "Invalid date",
-  }),
-});
-
-export async function PATCH(request: Request) {
-  const parsed = patchSchema.safeParse(await request.json().catch(() => null));
-  if (!parsed.success) {
-    return NextResponse.json({ error: "Provide a valid date." }, { status: 400 });
+function handleError(error: unknown): NextResponse {
+  if (error instanceof SettingsServiceError) {
+    return NextResponse.json(
+      {
+        success: false,
+        code: error.code,
+        message: error.message,
+      },
+      {
+        status: error.statusCode,
+      }
+    );
   }
-  await setAbstractDeadline(new Date(parsed.data.abstractDeadline).toISOString());
-  return NextResponse.json({ ok: true });
+
+  console.error("[GET /api/admin/settings]", error);
+
+  return NextResponse.json(
+    {
+      success: false,
+      message: "An unexpected server error occurred.",
+    },
+    {
+      status: 500,
+    }
+  );
 }

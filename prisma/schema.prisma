@@ -7,59 +7,609 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum SubmissionStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
+enum RegistrationCategory {
+  EARLY_BIRD
+  REGULAR
+  STUDENT_EARLY_BIRD
+  STUDENT_REGULAR
+  INTERNATIONAL
 }
 
 enum RegistrationStatus {
   PENDING
-  PAID
+  CONFIRMED
+  CANCELLED
+}
+
+enum StudentVerificationStatus {
+  NOT_REQUIRED
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PaymentGateway {
+  TRANZGATE
+}
+
+enum PaymentMethod {
+  CARD
+  BANK_TRANSFER
+  USSD
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCESSFUL
+  FAILED
+  REFUNDED
+}
+
+enum Currency {
+  NGN
+  USD
+}
+
+enum SubmissionStatus {
+  PENDING
+  UNDER_REVIEW
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum PresentationPreference {
+  NO_PREFERENCE
+  ORAL
+  POSTER
+}
+
+enum ConferenceTrack {
+  TRACK_I
+  TRACK_II
+  TRACK_III
+  TRACK_IV
+  TRACK_V
+  TRACK_VI
+  TRACK_VII
+  TRACK_VIII
+}
+
+enum ReviewRecommendation {
+  ACCEPT
+  ACCEPT_WITH_MINOR_REVISION
+  ACCEPT_WITH_MAJOR_REVISION
+  REJECT
+}
+
+enum ReviewStatus {
+  PENDING
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum AttendanceStatus {
+  CHECKED_IN
+  CHECKED_OUT
+}
+
+enum NotificationType {
+  EMAIL
+  SMS
+  BOTH
+}
+
+enum NotificationStatus {
+  QUEUED
+  SENT
+  DELIVERED
   FAILED
 }
 
-model Submission {
-  id                 String            @id @default(cuid())
-  reference          String            @unique
-  authorName         String
-  email              String
-  phone              String
-  institution        String
-  track              String
-  format             String
-  title              String
-  abstractText       String
-  manuscriptUrl      String?
-  manuscriptPublicId String?
-  status             SubmissionStatus  @default(PENDING)
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
+enum AdminRole {
+  SUPER_ADMIN
+  SECRETARIAT
+  REVIEWER
+  FINANCE
+  CHECK_IN_OFFICER
+}
 
-  @@index([email])
-  @@index([status])
+enum AdminStatus {
+  ACTIVE
+  SUSPENDED
+  DISABLED
+}
+
+enum SessionStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+enum ManuscriptStatus {
+  NOT_UPLOADED
+  UPLOADED
+  REVISED
+}
+
+enum FileType {
+  PDF
+  DOC
+  DOCX
+}
+
+enum WebhookStatus {
+  RECEIVED
+  VERIFIED
+  FAILED
+}
+
+enum AuditAction {
+  LOGIN
+  LOGIN_FAILED
+  LOGOUT
+
+  CREATE
+  UPDATE
+  DELETE
+
+  REGISTER
+  VERIFY_STUDENT
+
+  INITIALIZE_PAYMENT
+  VERIFY_PAYMENT
+  PAYMENT_SUCCESS
+  PAYMENT_FAILED
+
+  SUBMIT_ABSTRACT
+  UPDATE_SUBMISSION
+  DELETE_SUBMISSION
+
+  UPLOAD_MANUSCRIPT
+  DELETE_MANUSCRIPT
+
+  ASSIGN_REVIEWER
+  COMPLETE_REVIEW
+
+  GENERATE_QR
+  CHECK_IN
+  CHECK_OUT
+
+  SEND_EMAIL
+  SEND_SMS
+
+  UPDATE_SETTINGS
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum ConferencePhase {
+  ABSTRACT_SUBMISSION
+  EARLY_BIRD_REGISTRATION
+  REGULAR_REGISTRATION
+  CONFERENCE
+  CLOSED
 }
 
 model Registration {
-  id           String              @id @default(cuid())
-  reference    String              @unique
-  fullName     String
-  email        String
-  phone        String
-  institution  String
-  category     String
-  amount       Int
-  currency     String
-  paystackRef  String?             @unique
-  status       RegistrationStatus  @default(PENDING)
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @updatedAt
+  id                    String               @id @default(uuid())
+  registrationCode      String               @unique
+  fullName              String
+  email                 String               @unique
+  phoneNumber           String
+  institution           String
+  category              RegistrationCategory
+  amountDue             Decimal              @db.Decimal(10, 2)
+  currency              String               @default("NGN")
+  paymentStatus         PaymentStatus        @default(PENDING)
+  registrationStatus    RegistrationStatus   @default(PENDING)
+  studentVerificationId String?
+  studentVerification   StudentVerification?
+  qrCode                QRCode?
+  payments              Payment[]
+  submissions           Submission[]
+  attendances           Attendance[]
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
 
   @@index([email])
+  @@index([registrationCode])
+}
+
+model StudentVerification {
+  id                 String                    @id @default(uuid())
+  registrationId     String                    @unique
+  registration       Registration              @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  studentIdNumber    String
+  institutionName    String
+  studentIdFront     String
+  studentIdBack      String
+  verificationStatus StudentVerificationStatus @default(PENDING)
+  verifiedBy         String?
+  verifiedAt         DateTime?
+  rejectionReason    String?
+  createdAt          DateTime                  @default(now())
+}
+
+model Payment {
+  id String @id @default(uuid())
+
+  registrationId String
+  registration   Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+
+  transactionRef    String         @unique
+  paymentBatchId    String?        @unique
+  paymentCode       String?
+  paymentDocumentNo String?
+  sessionId         String?
+  gatewayReference  String?        @unique
+  gateway           PaymentGateway @default(TRANZGATE)
+  paymentMethod     PaymentMethod?
+
+  amountPaid Decimal @db.Decimal(10, 2)
+  currency   String
+
+  status PaymentStatus @default(PENDING)
+
+  paidAt DateTime?
+
+  gatewayResponse Json?
+
+  webhook PaymentWebhook?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([registrationId])
   @@index([status])
+  @@index([paymentBatchId])
+}
+
+model PaymentWebhook {
+  id String @id @default(uuid())
+
+  paymentId String  @unique
+  payment   Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  payload Json
+
+  signature String?
+
+  verified Boolean @default(false)
+
+  receivedAt DateTime @default(now())
+}
+
+model Attendance {
+  id             String       @id @default(uuid())
+  registrationId String
+  registration   Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  qrCodeId       String
+  qrCode         QRCode       @relation(fields: [qrCodeId], references: [id], onDelete: Cascade)
+  checkInTime    DateTime?
+  checkOutTime   DateTime?
+  checkedInBy    String?
+  checkedOutBy   String?
+  location       String?
+  createdAt      DateTime     @default(now())
+
+  @@index([registrationId])
+  @@index([qrCodeId])
+}
+
+model QRCode {
+  id String @id @default(uuid())
+
+  registrationId String       @unique
+  registration   Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+
+  token       String  @unique
+  qrImagePath String?
+
+  generatedAt DateTime     @default(now())
+  expiresAt   DateTime?
+   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  attendances Attendance[]
+
+  @@index([token])
+}
+
+model Submission {
+  id                     String                  @id @default(uuid())
+  submissionCode         String                  @unique
+  registrationId         String?
+  registration           Registration?           @relation(fields: [registrationId], references: [id], onDelete: SetNull)
+  presentingAuthor       String
+  email                  String
+  phoneNumber            String
+  institution            String
+  track                  ConferenceTrack
+  presentationPreference PresentationPreference
+  abstractTitle          String
+  abstractText           String                  @db.Text
+  fingerprint            String                  @unique
+  reviewStatus           SubmissionStatus        @default(PENDING)
+  reviewerComment        String?
+  acceptedPresentation   PresentationPreference?
+  acceptedAt             DateTime?
+  rejectedAt             DateTime?
+  submittedAt            DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  manuscript             Manuscript?
+  reviewerAssignments    ReviewerAssignment[]
+  reviews                Review[]
+
+  @@index([email])
+  @@index([submissionCode])
+  @@index([track])
+}
+
+model Manuscript {
+  id           String     @id @default(uuid())
+  submissionId String     @unique
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  originalFileName String
+  storedFileName   String
+
+  filePath String
+  mimeType String
+
+  fileExtension String
+
+  fileSize Int
+
+  version Int @default(1)
+
+  uploadedAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
+model ReviewerAssignment {
+  id String @id @default(uuid())
+
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  reviewerId String
+  reviewer   Admin  @relation("Reviewer", fields: [reviewerId], references: [id])
+
+  assignedById String?
+  assignedBy   Admin?  @relation("AssignedBy", fields: [assignedById], references: [id])
+
+  assignedAt DateTime @default(now())
+
+  completed Boolean @default(false)
+
+  completedAt DateTime?
+
+  @@unique([submissionId, reviewerId])
+  @@index([reviewerId])
+  @@index([submissionId])
+}
+
+model Review {
+  id String @id @default(uuid())
+
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  reviewerId String
+  reviewer   Admin  @relation("ReviewerReviews", fields: [reviewerId], references: [id])
+
+  originalityScore Int
+
+  relevanceScore Int
+
+  methodologyScore Int
+
+  presentationScore Int
+
+  overallScore Float
+
+  recommendation ReviewRecommendation
+
+  strengths String? @db.Text
+
+  weaknesses String? @db.Text
+
+  confidentialNote String? @db.Text
+
+  commentToAuthor String? @db.Text
+
+  reviewedAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([submissionId, reviewerId])
+  @@index([submissionId])
+  @@index([reviewerId])
+}
+
+model Admin {
+  id String @id @default(uuid())
+
+  fullName     String
+  email        String @unique
+  passwordHash String
+
+  role AdminRole
+
+  active AdminStatus @default(ACTIVE)
+
+  lastLogin DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions AdminSession[]
+
+  assignedReviews   ReviewerAssignment[] @relation("Reviewer")
+  assignedByReviews ReviewerAssignment[] @relation("AssignedBy")
+
+  reviews Review[] @relation("ReviewerReviews")
+
+  auditLogs AuditLog[]
+}
+
+model AdminSession {
+  id String @id @default(uuid())
+
+  adminId String
+  admin   Admin  @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  sessionHash String   @unique
+  lastUsedAt  DateTime @default(now())
+
+  ipAddress String?
+
+  userAgent String?
+
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+
+  revokedAt DateTime?
+
+  @@index([adminId])
+  @@index([expiresAt])
+}
+
+model Notification {
+  id String @id @default(uuid())
+
+  recipientName String?
+
+  recipientEmail String?
+
+  recipientPhone String?
+
+  notificationType NotificationType
+
+  subject String?
+
+  message String
+
+  status NotificationStatus @default(QUEUED)
+
+  sentAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  emailLog EmailLog?
+
+  smsLog SmsLog?
+}
+
+model EmailLog {
+  id String @id @default(uuid())
+
+  notificationId String       @unique
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  provider String?
+
+  recipient String
+
+  subject String
+
+  response Json?
+
+  status NotificationStatus
+
+  deliveredAt DateTime?
+
+  createdAt DateTime @default(now())
+}
+
+model SmsLog {
+  id String @id @default(uuid())
+
+  notificationId String       @unique
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  provider String?
+
+  recipient String
+
+  message String
+
+  response Json?
+
+  status NotificationStatus
+
+  deliveredAt DateTime?
+
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id String @id @default(uuid())
+
+  adminId String?
+  admin   Admin?  @relation(fields: [adminId], references: [id], onDelete: SetNull)
+
+  action AuditAction
+
+  entity String
+
+  entityId String
+
+  oldValue Json?
+
+  newValue Json?
+
+  ipAddress String?
+
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  @@index([adminId])
+  @@index([entity])
 }
 
 model Setting {
-  key   String @id
-  value String
+  id String @id @default(uuid())
+
+  conferenceName String @unique
+  conferenceYear Int
+
+  conferencePhase ConferencePhase @default(ABSTRACT_SUBMISSION)
+
+  abstractSubmissionOpen Boolean @default(true)
+  registrationOpen       Boolean @default(true)
+
+  abstractDeadline  DateTime
+  earlyBirdDeadline DateTime
+  regularDeadline   DateTime
+
+  conferenceStartDate DateTime
+  conferenceEndDate   DateTime
+
+  earlyBirdFee        Decimal @db.Decimal(10, 2)
+  regularFee          Decimal @db.Decimal(10, 2)
+  studentEarlyBirdFee Decimal @db.Decimal(10, 2)
+  studentRegularFee   Decimal @db.Decimal(10, 2)
+  internationalFee    Decimal @db.Decimal(10, 2)
+
+  internationalCurrency String @default("USD")
+
+  maxAbstractWords Int @default(500)
+  minAbstractWords Int @default(300)
+
+  maxUploadSizeMB Int @default(10)
+
+  maintenanceMode Boolean @default(false)
+
+  updatedAt DateTime @updatedAt
 }

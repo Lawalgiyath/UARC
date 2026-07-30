@@ -8,13 +8,13 @@ import {
 } from "@/lib/auth/rbac";
 
 import {
-  registrationService,
-  RegistrationServiceError,
-} from "@/lib/registration/registration.service";
+  listStudentVerificationsSchema,
+} from "@/lib/registration/student-verification/student-verification.validation";
 
 import {
-  listRegistrationsSchema,
-} from "@/lib/registration/registration.validation";
+  studentVerificationService,
+  StudentVerificationServiceError,
+} from "@/lib/registration/student-verification/student-verification.service";
 
 export async function GET(
   request: NextRequest
@@ -28,8 +28,9 @@ export async function GET(
     ]);
 
     const query =
-      listRegistrationsSchema.parse({
-        page: request.nextUrl.searchParams.get("page"),
+      listStudentVerificationsSchema.parse({
+        page:
+          request.nextUrl.searchParams.get("page"),
 
         pageSize:
           request.nextUrl.searchParams.get(
@@ -41,24 +42,19 @@ export async function GET(
             "search"
           ) ?? undefined,
 
-        category:
+        verificationStatus:
           request.nextUrl.searchParams.get(
-            "category"
+            "verificationStatus"
           ) ?? undefined,
 
-        registrationStatus:
+        institution:
           request.nextUrl.searchParams.get(
-            "registrationStatus"
-          ) ?? undefined,
-
-        paymentStatus:
-          request.nextUrl.searchParams.get(
-            "paymentStatus"
+            "institution"
           ) ?? undefined,
       });
 
-    const registrations =
-      await registrationService.listRegistrations(
+    const verifications =
+      await studentVerificationService.listVerifications(
         query
       );
 
@@ -66,8 +62,8 @@ export async function GET(
       {
         success: true,
         message:
-          "Registrations retrieved successfully.",
-        data: registrations,
+          "Student verifications retrieved successfully.",
+        data: verifications,
       },
       {
         status: 200,
@@ -94,7 +90,9 @@ function handleError(
     );
   }
 
-  if (error instanceof RegistrationServiceError) {
+  if (
+    error instanceof StudentVerificationServiceError
+  ) {
     return NextResponse.json(
       {
         success: false,
@@ -108,7 +106,7 @@ function handleError(
   }
 
   console.error(
-    "[GET /api/admin/registrations]",
+    "[GET /api/admin/student-verifications]",
     error
   );
 

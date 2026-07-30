@@ -1,20 +1,68 @@
+import { unauthorized } from "next/navigation";
 import { NextRequest, NextResponse } from "next/server";
-import { ADMIN_SESSION_COOKIE, verifySessionToken } from "@/lib/session";
+import { success } from "zod/v4";
 
-export async function middleware(request: NextRequest) {
-  const token = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
-  const valid = await verifySessionToken(token);
+const SESSION_COOKIE_NAME = "uarc_admin_session";
 
-  if (valid) return NextResponse.next();
+const PUBLIC_ADMIN_ROUTES = ["/admin/login"];
 
-  if (request.nextUrl.pathname.startsWith("/api/")) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+const PUBLIC_API_ROUTES = ["/api/admin/login", "/api/admin/logout"];
+
+function isPublicRoute (pathname: string): boolean {
+  return PUBLIC_ADMIN_ROUTES.some((route) => pathname.startsWith(route));
+}
+
+function isPublicApiRoute(pathname: string): boolean{
+  return PUBLIC_API_ROUTES.some((route)=> pathname.startsWith(route))
+}
+
+function hasSession(request: NextRequest): boolean{
+  return Boolean (
+    request.cookies.get(SESSION_COOKIE_NAME)?.value
+  );
+}
+
+export function middleware(request: NextRequest){
+  const {pathname} = request.nextUrl;
+
+  const isAdminPage = pathname.startsWith("/admin");
+  const isAdminApi = pathname.startsWith("/api/admin");
+
+  if(isAdminPage && isPublicRoute (pathname)){
+    return NextResponse.next();
   }
 
-  const loginUrl = new URL("/admin/login", request.url);
-  return NextResponse.redirect(loginUrl);
+  if(isAdminApi && isPublicApiRoute (pathname)){
+    return NextResponse.next();
+  }
+
+  if(isAdminPage){
+    if(!hasSession(request)){
+      const loginUrl = new URL ( "/admin/login", request.url);
+      loginUrl.searchParams.set("callbackUrl", pathname);
+
+      return NextResponse.redirect(loginUrl)
+    }
+  }
+
+  if(isAdminApi){
+    if(!hasSession(request)){
+    return NextResponse.json(
+  {
+    success: false,
+    code: "UNAUTHORIZED",
+    message: "Authentication required.",
+  },
+  {
+    status: 401,
+  }
+);
+    }
+  }
+
+  return NextResponse.next()
 }
 
 export const config = {
-  matcher: ["/admin", "/admin/((?!login).*)", "/api/admin/((?!login|logout).*)"],
-};
+  matcher: ["/admin/:path*", "/api/admin/:path*"], 
+}
