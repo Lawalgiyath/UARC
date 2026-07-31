@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "StudentVerification" ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ALTER COLUMN "studentIdFront" DROP NOT NULL,
+ALTER COLUMN "studentIdBack" DROP NOT NULL;

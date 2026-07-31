@@ -236,7 +236,7 @@ model StudentVerification {
   verifiedAt         DateTime?
   rejectionReason    String?
   createdAt          DateTime                  @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt          DateTime                  @default(now()) @updatedAt
 }
 
 model Payment {
@@ -316,8 +316,8 @@ model QRCode {
 
   generatedAt DateTime     @default(now())
   expiresAt   DateTime?
-   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
   attendances Attendance[]
 
   @@index([token])
