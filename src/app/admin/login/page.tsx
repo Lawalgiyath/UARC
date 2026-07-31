@@ -38,14 +38,19 @@ export default function AdminLoginPage() {
       <section>
         <div className="wrap login-shell">
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "2rem" }}>
-            <UnilagLogo height={36} />
+            <UnilagLogo height={40} variant="crestOnly" />
             <div>
               <div style={{ fontFamily: "'Iowan Old Style', Palatino, Georgia, serif", fontWeight: 600 }}>Secretariat</div>
               <div style={{ fontSize: "0.8125rem", color: "var(--text-muted)" }}>Administrator sign in</div>
             </div>
           </div>
           {error && <div className="form-error">{error}</div>}
-          <form onSubmit={handleSubmit}>
+          {/* `method="post"` matters even though the submit is handled in
+              JavaScript. If the page ever fails to hydrate, a form with no
+              method falls back to a native GET, which puts the typed password
+              in the URL, the browser history and every access log between
+              here and the server. A POST fallback fails harmlessly instead. */}
+          <form method="post" onSubmit={handleSubmit}>
             <div className="field">
               <label htmlFor="email">Administrator email</label>
               <input id="email" name="email" type="email" required autoComplete="username" />

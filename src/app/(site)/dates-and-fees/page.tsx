@@ -19,9 +19,11 @@ export default async function DatesAndFeesPage() {
       <section className="page-hero">
         <div className="wrap">
           <div className="eyebrow">Plan your attendance</div>
-          <h1 style={{ fontFamily: "'Iowan Old Style', Palatino, Georgia, serif", fontSize: "clamp(1.9rem, 1.5rem + 1.6vw, 2.75rem)", marginTop: "0.6rem" }}>
-            Dates and fees
-          </h1>
+          <h1 className="page-title">Dates and fees</h1>
+          <p className="page-lede">
+            Every milestone from the opening of the call for abstracts to the closing session, and
+            what registration costs in each category.
+          </p>
         </div>
       </section>
       <DatesSection abstractOpensAt={ABSTRACT_OPENS_AT} abstractClosesAt={deadline.toISOString()} />

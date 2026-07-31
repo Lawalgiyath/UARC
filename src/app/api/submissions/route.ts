@@ -5,6 +5,7 @@ import { getAbstractDeadline } from "@/lib/settings";
 import { generateUniqueReference } from "@/lib/reference";
 import { sendEmail } from "@/lib/email";
 import { sendSms } from "@/lib/sms";
+import { guardPublicWrite } from "@/lib/security";
 
 const submissionSchema = z.object({
   authorName: z.string().trim().min(2),
@@ -20,6 +21,9 @@ const submissionSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const blocked = await guardPublicWrite(request, "submission");
+  if (blocked) return blocked;
+
   const deadline = await getAbstractDeadline();
   if (new Date() > deadline) {
     return NextResponse.json(

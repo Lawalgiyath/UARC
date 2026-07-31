@@ -1,10 +1,13 @@
 import Image from "next/image";
 import type { Metadata } from "next";
 import { AcademicVine } from "@/components/AcademicVine";
+import { PhotoFrame } from "@/components/PhotoFrame";
 import { CAMPUS_PHOTOS } from "@/lib/media";
 
 export const metadata: Metadata = {
   title: "Past Editions | 19th UNILAG Annual Research Conference",
+  description:
+    "The themes, dates and outcomes of the 16th, 17th and 18th University of Lagos Annual Research Conferences.",
 };
 
 const EDITIONS = [
@@ -15,7 +18,7 @@ const EDITIONS = [
     theme: "The Future of Work, Education and Wellbeing in the AI Age",
     summary:
       "Organised into six subtheme tracks spanning education, environmental monitoring, business, and public health, with oral and poster sessions across the sciences and humanities. Over 120 participants attended. Professor Solomon Okunuga, Chairman of the Conference Planning Committee and Director of the Research Management Office, delivered the official communique, and Professor Bola Oboh, Deputy Vice-Chancellor (Academic and Research), gave the closing remarks.",
-    photo: CAMPUS_PHOTOS.library,
+    photo: CAMPUS_PHOTOS.confuciusInstitute,
     sourceLabel: "unilag.edu.ng",
     sourceUrl:
       "https://unilag.edu.ng/unilags-18th-annual-research-conference-ends-showcasing-ais-transformative-power-across-disciplines/",
@@ -51,39 +54,58 @@ export default function PastEditionsPage() {
       <section className="page-hero">
         <div className="wrap">
           <div className="eyebrow">The Archive</div>
-          <h1 style={{ fontFamily: "'Iowan Old Style', Palatino, Georgia, serif", fontSize: "clamp(1.9rem, 1.5rem + 1.6vw, 2.75rem)", marginTop: "0.6rem" }}>
-            Past editions
-          </h1>
-          <p style={{ color: "var(--text-muted)", marginTop: "0.9rem", fontSize: "1.0625rem", maxWidth: "44rem" }}>
-            A running record of prior conferences, each held on the University of Lagos campus. Campus
-            photography below illustrates the setting rather than the specific event.
+          <h1 className="page-title">Past editions</h1>
+          <p className="page-lede">
+            A running record of prior conferences, each held on the University of Lagos campus.
+            Campus photography illustrates the setting rather than the specific event.
           </p>
         </div>
       </section>
 
-      <section style={{ position: "relative" }}>
+      {/* The library photo is framed by its declared crop, which holds the top
+          of the frame and drops the ground level clutter the Secretariat asked
+          to see the back of. */}
+      <PhotoFrame
+        photo={CAMPUS_PHOTOS.library}
+        caption="The University of Lagos library, Akoka campus."
+        className="photo-band"
+        sizes="100vw"
+        maxHeight="24rem"
+      />
+
+      <section className="archive-section">
         <div className="wrap">
           <div className="past-grid">
             {EDITIONS.map((ed) => (
-              <div className="past-card" key={ed.ordinal}>
+              <article className="past-card" key={ed.ordinal}>
                 <div className="plate">
-                  <Image src={ed.photo.src} width={ed.photo.width} height={ed.photo.height} alt={ed.photo.alt} sizes="(max-width: 600px) 100vw, 33vw" />
+                  <Image
+                    src={ed.photo.src}
+                    width={ed.photo.width}
+                    height={ed.photo.height}
+                    alt={ed.photo.alt}
+                    sizes="(max-width: 600px) 100vw, 33vw"
+                  />
                 </div>
                 <div className="body">
-                  <div className="yr tnum">{ed.ordinal} Edition &middot; {ed.year}</div>
-                  <h3>{ed.theme}</h3>
+                  <div className="yr tnum">
+                    {ed.ordinal} Edition <span className="sep">&middot;</span> {ed.year}
+                  </div>
+                  <h2>{ed.theme}</h2>
+                  <div className="past-dates mono">{ed.dates}</div>
                   <p>{ed.summary}</p>
                   <p className="photo-credit-list">
                     Source: <a href={ed.sourceUrl}>{ed.sourceLabel}</a>. Campus photo by{" "}
                     <a href={ed.photo.sourceUrl}>{ed.photo.credit}</a>, CC BY-SA 4.0.
                   </p>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
+
           <p className="archive-note">
-            The 19th edition will be added to this archive after the conference concludes in October 2026,
-            drawing on the same submissions and registrations recorded through this site.
+            The 19th edition will be added to this archive after the conference concludes in October
+            2026, drawing on the same submissions and registrations recorded through this site.
           </p>
         </div>
         <AcademicVine variant="corner" className="vine-corner bottom-right" />

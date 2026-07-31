@@ -1,62 +1,106 @@
 # 19th UNILAG Annual Research Conference
 
-Public site, abstract submission portal, registration and payment, and an
-admin panel for the Secretariat. Built with Next.js (App Router), Prisma and
-Postgres, Cloudinary for file storage, Paystack for payment, and SendGrid and
-Twilio for confirmation email and SMS.
+Public site, abstract submission portal, registration and payment, sponsorship
+and exhibition sales, automatic certificates, and an admin panel for the
+Secretariat. Built with Next.js (App Router), Prisma and Postgres, Cloudinary
+for file storage, Paystack for payment, and SendGrid and Twilio for
+confirmation email and SMS.
 
 ## What is real here versus what needs your accounts
 
-Every page and form works end to end once the environment variables below
-are filled in. Nothing is faked: submissions and registrations are stored in
-your database, the abstract deadline enforced by the server (not just the
-browser), and the admin panel edits real data. You still need to create
+Every page and form works end to end once the environment variables below are
+filled in. Nothing is faked: submissions, registrations, sponsorships and
+exhibition bookings are stored in your database, the abstract deadline is
+enforced by the server (not just the browser), certificates are generated and
+verifiable, and the admin panel edits real data. You still need to create
 accounts with each provider and paste their keys into `.env` before anything
 sends an email, takes a payment, or accepts a file.
 
-## One time setup
+## Running it locally
 
-1. Install dependencies:
-   ```
-   npm install
-   ```
-2. Copy the environment template and fill it in:
-   ```
-   cp .env.example .env
-   ```
-   See "Getting each API key" below for where each value comes from.
-3. Generate your admin password hash (never put the plain password in `.env`):
-   ```
-   npm run hash-password -- "your real password"
-   ```
-   Paste the printed `ADMIN_PASSWORD_HASH=...` line into `.env`, and set
-   `ADMIN_EMAIL` to whatever email the Secretariat will sign in with.
-4. Create the database tables:
-   ```
-   npm run prisma:migrate
-   ```
-5. Run the site locally:
-   ```
-   npm run dev
-   ```
-   Visit `http://localhost:3000` for the public site and
-   `http://localhost:3000/admin` for the Secretariat dashboard.
+Four commands, no Docker and no cloud account. `npm run db:start` runs a real
+PostgreSQL server as an ordinary Node process, using binaries that ship with
+the `embedded-postgres` package, so the local database is the same Postgres the
+site uses in production, enums and all.
+
+```
+npm install
+npm run db:start     # leave this running in its own terminal
+npm run db:seed      # demo data, so the pages have something to show
+npm run dev          # in a second terminal
+```
+
+Then visit `http://localhost:3000` for the public site and
+`http://localhost:3000/admin` for the Secretariat dashboard.
+
+The database files live in `.pgdata/`, which is gitignored, so data survives
+restarts. `npm run db:stop` stops the server; `npm run db:destroy` throws the
+data away and starts from nothing.
+
+### Signing in to the dashboard
+
+The credentials come from `.env`. To change them:
+
+```
+npm run hash-password -- "your real password"
+```
+
+Paste the printed `ADMIN_PASSWORD_HASH="..."` line into `.env` exactly as
+printed, **backslashes included**, and set `ADMIN_EMAIL` to whatever address
+the Secretariat will use.
+
+> **Why the backslashes.** A bcrypt hash is full of `$` characters, and the
+> `.env` loader expands `$NAME` as a variable reference, which silently eats
+> part of the hash. Sign in then fails with "Incorrect email or password" on a
+> correct password, which is a miserable thing to debug. Escaping each `$` as
+> `\$` stops it; quoting, single or double, does not. `hash-password` prints
+> the line already escaped, and also prints the raw hash to paste into a
+> hosting dashboard such as Vercel, which takes values literally and needs no
+> escaping. If the hash is ever malformed, the server logs a loud explanation
+> at the first sign in attempt rather than failing silently.
+
+Sign in is limited to five attempts per address per fifteen minutes. If the
+Secretariat locks itself out, `npm run rate-limit -- --clear` clears the
+counter without waiting.
+
+### Demo data
+
+`npm run db:seed` inserts invented abstracts, delegates, sponsors and
+exhibitors so the sponsor wall, delegate list, exhibitor directory and
+dashboard are not empty while the site is being reviewed. Two certificate
+codes are seeded for trying `/verify`:
+
+```
+H4KM-9TR2-BXQ7    certificate of attendance
+P2WD-6NCF-3JVA    certificate of presentation
+```
+
+**None of it is real.** Run `npm run db:seed -- --clear` to wipe it, and make
+sure that has been done before the site is pointed at a public domain.
+
+### Moving to a hosted database
+
+Nothing above is load bearing. Point `DATABASE_URL` at a Neon or Supabase
+connection string, run `npm run prisma:deploy`, and stop running
+`npm run db:start`. No application code changes.
 
 ## Getting each API key
 
-- **Database** (`DATABASE_URL`): create a free Postgres database on Neon
-  (neon.tech) or Supabase (supabase.com), copy the connection string they
-  give you.
+- **Database** (`DATABASE_URL`): nothing needed to develop locally, see
+  "Running it locally" above. For production, create a Postgres database on
+  Neon (neon.tech) or Supabase (supabase.com) and copy the connection string
+  they give you.
 - **Cloudinary** (`CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`,
   `CLOUDINARY_API_SECRET`, `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`): create a
   free account at cloudinary.com, the three values are on the dashboard home
-  page. Uploads from the submission form go straight from the visitor's
-  browser to Cloudinary using a signed request generated by this app, so
-  manuscript files never pass through, or slow down, your server.
+  page. Manuscripts and sponsor logos upload straight from the visitor's
+  browser to Cloudinary using a signed request generated by this app, so files
+  never pass through, or slow down, your server.
 - **Paystack** (`PAYSTACK_SECRET_KEY`): create an account at paystack.com,
   take the secret key from Settings > API Keys & Webhooks. Start with the
   test key while you are trying the site out, switch to the live key once
-  you are ready to take real payments.
+  you are ready to take real payments. **Also set the webhook URL** (see
+  "Payments and the webhook" below).
 - **SendGrid** (`SENDGRID_API_KEY`, `SENDGRID_FROM_EMAIL`): create an account
   at sendgrid.com, verify a sender email address (Settings > Sender
   Authentication), and create an API key with Mail Send permission.
@@ -74,13 +118,87 @@ If a given provider's keys are missing, that one feature degrades quietly
 (the email or SMS is skipped and logged) rather than breaking the rest of the
 site, so you can turn features on one at a time.
 
+## Payments and the webhook
+
+Two things confirm a payment, and both matter:
+
+- The **browser redirect** back from Paystack checkout, which re-verifies the
+  transaction with Paystack before showing anyone a success page. This gives
+  the payer an immediate answer.
+- The **signed webhook** at `/api/webhooks/paystack`, which is the authority.
+  A delegate who closes the tab at the wrong moment never triggers the
+  redirect; the webhook fires anyway.
+
+In the Paystack dashboard, under Settings > API Keys & Webhooks, set the live
+webhook URL to `https://your-domain/api/webhooks/paystack`. The route verifies
+the `x-paystack-signature` header against the raw request body and rejects
+anything unsigned, so it is safe to leave public.
+
+## Certificates
+
+Certificates are generated by the system, not typed up by hand.
+
+1. A delegate is marked present in the admin panel (Registrations tab, "Mark
+   present"). That single action is the trigger.
+2. A certificate row is created with a random twelve character code, and a
+   link is emailed to the delegate.
+3. The certificate renders from the database at `/certificate/<code>`, styled
+   for A4 landscape, so delegates print to PDF from any browser. There is no
+   stored file to lose, and a correction to a name takes effect everywhere at
+   once.
+4. Anyone can confirm a certificate is genuine at `/verify`. Codes are 60 bits
+   of randomness and the endpoint is rate limited, so the verifier cannot be
+   used to enumerate the delegate register.
+
+Presentation, poster, session chair and reviewer certificates are issued from
+`/api/admin/certificates`. Revoking leaves the code resolvable and says plainly
+that it is no longer valid, which is more useful to a checker than a
+certificate that simply vanishes.
+
+## Student verification
+
+Student rates ask for a matriculation or student number and an institutional
+email address. Addresses on recognised academic domains (`unilag.edu.ng`, any
+`.edu`, any `.ac.xx` or `.edu.xx`) clear automatically. Anything else is
+queued as PENDING and appears under "Student checks" in the admin panel, and
+the delegate can still pay immediately. Physical ID is still checked at the
+registration desk; this system exists to stop casual abuse of the discount and
+to give the Secretariat a worklist.
+
+## The public delegate list
+
+`/delegates` lists the names of delegates who have both paid and ticked the
+consent box on the registration form. The box is off by default. Only name,
+institution and country are selected from the database for that page; no email
+address, phone number, fee category or amount is published anywhere.
+
+## Security
+
+- **Rate limiting** on sign in, submissions, registrations, partner
+  applications, upload signing and every lookup endpoint. Counters live in
+  Postgres rather than process memory, because on Vercel this app runs as
+  several instances and an in-process counter would be trivially bypassed.
+- **Admin sign in** is throttled to five attempts per address per fifteen
+  minutes, on top of bcrypt, and returns the same message for a wrong email as
+  for a wrong password.
+- **Same-origin checks** on every public write route, so a form on another
+  site cannot post to ours using a visitor's cookies.
+- **Signed webhooks**: payment is only recorded from a payload whose HMAC
+  SHA512 signature checks out against the Paystack secret key.
+- **Security headers** are set in `next.config.mjs`: a Content Security Policy
+  that blocks framing and plugins and restricts where forms may post, plus
+  HSTS, `nosniff`, a referrer policy and a permissions policy. The admin panel
+  and the API are marked `no-store`.
+- **CSV exports** neutralise fields beginning with `=`, `+`, `-` or `@`, so an
+  export opened in Excel cannot execute anything a delegate typed into a form.
+
 ## How the abstract deadline works
 
 The deadline shown on the site and enforced by the submission API comes from
 the database (a `Setting` row), with `ABSTRACT_DEADLINE_FALLBACK` in `.env`
-as the default until the Secretariat changes it. Sign in at `/admin`, use the
-"Extend Deadline" control, and the public portal opens or closes immediately,
-no redeploy required.
+as the default until the Secretariat changes it. Sign in at `/admin`, edit the
+deadline, and the public portal opens or closes immediately, no redeploy
+required.
 
 ## Adding a `?preview=1` link for the Secretariat
 
@@ -90,6 +208,42 @@ the site with `?preview=1` on the end of the URL (for example
 so the committee can see what visitors will experience once submissions
 close, without waiting for the real date or changing the real deadline.
 
+## Content the Secretariat owns
+
+These files are plain data, edited without touching any component:
+
+- `src/lib/conference.ts` — phone numbers, email, address, social handles, and
+  the breaking news item shown at the top of the home page.
+- `src/lib/university.ts` — the "about the university" block, the promises made
+  to authors, and the visibility channels.
+- `src/lib/tracks.ts` — the eight subtheme tracks with their descriptions,
+  topic areas and disciplines. The submission form reads its options from here.
+- `src/lib/sponsorship.ts` and `src/lib/exhibition.ts` — tiers, packages,
+  prices and what each one includes.
+- `src/lib/accommodation.ts` — the hotel list. **Every entry carries a
+  `confirmed` flag, and only the on-campus guest house is currently set to
+  true**, because its numbers come from its own official site. Ring the other
+  hotels, agree a delegate rate, fill in `phone` and `rateFrom`, and set
+  `confirmed: true`.
+- `src/lib/media.ts` — campus photography, with an optional `crop` per photo.
+  To swap in official university photography, drop a file in `public/` and
+  point `src` at it; nothing else reads image paths.
+
+## Project layout
+
+- `src/app` - pages and API routes (App Router)
+- `src/components` - the public site's sections, the shared icon system and
+  the admin dashboard
+- `src/components/icons/AcademicIcons.tsx` - one 24 grid, 1.5 stroke icon
+  family used everywhere, plus `IconPattern.tsx`, the tiled watermark built
+  from the same glyphs
+- `src/lib` - content data files, Cloudinary signing, Paystack, SendGrid,
+  Twilio, admin session, rate limiting, certificates and fee schedule logic,
+  kept as plain `fetch` calls rather than SDKs so the integration code stays
+  easy to read and swap out
+- `prisma/schema.prisma` - `Submission`, `Registration`, `Sponsor`,
+  `Exhibitor`, `Certificate`, `RateLimit` and `Setting`
+
 ## Deploying
 
 The app is a standard Next.js project, so it deploys to Vercel by pushing
@@ -97,16 +251,7 @@ this repository and importing it there, then pasting the same environment
 variables into the Vercel project settings. Point `DATABASE_URL` at a
 production Postgres instance and run `npm run prisma:deploy` once against it
 (Vercel's build step can do this automatically if you add
-`prisma migrate deploy` to the build command). Set
-`NEXT_PUBLIC_SITE_URL` to the real domain once you have one, Paystack uses it
-to send delegates back to the right success or failure page after payment.
-
-## Project layout
-
-- `src/app` - pages and API routes (App Router)
-- `src/components` - the public site's sections and the admin dashboard
-- `src/lib` - Cloudinary signing, Paystack, SendGrid, Twilio, admin session
-  and fee schedule logic, kept as plain `fetch` calls rather than SDKs so the
-  integration code stays easy to read and swap out
-- `prisma/schema.prisma` - the three tables: `Submission`, `Registration`,
-  `Setting`
+`prisma migrate deploy` to the build command). Set `NEXT_PUBLIC_SITE_URL` to
+the real domain once you have one: Paystack uses it to send delegates back to
+the right success or failure page, the certificate emails link to it, and the
+same-origin check reads it.

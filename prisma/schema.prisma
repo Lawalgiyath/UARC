@@ -19,6 +19,33 @@ enum RegistrationStatus {
   FAILED
 }
 
+/// Student rates are only released once the claim has been checked.
+enum VerificationStatus {
+  NOT_REQUIRED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+/// Sponsors and exhibitors may pay online or by bank transfer against an
+/// invoice, so their lifecycle has one more state than a delegate's.
+enum PartnerStatus {
+  PENDING
+  AWAITING_TRANSFER
+  PAID
+  CONFIRMED
+  FAILED
+  CANCELLED
+}
+
+enum CertificateKind {
+  ATTENDANCE
+  PRESENTATION
+  POSTER
+  SESSION_CHAIR
+  REVIEWER
+}
+
 model Submission {
   id                 String            @id @default(cuid())
   reference          String            @unique
@@ -36,6 +63,8 @@ model Submission {
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
 
+  certificates       Certificate[]
+
   @@index([email])
   @@index([status])
 }
@@ -52,11 +81,131 @@ model Registration {
   currency     String
   paystackRef  String?             @unique
   status       RegistrationStatus  @default(PENDING)
+
+  /// Country of residence, so international delegates can be supported with
+  /// visa letters and dial-in guidance.
+  country      String?
+
+  /// Delegates choose whether their name appears on the public list. Default
+  /// off: publishing an attendee list without consent is not ours to do.
+  listPublicly Boolean             @default(false)
+
+  /// Student verification. `studentIdNumber` is a matriculation or student
+  /// number; `studentInstitutionEmail` is the institutional address the claim
+  /// was made against. Both are only collected for student categories.
+  verification            VerificationStatus @default(NOT_REQUIRED)
+  studentIdNumber         String?
+  studentInstitutionEmail String?
+  verifiedAt              DateTime?
+  verificationNote        String?
+
+  /// Set at the registration desk, and the trigger for issuing a certificate.
+  attended     Boolean             @default(false)
+  attendedAt   DateTime?
+
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
 
+  certificates Certificate[]
+
   @@index([email])
   @@index([status])
+  @@index([verification])
+  @@index([listPublicly, status])
+}
+
+model Sponsor {
+  id            String        @id @default(cuid())
+  reference     String        @unique
+  organisation  String
+  contactName   String
+  email         String
+  phone         String
+  tier          String
+  amount        Int
+  currency      String
+  paystackRef   String?       @unique
+  status        PartnerStatus @default(PENDING)
+
+  /// Shown on the sponsor wall once the sponsorship is confirmed and the
+  /// Secretariat has ticked `displayOnSite`.
+  websiteUrl    String?
+  logoUrl       String?
+  logoPublicId  String?
+  displayOnSite Boolean       @default(false)
+  message       String?
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([status])
+  @@index([displayOnSite, status])
+}
+
+model Exhibitor {
+  id            String        @id @default(cuid())
+  reference     String        @unique
+  organisation  String
+  contactName   String
+  email         String
+  phone         String
+  packageKey    String
+  amount        Int
+  currency      String
+  paystackRef   String?       @unique
+  status        PartnerStatus @default(PENDING)
+
+  description   String?
+  websiteUrl    String?
+  logoUrl       String?
+  logoPublicId  String?
+  standNumber   String?
+  displayOnSite Boolean       @default(false)
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([status])
+  @@index([displayOnSite, status])
+}
+
+/// Issued automatically once attendance is recorded. `code` is the public
+/// verification code printed on the certificate; anyone can check it at
+/// /verify without being able to enumerate the register, because the code is
+/// long and random and lookups are rate limited.
+model Certificate {
+  id             String          @id @default(cuid())
+  code           String          @unique
+  kind           CertificateKind
+  recipientName  String
+  institution    String?
+  /// Paper title, for presentation and poster certificates.
+  paperTitle     String?
+  track          String?
+  issuedAt       DateTime        @default(now())
+  revokedAt      DateTime?
+  revokedReason  String?
+
+  registrationId String?
+  registration   Registration?   @relation(fields: [registrationId], references: [id], onDelete: SetNull)
+  submissionId   String?
+  submission     Submission?     @relation(fields: [submissionId], references: [id], onDelete: SetNull)
+
+  @@index([registrationId])
+  @@index([submissionId])
+  @@index([kind])
+}
+
+/// Fixed window counters for rate limiting. Kept in the database rather than
+/// in process memory so the limit still holds when the app runs as more than
+/// one serverless instance, which is exactly when brute force matters.
+model RateLimit {
+  key       String   @id
+  count     Int      @default(0)
+  resetAt   DateTime
+  updatedAt DateTime @updatedAt
+
+  @@index([resetAt])
 }
 
 model Setting {

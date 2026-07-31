@@ -77,3 +77,25 @@ export async function verifyTransaction(reference: string): Promise<VerifyResult
     reference: json.data.reference,
   };
 }
+
+/**
+ * Verifies the `x-paystack-signature` header on a webhook: HMAC SHA512 of the
+ * raw request body, keyed with our secret key.
+ *
+ * The browser redirect back from checkout is a convenience, not proof of
+ * payment: a delegate can simply navigate to the callback URL. The webhook is
+ * the channel Paystack itself controls, so it is the one that may mark money
+ * as received, and it is only trustworthy if this signature checks out. The
+ * body must be the exact bytes received, before any JSON parsing.
+ */
+export async function verifyWebhookSignature(rawBody: string, signature: string | null): Promise<boolean> {
+  if (!signature) return false;
+
+  const { createHmac, timingSafeEqual } = await import("node:crypto");
+  const expected = createHmac("sha512", secretKey()).update(rawBody, "utf8").digest("hex");
+
+  const a = Buffer.from(expected, "utf8");
+  const b = Buffer.from(signature, "utf8");
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
+}

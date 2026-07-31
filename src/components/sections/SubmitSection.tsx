@@ -2,6 +2,7 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { IconSearch } from "@/components/icons/AcademicIcons";
 
 interface ManuscriptUpload {
   url: string;
@@ -141,7 +142,7 @@ export function SubmitSection({
           <div className="panel">
             {submitError && <div className="form-error">{submitError}</div>}
             <form onSubmit={handleSubmit}>
-              <fieldset disabled={isClosed || submitting} style={{ border: "none", padding: 0, margin: 0 }}>
+              <fieldset disabled={isClosed || submitting} className="bare-fieldset">
                 <div className="field-grid">
                   <div className="field">
                     <label htmlFor="authorName">Presenting author</label>
@@ -237,7 +238,13 @@ export function SubmitSection({
 function SubmissionTracker() {
   const [email, setEmail] = useState("");
   const [ref, setRef] = useState("");
-  const [result, setResult] = useState<{ title: string; track: string; status: string } | null>(null);
+  const [result, setResult] = useState<{
+    title: string;
+    track: string;
+    status: string;
+    format?: string;
+    submittedAt?: string;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
 
@@ -258,26 +265,84 @@ function SubmissionTracker() {
   }
 
   return (
-    <div>
+    <div className="tracker" id="track">
+      {/* Asked for by name: the tracker used to be an unlabelled pair of
+          fields at the foot of the form, which nobody found. */}
+      <div className="section-head tracker-head">
+        <div className="eyebrow">
+          <IconSearch size={14} /> Track a submission
+        </div>
+        <h2>Check the status of an abstract you have already sent</h2>
+        <p>
+          Enter the email address you submitted with and the reference code we emailed and texted
+          you. Both are needed, so nobody else can look up your submission.
+        </p>
+      </div>
+
       <div className="tracker-row">
         <div className="field">
-          <label htmlFor="trackEmail">Track a submission &middot; email</label>
-          <input id="trackEmail" type="email" placeholder="you@institution.edu" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <label htmlFor="trackEmail">Email address</label>
+          <input
+            id="trackEmail"
+            type="email"
+            placeholder="you@institution.edu"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </div>
         <div className="field">
           <label htmlFor="trackRef">Reference code</label>
-          <input id="trackRef" type="text" placeholder="UARC26-0000" value={ref} onChange={(e) => setRef(e.target.value)} />
+          <input
+            id="trackRef"
+            type="text"
+            className="mono"
+            placeholder="UARC26-0000"
+            value={ref}
+            onChange={(e) => setRef(e.target.value)}
+          />
         </div>
-        <button className="btn ghost" type="button" onClick={check} disabled={checking || !email || !ref}>
-          {checking ? "Checking..." : "Check Status"}
+        <button className="btn solid" type="button" onClick={check} disabled={checking || !email || !ref}>
+          {checking ? "Checking..." : "Check status"}
         </button>
       </div>
-      {error && <div className="form-error" style={{ marginTop: "1rem" }}>{error}</div>}
+
+      {error && <div className="form-error tracker-error">{error}</div>}
+
       {result && (
-        <div className="confirm-panel" style={{ marginTop: "1rem" }}>
-          <p><strong>{result.title}</strong></p>
-          <p style={{ color: "var(--text-muted)", fontSize: "0.9375rem", marginTop: "0.35rem" }}>{result.track}</p>
-          <p style={{ marginTop: "0.5rem" }}>Status: <strong>{result.status}</strong></p>
+        <div className="confirm-panel tracker-result">
+          <p>
+            <strong>{result.title}</strong>
+          </p>
+          <p className="tracker-track">{result.track}</p>
+          <dl className="tracker-fields">
+            <div>
+              <dt>Status</dt>
+              <dd>
+                <span className={`pill-status ${result.status.toLowerCase()}`}>{result.status}</span>
+              </dd>
+            </div>
+            {result.format && (
+              <div>
+                <dt>Preference</dt>
+                <dd>{result.format}</dd>
+              </div>
+            )}
+            {result.submittedAt && (
+              <div>
+                <dt>Submitted</dt>
+                <dd>
+                  {new Date(result.submittedAt).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </dd>
+              </div>
+            )}
+          </dl>
+          <p className="tracker-note">
+            Decisions on every abstract are sent by 21 September 2026, accepted or not.
+          </p>
         </div>
       )}
     </div>

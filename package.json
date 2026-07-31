@@ -12,7 +12,12 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
-    "hash-password": "tsx scripts/hash-password.ts"
+    "hash-password": "tsx scripts/hash-password.ts",
+    "db:start": "tsx scripts/dev-db.ts start",
+    "db:stop": "tsx scripts/dev-db.ts stop",
+    "db:destroy": "tsx scripts/dev-db.ts destroy",
+    "db:seed": "tsx scripts/seed.ts",
+    "rate-limit": "tsx scripts/rate-limit.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",
@@ -27,6 +32,7 @@
     "@types/node": "^22.7.4",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "embedded-postgres": "^18.4.0-beta.17",
     "prisma": "^5.20.0",
     "tsx": "^4.19.1",
     "typescript": "^5.6.2"

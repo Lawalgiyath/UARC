@@ -1,41 +1,39 @@
-import Image from "next/image";
 import type { Metadata } from "next";
 import { Committee } from "@/components/sections/Committee";
 import { AcademicVine } from "@/components/AcademicVine";
+import { PhotoFrame } from "@/components/PhotoFrame";
 import { CAMPUS_PHOTOS } from "@/lib/media";
+import { CRC } from "@/lib/conference";
 
 export const metadata: Metadata = {
   title: "Organising Committee | 19th UNILAG Annual Research Conference",
+  description:
+    "The Central Research Committee and the Conference Planning Committee Secretariat behind the 19th UNILAG Annual Research Conference, and who handles what.",
 };
 
 export default function CommitteePage() {
-  const photo = CAMPUS_PHOTOS.lagoonFountain;
-
   return (
     <>
       <section className="page-hero">
         <div className="wrap">
           <div className="eyebrow">Secretariat</div>
-          <h1 style={{ fontFamily: "'Iowan Old Style', Palatino, Georgia, serif", fontSize: "clamp(1.9rem, 1.5rem + 1.6vw, 2.75rem)", marginTop: "0.6rem" }}>
-            Organising committee
-          </h1>
-          <AcademicVine variant="horizontal" className="vine-horizontal" style={{ marginTop: "1.5rem" }} />
+          <h1 className="page-title">Organising committee</h1>
+          <p className="page-lede">
+            The conference is convened by the {CRC.name} ({CRC.abbr}), chaired by the{" "}
+            {CRC.chairRole}, and run day to day by the {CRC.secretariat} in the{" "}
+            {CRC.secretariatOffice}.
+          </p>
+          <AcademicVine variant="horizontal" className="vine-horizontal committee-vine" />
         </div>
       </section>
 
-      <figure className="photo-band">
-        <Image
-          src={photo.src}
-          width={photo.width}
-          height={photo.height}
-          alt={photo.alt}
-          sizes="100vw"
-          style={{ objectFit: "cover", maxHeight: "20rem" }}
-        />
-        <figcaption>
-          The lagoon front fountain, University of Lagos. Photo by <a href={photo.sourceUrl}>{photo.credit}</a>, CC BY-SA 4.0.
-        </figcaption>
-      </figure>
+      <PhotoFrame
+        photo={CAMPUS_PHOTOS.lagoonFountain}
+        caption="The lagoon front fountain, University of Lagos."
+        className="photo-band"
+        sizes="100vw"
+        maxHeight="20rem"
+      />
 
       <Committee />
     </>
