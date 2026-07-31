@@ -368,8 +368,6 @@ model Manuscript {
 
   fileSize Int
 
-  version Int @default(1)
-
   uploadedAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
