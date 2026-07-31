@@ -1,5 +1,10 @@
-import { RegistrationCategory, RegistrationStatus, PaymentStatus } from "@prisma/client";
+import { PaymentStatus, RegistrationCategory, RegistrationStatus } from "@prisma/client";
 import { z } from "zod";
+
+const STUDENT_CATEGORIES = new Set<RegistrationCategory>([
+    RegistrationCategory.STUDENT_EARLY_BIRD,
+    RegistrationCategory.STUDENT_REGULAR,
+]);
 
 const fullNameField = z
     .string()
@@ -14,7 +19,7 @@ const emailField = z
     .email("A valid email address is required.")
     .max(255);
 
-const phoneField = z
+const phoneNumberField = z
     .string()
     .trim()
     .regex(
@@ -28,30 +33,24 @@ const institutionField = z
     .min(2, "Institution name is required.")
     .max(200);
 
-const studentIdField = z
+const studentIdNumberField = z
     .string()
     .trim()
-    .min(3)
+    .min(3, "Student ID number is required.")
     .max(100)
     .optional();
 
-const studentInstitutionField = z
+const studentInstitutionNameField = z
     .string()
     .trim()
-    .min(2)
+    .min(2, "Student institution is required.")
     .max(200)
     .optional();
 
-const studentIdFrontField = z
+const uploadedStudentIdField = z
     .string()
     .trim()
-    .min(1, "Student ID front image is required.")
-    .optional();
-
-const studentIdBackField = z
-    .string()
-    .trim()
-    .min(1, "Student ID back image is required.")
+    .min(1)
     .optional();
 
 export const createRegistrationSchema = z
@@ -60,111 +59,142 @@ export const createRegistrationSchema = z
 
         email: emailField,
 
-        phoneNumber: phoneField,
+        phoneNumber: phoneNumberField,
 
         institution: institutionField,
 
-        category: z.nativeEnum(RegistrationCategory),
+        category: z.nativeEnum(
+            RegistrationCategory
+        ),
 
-        studentIdNumber: studentIdField,
+        studentIdNumber:
+            studentIdNumberField,
 
-        studentInstitutionName: studentInstitutionField,
+        studentInstitutionName:
+            studentInstitutionNameField,
 
-        studentIdFront: studentIdFrontField,
+        studentIdFront:
+            uploadedStudentIdField,
 
-        studentIdBack: studentIdBackField,
-
+        studentIdBack:
+            uploadedStudentIdField,
     })
     .superRefine((data, ctx) => {
-        const isStudent =
-            data.category === RegistrationCategory.STUDENT_EARLY_BIRD ||
-            data.category === RegistrationCategory.STUDENT_REGULAR;
+        if (!STUDENT_CATEGORIES.has(data.category)) {
+            return;
+        }
 
-        if (isStudent) {
-            if (!data.studentIdNumber) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    path: ["studentIdNumber"],
-                    message: "Student ID number is required.",
-                });
-            }
+        if (!data.studentIdNumber) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ["studentIdNumber"],
+                message:
+                    "Student ID number is required.",
+            });
+        }
 
-            if (!data.studentInstitutionName) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    path: ["studentInstitution"],
-                    message: "Student institution is required.",
-                });
-            }
+        if (!data.studentInstitutionName) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ["studentInstitutionName"],
+                message:
+                    "Student institution is required.",
+            });
+        }
 
-            if (!data.studentIdFront) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    path: ["studentIdFront"],
-                    message: "Front of student ID is required.",
-                });
-            }
+        if (!data.studentIdFront) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ["studentIdFront"],
+                message:
+                    "Front of student ID is required.",
+            });
+        }
 
-            if (!data.studentIdBack) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    path: ["studentIdBack"],
-                    message: "Back of student ID is required.",
-                });
-            }
+        if (!data.studentIdBack) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ["studentIdBack"],
+                message:
+                    "Back of student ID is required.",
+            });
         }
     });
 
-export const getRegistrationSchema = z.object({
-    registrationCode: z
-        .string()
-        .trim()
-        .min(5)
-        .max(50),
-});
+export const getRegistrationSchema =
+    z.object({
+        registrationCode: z
+            .string()
+            .trim()
+            .min(5)
+            .max(50),
+    });
 
-export const verifyRegistrationSchema = z.object({
-    registrationCode: z
-        .string()
-        .trim()
-        .min(5)
-        .max(50),
+export const verifyRegistrationSchema =
+    z.object({
+        registrationCode: z
+            .string()
+            .trim()
+            .min(5)
+            .max(50),
 
-    email: emailField,
-});
+        email: emailField,
+    });
 
-export const listRegistrationsSchema = z.object({
-  page: z.coerce.number().int().min(1).default(1),
+export const listRegistrationsSchema =
+    z.object({
+        page: z.coerce
+            .number()
+            .int()
+            .min(1)
+            .default(1),
 
-  pageSize: z.coerce.number().int().min(1).max(100).default(20),
+        pageSize: z.coerce
+            .number()
+            .int()
+            .min(1)
+            .max(100)
+            .default(20),
 
-  search: z.string().trim().optional(),
+        search: z
+            .string()
+            .trim()
+            .min(1)
+            .optional(),
 
-  category: z
-    .nativeEnum(RegistrationCategory)
-    .optional(),
+        category: z
+            .nativeEnum(
+                RegistrationCategory
+            )
+            .optional(),
 
-  registrationStatus: z
-    .nativeEnum(RegistrationStatus)
-    .optional(),
+        registrationStatus: z
+            .nativeEnum(
+                RegistrationStatus
+            )
+            .optional(),
 
-  paymentStatus: z
-    .nativeEnum(PaymentStatus)
-    .optional(),
-});
+        paymentStatus: z
+            .nativeEnum(PaymentStatus)
+            .optional(),
+    });
 
-export type CreateRegistrationInput = z.infer<
-    typeof createRegistrationSchema
->;
+export type CreateRegistrationInput =
+    z.infer<
+        typeof createRegistrationSchema
+    >;
 
-export type GetRegistrationInput = z.infer<
-    typeof getRegistrationSchema
->;
+export type GetRegistrationInput =
+    z.infer<
+        typeof getRegistrationSchema
+    >;
 
-export type VerifyRegistrationInput = z.infer<
-    typeof verifyRegistrationSchema
->;
+export type VerifyRegistrationInput =
+    z.infer<
+        typeof verifyRegistrationSchema
+    >;
 
-export type ListRegistrationsInput = z.infer<
-  typeof listRegistrationsSchema
->;
+export type ListRegistrationsInput =
+    z.infer<
+        typeof listRegistrationsSchema
+    >;

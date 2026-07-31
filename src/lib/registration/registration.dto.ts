@@ -1,38 +1,42 @@
-import type {
-    Registration,
-    StudentVerification,
-    Payment,
-    QRCode,
-} from "@prisma/client";
+import type {Payment,QRCode,Registration,StudentVerification} from "@prisma/client";
 
 export interface RegistrationDto {
-    id: string;
-    registrationCode: string;
+  id: string;
 
-    fullName: string;
-    email: string;
-    phoneNumber: string;
+  registrationCode: string;
 
-    institution: string;
+  fullName: string;
 
-    category: string;
+  email: string;
 
-    amountDue: number;
-    currency: string;
+  phoneNumber: string;
 
-    paymentStatus: string;
-    registrationStatus: string;
+  institution: string;
 
-    createdAt: Date;
-    updatedAt: Date;
+  category: string;
+
+  amountDue: number;
+
+  currency: string;
+
+  paymentStatus: string;
+
+  registrationStatus: string;
+
+  createdAt: Date;
+
+  updatedAt: Date;
 }
 
-export interface RegistrationDetailsDto extends RegistrationDto {
-    studentVerification?: StudentVerificationDto | null;
+export interface RegistrationDetailsDto
+  extends RegistrationDto {
+  studentVerification:
+    | StudentVerificationDto
+    | null;
 
-    qrCode?: QRCodeDto | null;
+  qrCode: QRCodeDto | null;
 
-    payments: PaymentDto[];
+  payments: PaymentDto[];
 }
 
 export interface RegistrationVerificationDto {
@@ -54,187 +58,252 @@ export interface RegistrationVerificationDto {
 
   qrGenerated: boolean;
 
-  studentVerificationStatus: string | null;
+  studentVerificationStatus:
+    | string
+    | null;
 
   createdAt: Date;
 }
 
 export interface StudentVerificationDto {
-    studentIdNumber: string;
+  studentIdNumber: string;
 
-    institutionName: string;
+  institutionName: string;
 
-    verificationStatus: string;
+  studentIdFront: string;
 
-    verifiedBy: string | null;
+  studentIdBack: string;
 
-    verifiedAt: Date | null;
+  verificationStatus: string;
 
-    rejectionReason: string | null;
+  verifiedBy: string | null;
+
+  verifiedAt: Date | null;
+
+  rejectionReason: string | null;
 }
 
 export interface PaymentDto {
-    transactionRef: string;
+  transactionRef: string;
 
-    gatewayReference: string | null;
+  gatewayReference: string | null;
 
-    amountPaid: number;
+  amountPaid: number;
 
-    currency: string;
+  currency: string;
 
-    status: string;
+  status: string;
 
-    paidAt: Date | null;
+  paidAt: Date | null;
 }
 
 export interface QRCodeDto {
-    token: string;
+  token: string;
 
-    qrImagePath: string | null;
+  qrImagePath: string | null;
 
-    generatedAt: Date;
+  generatedAt: Date;
 
-    expiresAt: Date | null;
+  expiresAt: Date | null;
 }
 
-export type RegistrationWithRelations = Registration & {
-    studentVerification: StudentVerification | null;
+export type RegistrationWithRelations =
+  Registration & {
+    studentVerification:
+      | StudentVerification
+      | null;
 
     qrCode: QRCode | null;
 
     payments: Payment[];
-};
+  };
 
 export function toRegistrationDto(
-    registration: Registration
+  registration: Registration
 ): RegistrationDto {
-    return {
-        id: registration.id,
+  return {
+    id: registration.id,
 
-        registrationCode: registration.registrationCode,
+    registrationCode:
+      registration.registrationCode,
 
-        fullName: registration.fullName,
+    fullName:
+      registration.fullName,
 
-        email: registration.email,
+    email:
+      registration.email,
 
-        phoneNumber: registration.phoneNumber,
+    phoneNumber:
+      registration.phoneNumber,
 
-        institution: registration.institution,
+    institution:
+      registration.institution,
 
-        category: registration.category,
+    category:
+      registration.category,
 
-        amountDue: Number(registration.amountDue),
+    amountDue: Number(
+      registration.amountDue
+    ),
 
-        currency: registration.currency,
+    currency:
+      registration.currency,
 
-        paymentStatus: registration.paymentStatus,
+    paymentStatus:
+      registration.paymentStatus,
 
-        registrationStatus: registration.registrationStatus,
+    registrationStatus:
+      registration.registrationStatus,
 
-        createdAt: registration.createdAt,
+    createdAt:
+      registration.createdAt,
 
-        updatedAt: registration.updatedAt,
-    };
+    updatedAt:
+      registration.updatedAt,
+  };
 }
 
 export function toRegistrationDetailsDto(
-    registration: RegistrationWithRelations
+  registration: RegistrationWithRelations
 ): RegistrationDetailsDto {
-    return {
-        ...toRegistrationDto(registration),
+  return {
+    ...toRegistrationDto(
+      registration
+    ),
 
-        studentVerification: registration.studentVerification
-            ? toStudentVerificationDto(
-                registration.studentVerification
-            )
-            : null,
+    studentVerification:
+      registration.studentVerification
+        ? toStudentVerificationDto(
+            registration.studentVerification
+          )
+        : null,
 
-        qrCode: registration.qrCode
-            ? toQRCodeDto(registration.qrCode)
-            : null,
+    qrCode:
+      registration.qrCode
+        ? toQRCodeDto(
+            registration.qrCode
+          )
+        : null,
 
-        payments: registration.payments.map(
-            toPaymentDto
-        ),
-    };
+    payments:
+      registration.payments.map(
+        toPaymentDto
+      ),
+  };
 }
 
 export function toRegistrationVerificationDto(
   registration: RegistrationWithRelations
 ): RegistrationVerificationDto {
   return {
-    registrationCode: registration.registrationCode,
+    registrationCode:
+      registration.registrationCode,
 
-    fullName: registration.fullName,
+    fullName:
+      registration.fullName,
 
-    email: registration.email,
+    email:
+      registration.email,
 
-    category: registration.category,
+    category:
+      registration.category,
 
-    amountDue: Number(registration.amountDue),
+    amountDue: Number(
+      registration.amountDue
+    ),
 
-    currency: registration.currency,
+    currency:
+      registration.currency,
 
-    registrationStatus: registration.registrationStatus,
+    registrationStatus:
+      registration.registrationStatus,
 
-    paymentStatus: registration.paymentStatus,
+    paymentStatus:
+      registration.paymentStatus,
 
-    qrGenerated: registration.qrCode !== null,
+    qrGenerated:
+      registration.qrCode !== null,
 
     studentVerificationStatus:
-      registration.studentVerification
-        ?.verificationStatus ?? null,
+      registration
+        .studentVerification
+        ?.verificationStatus ??
+      null,
 
-    createdAt: registration.createdAt,
+    createdAt:
+      registration.createdAt,
   };
 }
 
 export function toStudentVerificationDto(
-    verification: StudentVerification
+  verification: StudentVerification
 ): StudentVerificationDto {
-    return {
-        studentIdNumber: verification.studentIdNumber,
+  return {
+    studentIdNumber:
+      verification.studentIdNumber,
 
-        institutionName: verification.institutionName,
+    institutionName:
+      verification.institutionName,
 
-        verificationStatus: verification.verificationStatus,
+    studentIdFront:
+      verification.studentIdFront,
 
-        verifiedBy: verification.verifiedBy,
+    studentIdBack:
+      verification.studentIdBack,
 
-        verifiedAt: verification.verifiedAt,
+    verificationStatus:
+      verification.verificationStatus,
 
-        rejectionReason: verification.rejectionReason,
-    };
+    verifiedBy:
+      verification.verifiedBy,
+
+    verifiedAt:
+      verification.verifiedAt,
+
+    rejectionReason:
+      verification.rejectionReason,
+  };
 }
 
 export function toPaymentDto(
-    payment: Payment
+  payment: Payment
 ): PaymentDto {
-    return {
-        transactionRef: payment.transactionRef,
+  return {
+    transactionRef:
+      payment.transactionRef,
 
-        gatewayReference: payment.gatewayReference,
+    gatewayReference:
+      payment.gatewayReference,
 
-        amountPaid: Number(payment.amountPaid),
+    amountPaid: Number(
+      payment.amountPaid
+    ),
 
-        currency: payment.currency,
+    currency:
+      payment.currency,
 
-        status: payment.status,
+    status:
+      payment.status,
 
-        paidAt: payment.paidAt,
-    };
+    paidAt:
+      payment.paidAt,
+  };
 }
 
 export function toQRCodeDto(
-    qrCode: QRCode
+  qrCode: QRCode
 ): QRCodeDto {
-    return {
-        token: qrCode.token,
+  return {
+    token:
+      qrCode.token,
 
-        qrImagePath: qrCode.qrImagePath,
+    qrImagePath:
+      qrCode.qrImagePath,
 
-        generatedAt: qrCode.generatedAt,
+    generatedAt:
+      qrCode.generatedAt,
 
-        expiresAt: qrCode.expiresAt,
-    };
+    expiresAt:
+      qrCode.expiresAt,
+  };
 }

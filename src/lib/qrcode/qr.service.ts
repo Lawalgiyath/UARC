@@ -2,13 +2,8 @@ import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import QRCode from "qrcode";
-import type {
-    Attendance,
-    Prisma,
-    Registration,
-    QRCode as PrismaQRCode
-} from "@prisma/client";
-
+import type {Attendance,Prisma,Registration,QRCode as PrismaQRCode} from "@prisma/client";
+import { attendanceErrors } from "../attendance/attendance.errors";
 import { prisma } from "@/lib/prisma";
 import { qrErrors } from "./qr.errors";
 import {
@@ -230,7 +225,7 @@ async recordAttendance(
     });
 
     if (existingAttendance) {
-        throw qrErrors.alreadyCheckedIn(registration.registrationCode);
+        throw attendanceErrors.alreadyCheckedIn(registration.registrationCode);
     }
 
     try {
@@ -246,7 +241,7 @@ async recordAttendance(
         };
     } catch (error) {
         const msg = error instanceof Error ? error.message : String(error);
-        throw qrErrors.attendanceRecordingFailed(registration.registrationCode, msg);
+        throw attendanceErrors.creationFailed(registration.registrationCode, msg);
     }
 }
 

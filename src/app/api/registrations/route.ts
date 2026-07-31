@@ -1,98 +1,115 @@
-import { NextRequest, NextResponse } from "next/server";
-import { ZodError } from "zod";
-
+import { NextRequest } from "next/server";
+import { RegistrationCategory } from "@prisma/client";
 import { createRegistrationSchema } from "@/lib/registration/registration.validation";
+import { registrationService } from "@/lib/registration/registration.service";
+import { studentUploadService } from "@/lib/storage/student-upload.service";
+import { ApiResponse } from "@/lib/api/api-response";
+import { handleApiError } from "@/lib/api/api-errors";
 
-import {
-  registrationService,
-  RegistrationServiceError,
-} from "@/lib/registration/registration.service";
+const STUDENT_CATEGORIES = new Set<RegistrationCategory>([
+  RegistrationCategory.STUDENT_EARLY_BIRD,
+  RegistrationCategory.STUDENT_REGULAR,
+]);
 
 export async function POST(
   request: NextRequest
-): Promise<NextResponse> {
+) {
   try {
-    let body: unknown;
+    const formData = await request.formData();
 
-    try {
-      body = await request.json();
-    } catch {
-      return NextResponse.json(
-        {
-          success: false,
-          code: "INVALID_JSON",
-          message: "Invalid JSON payload.",
-        },
-        {
-          status: 400,
-        }
-      );
+    const category =
+      formData.get(
+        "category"
+      ) as RegistrationCategory;
+
+    const isStudent =
+      STUDENT_CATEGORIES.has(category);
+
+    let studentIdFront: string | undefined;
+    let studentIdBack: string | undefined;
+
+    if (isStudent) {
+      const frontFile =
+        formData.get("studentIdFront");
+
+      const backFile =
+        formData.get("studentIdBack");
+
+      if (
+        !(frontFile instanceof File) ||
+        !(backFile instanceof File)
+      ) {
+        return ApiResponse.badRequest(
+          "Student ID front and back images are required."
+        );
+      }
+
+      const [
+        frontUpload,
+        backUpload,
+      ] = await Promise.all([
+        studentUploadService.uploadStudentId(
+          frontFile,
+          "front"
+        ),
+
+        studentUploadService.uploadStudentId(
+          backFile,
+          "back"
+        ),
+      ]);
+
+      studentIdFront =
+        frontUpload.storagePath;
+
+      studentIdBack =
+        backUpload.storagePath;
     }
 
-    const input = createRegistrationSchema.parse(body);
+    const input =
+      createRegistrationSchema.parse({
+        fullName:
+          formData.get("fullName"),
+
+        email:
+          formData.get("email"),
+
+        phoneNumber:
+          formData.get("phoneNumber"),
+
+        institution:
+          formData.get("institution"),
+
+        category,
+
+        studentIdNumber:
+          formData.get(
+            "studentIdNumber"
+          ) ?? undefined,
+
+        studentInstitutionName:
+          formData.get(
+            "studentInstitutionName"
+          ) ?? undefined,
+
+        studentIdFront,
+
+        studentIdBack,
+      });
 
     const registration =
-      await registrationService.createRegistration(input);
+      await registrationService.createRegistration(
+        input
+      );
 
-    return NextResponse.json(
+    return ApiResponse.created(
+      registration,
+      "Registration created successfully.",
       {
-        success: true,
-        message: "Registration created successfully.",
-        data: registration,
-      },
-      {
-        status: 201,
-        headers: {
-          Location: `/api/registrations/${registration.registrationCode}`,
-        },
+        Location: `/api/registrations/${registration.registrationCode}`,
       }
     );
   } catch (error) {
-    return handleError(error);
+    return handleApiError(error);
   }
-}
-
-function handleError(error: unknown): NextResponse {
-  if (error instanceof ZodError) {
-    return NextResponse.json(
-      {
-        success: false,
-        code: "VALIDATION_ERROR",
-        message: "Validation failed.",
-        errors: error.issues,
-      },
-      {
-        status: 400,
-      }
-    );
-  }
-
-  if (error instanceof RegistrationServiceError) {
-    return NextResponse.json(
-      {
-        success: false,
-        code: error.code,
-        message: error.message,
-      },
-      {
-        status: error.statusCode,
-      }
-    );
-  }
-
-  console.error("[POST /api/registrations]", {
-    timestamp: new Date().toISOString(),
-    error,
-  });
-
-  return NextResponse.json(
-    {
-      success: false,
-      code: "INTERNAL_SERVER_ERROR",
-      message: "An unexpected server error occurred.",
-    },
-    {
-      status: 500,
-    }
-  );
 }

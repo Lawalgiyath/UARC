@@ -229,13 +229,14 @@ model StudentVerification {
   registration       Registration              @relation(fields: [registrationId], references: [id], onDelete: Cascade)
   studentIdNumber    String
   institutionName    String
-  studentIdFront     String
-  studentIdBack      String
+  studentIdFront     String?
+  studentIdBack      String?
   verificationStatus StudentVerificationStatus @default(PENDING)
   verifiedBy         String?
   verifiedAt         DateTime?
   rejectionReason    String?
   createdAt          DateTime                  @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Payment {

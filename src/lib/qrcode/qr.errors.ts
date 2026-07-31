@@ -83,7 +83,7 @@ export const qrErrors = Object.freeze({
   ): never {
     return createError({
       code: "QR_ALREADY_EXISTS",
-      message: `A QR code already exists for registration '${registrationId}'.`,
+      message: `QR code already exists for registration '${registrationId}'.`,
       statusCode: 409,
     });
   },
@@ -98,12 +98,12 @@ export const qrErrors = Object.freeze({
     });
   },
 
-  qrInvalid(
-    reason = "Invalid QR code."
+  invalidQrToken(
+    token: string
   ): never {
     return createError({
-      code: "QR_INVALID",
-      message: reason,
+      code: "INVALID_QR_TOKEN",
+      message: `QR token '${token}' is invalid.`,
       statusCode: 400,
     });
   },
@@ -111,7 +111,7 @@ export const qrErrors = Object.freeze({
   qrExpired(): never {
     return createError({
       code: "QR_EXPIRED",
-      message: "This QR code has expired.",
+      message: "The QR code has expired.",
       statusCode: 410,
     });
   },
@@ -121,68 +121,59 @@ export const qrErrors = Object.freeze({
   ): never {
     return createError({
       code: "QR_ALREADY_SCANNED",
-      message: `Attendance has already been recorded for '${registrationCode}'.`,
+      message: `QR code for '${registrationCode}' has already been scanned.`,
       statusCode: 409,
     });
   },
 
   generationFailed(
-    reason: string,
+    message: string,
     cause?: unknown
   ): never {
     return createError({
       code: "QR_GENERATION_FAILED",
-      message: reason,
+      message,
       statusCode: 500,
       cause,
     });
   },
 
   storageFailed(
-    reason: string,
+    message: string,
     cause?: unknown
   ): never {
     return createError({
       code: "QR_STORAGE_FAILED",
-      message: reason,
+      message,
       statusCode: 500,
       cause,
     });
   },
 
   scanFailed(
-    reason: string,
+    message: string,
     cause?: unknown
   ): never {
     return createError({
       code: "QR_SCAN_FAILED",
-      message: reason,
+      message,
       statusCode: 500,
       cause,
     });
   },
 
   verificationFailed(
-    reason: string,
+    message: string,
     cause?: unknown
   ): never {
     return createError({
       code: "QR_VERIFICATION_FAILED",
-      message: reason,
+      message,
       statusCode: 500,
       cause,
     });
   },
 
-  invalidQrToken(
-  token: string
-): never {
-  return createError({
-    code: "INVALID_QR_TOKEN",
-    message: `QR token '${token}' is invalid.`,
-    statusCode: 400,
-  });
-},
   configurationError(
     message: string
   ): never {
@@ -192,14 +183,4 @@ export const qrErrors = Object.freeze({
       statusCode: 500,
     });
   },
-
-  alreadyCheckedIn(registrationCode: string): never {
-        throw new Error(`Registration code ${registrationCode} is already checked in.`);
-    },
-
-    attendanceRecordingFailed(registrationCode: string, error: unknown): never {
-        const message = error instanceof Error ? error.message : String(error);
-        throw new Error(`Failed to record attendance for ${registrationCode}. Reason: ${message}`);
-    }
-} as const
-);
+} as const);

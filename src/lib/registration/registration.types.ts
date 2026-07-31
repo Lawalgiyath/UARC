@@ -1,8 +1,4 @@
-import {
-  PaymentStatus,
-  RegistrationCategory,
-  RegistrationStatus,
-} from "@prisma/client";
+import {PaymentStatus,RegistrationCategory,RegistrationStatus} from "@prisma/client";
 
 export interface RegistrationListQuery {
   page: number;
