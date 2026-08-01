@@ -1,8 +1,4 @@
-import {
-  PreRegisterPaymentRequest,
-  PreRegisterPaymentResponse,
-} from "./tranzgate.types";
-
+import { PreRegisterPaymentRequest, PreRegisterPaymentResponse } from "./tranzgate.types";
 
 export class MockTranzgateClient {
 
@@ -11,10 +7,9 @@ export class MockTranzgateClient {
   ): Promise<PreRegisterPaymentResponse> {
 
     console.log(
-      "MOCK TRANZGATE REQUEST:",
+      "MOCK PRE-REGISTER PAYMENT",
       request
     );
-
 
     return {
       paymentBatchId:
@@ -22,25 +17,78 @@ export class MockTranzgateClient {
     };
   }
 
+  async verifyPayment(
+    paymentBatchId: string
+  ) {
 
-  async setPaymentChannel() {
-    return;
-  }
+    console.log(
+      "MOCK VERIFY PAYMENT",
+      paymentBatchId
+    );
 
-
-  async sendToRemita() {
     return {
-      paymentUrl:
-        "https://mock-payment-url.com/pay",
+      paymentBatchId,
+
+      transactionReference:
+        `MOCK-TXN-${Date.now()}`,
+
+      status:
+        "SUCCESSFUL",
+
+      amount: 5000,
+
+      paidAt:
+        new Date().toISOString(),
     };
   }
 
+  async setPaymentChannel() {
+
+    return {
+      success: true,
+    };
+
+  }
+
+  async sendToRemita() {
+
+    return {
+
+      paymentUrl:
+        "https://mock-payment-url.com/pay",
+
+      status:
+        "SUCCESSFUL",
+
+    };
+
+  }
 
   async searchPayments() {
-    return [];
-  }
-}
 
+    return [
+
+      {
+
+        paymentBatchId:
+          "MOCK-BATCH-001",
+
+        transactionReference:
+          "MOCK-TXN-001",
+
+        status:
+          "SUCCESSFUL",
+
+        amount:
+          5000,
+
+      },
+
+    ];
+
+  }
+
+}
 
 export const mockTranzgateClient =
   new MockTranzgateClient();

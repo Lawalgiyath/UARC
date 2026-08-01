@@ -367,6 +367,7 @@ model Manuscript {
   fileExtension String
 
   fileSize Int
+  version  Int @default(1)
 
   uploadedAt DateTime @default(now())
 

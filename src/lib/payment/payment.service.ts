@@ -1,33 +1,14 @@
 import crypto from "node:crypto";
-
-import {
-    Payment,
-    PaymentGateway,
-    PaymentStatus,
-    Prisma,
-    Registration,
-} from "@prisma/client";
-
+import { Payment, PaymentGateway, PaymentStatus, Prisma, Registration } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-
 import { mockTranzgateClient } from "./tranzgate.mock";
-
 import { paymentErrors } from "./payment.errors";
 import { TranzgateCurrency } from "./tranzgate.types";
-
-import {
-    DEFAULT_CURRENCY,
-    DEFAULT_PAYMENT_GATEWAY,
-    PAYMENT_REFERENCE_PREFIX,
-    PAYMENT_SESSION_PREFIX,
-} from "./payment.constants";
-import {
-    CreatePaymentInput,
-} from "./payment.validation";
-
-import {
-    PreRegisterPaymentRequest,
-} from "./tranzgate.types";
+import { DEFAULT_CURRENCY, DEFAULT_PAYMENT_GATEWAY, PAYMENT_REFERENCE_PREFIX, PAYMENT_SESSION_PREFIX } from "./payment.constants";
+import { CreatePaymentInput } from "./payment.validation";
+import { PreRegisterPaymentRequest } from "./tranzgate.types";
+import { qrService } from "@/lib/qrcode/qr.service";
+import { emailService } from "@/lib/email/email.service";
 
 export class PaymentService {
     constructor(
@@ -449,6 +430,65 @@ export class PaymentService {
             "Unable to initialize payment.",
             Error
         );
+    }
+
+    async verifyPayment(
+        paymentBatchId: string
+    ) {
+
+        const payment =
+            await this.db.payment.findFirst({
+                where: {
+                    gatewayReference:
+                        paymentBatchId,
+                },
+            });
+
+        if (!payment) {
+            throw paymentErrors.paymentNotFound(
+                paymentBatchId
+            );
+        }
+
+        const gatewayResponse =
+            await this.gateway.verifyPayment(
+                paymentBatchId
+            );
+
+        if (
+            gatewayResponse.status ===
+            "SUCCESSFUL"
+        ) {
+
+            await this.markPaymentSuccessful(
+                payment.id,
+                gatewayResponse
+            );
+
+            await this.db.registration.update({
+                where: {
+                    id:
+                        payment.registrationId,
+                },
+                data: {
+                    paymentStatus:
+                        PaymentStatus.SUCCESSFUL,
+                },
+            });
+
+            await qrService.generateQr({
+                registrationId:
+                    payment.registrationId,
+
+                regenerate: false,
+            });
+
+            await emailService.sendRegistrationConfirmation(
+                payment.registrationId
+            );
+        }
+
+        return gatewayResponse;
     }
 }
 
