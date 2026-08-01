@@ -1,86 +1,67 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ZodError } from "zod";
+import { paymentService } from "@/lib/payment/payment.service";
+import { PaymentServiceError } from "@/lib/payment/payment.errors";
+import { verifyPaymentSchema } from "@/lib/payment/payment.validation";
 
-import {
-  paymentService,
-} from "@/lib/payment/payment.service";
-
-import {
-  PaymentServiceError,
-} from "@/lib/payment/payment.errors";
-
-import {
-  verifyPaymentSchema,
-} from "@/lib/payment/payment.validation";
-
-export async function GET(
+export async function POST(
   request: NextRequest
 ): Promise<NextResponse> {
   try {
-    const { searchParams } = new URL(request.url);
+    const body =
+      await request.json();
 
     const input =
-      verifyPaymentSchema.parse({
-        paymentBatchId:
-          searchParams.get(
-            "paymentBatchId"
-          ) ?? undefined,
+      verifyPaymentSchema.parse(body);
 
-        paymentDocumentNo:
-          searchParams.get(
-            "paymentDocumentNo"
-          ) ?? undefined,
+    if (!input.paymentBatchId) {
+      return NextResponse.json(
+        {
+          success: false,
+          code: "MISSING_PAYMENT_BATCH_ID",
+          message:
+            "paymentBatchId is required for verification.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
 
-        transactionReference:
-          searchParams.get(
-            "transactionReference"
-          ) ?? undefined,
-
-        customerId:
-          searchParams.get(
-            "customerId"
-          ) ?? undefined,
-      });
-    
-
-/**work on verifyPayment later */
-    // const payment =
-    //   await paymentService.verifyPayment(
-    //     input
-    //   );
+    const payment =
+      await paymentService.verifyPayment(
+        input.paymentBatchId
+      );
 
     return NextResponse.json(
       {
         success: true,
-
         message:
           "Payment verified successfully.",
-
-        data: null,
+        data: payment,
       },
       {
         status: 200,
       }
     );
+
   } catch (error) {
     return handleError(error);
   }
 }
 
+
 function handleError(
   error: unknown
 ): NextResponse {
-  if (error instanceof ZodError) {
+
+  if (error instanceof SyntaxError) {
     return NextResponse.json(
       {
         success: false,
-
-        code: "VALIDATION_ERROR",
-
+        code: "INVALID_JSON",
         message:
-          "One or more request parameters are invalid.",
-
-        errors: error.flatten(),
+          "Invalid JSON payload.",
       },
       {
         status: 400,
@@ -88,25 +69,45 @@ function handleError(
     );
   }
 
+
+  if (error instanceof ZodError) {
+    return NextResponse.json(
+      {
+        success: false,
+        code: "VALIDATION_ERROR",
+        message:
+          "One or more request parameters are invalid.",
+        errors:
+          error.flatten(),
+      },
+      {
+        status: 400,
+      }
+    );
+  }
+
+
   if (
     error instanceof PaymentServiceError
   ) {
     return NextResponse.json(
       {
         success: false,
-
-        code: error.code,
-
-        message: error.message,
+        code:
+          error.code,
+        message:
+          error.message,
       },
       {
-        status: error.statusCode,
+        status:
+          error.statusCode,
       }
     );
   }
 
+
   console.error(
-    "[GET /api/payments/verify]",
+    "[POST /api/payments/verify]",
     {
       timestamp:
         new Date().toISOString(),
@@ -115,12 +116,12 @@ function handleError(
     }
   );
 
+
   return NextResponse.json(
     {
       success: false,
-
-      code: "INTERNAL_SERVER_ERROR",
-
+      code:
+        "INTERNAL_SERVER_ERROR",
       message:
         "An unexpected server error occurred.",
     },

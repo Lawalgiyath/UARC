@@ -18,14 +18,9 @@ export class MockTranzgateClient {
   }
 
   async verifyPayment(
-    paymentBatchId: string
+    paymentBatchId: string,
+    amount: number
   ) {
-
-    console.log(
-      "MOCK VERIFY PAYMENT",
-      paymentBatchId
-    );
-
     return {
       paymentBatchId,
 
@@ -35,10 +30,10 @@ export class MockTranzgateClient {
       status:
         "SUCCESSFUL",
 
-      amount: 5000,
+      amount,
 
       paidAt:
-        new Date().toISOString(),
+        new Date(),
     };
   }
 

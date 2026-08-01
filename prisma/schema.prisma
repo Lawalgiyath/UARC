@@ -312,7 +312,7 @@ model QRCode {
   registration   Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
 
   token       String  @unique
-  qrImagePath String?
+  qrImagePath String
 
   generatedAt DateTime     @default(now())
   expiresAt   DateTime?

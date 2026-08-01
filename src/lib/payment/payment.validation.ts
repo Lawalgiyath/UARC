@@ -283,14 +283,14 @@ export const searchPaymentSchema =
       (data) =>
         Boolean(
           data.paymentBatchId ||
-            data.paymentDetailId ||
-            data.clientId ||
-            data.customerId ||
-            data.paymentCode ||
-            data.paymentDocumentNo ||
-            data.channel ||
-            data.startDate ||
-            data.endDate
+          data.paymentDetailId ||
+          data.clientId ||
+          data.customerId ||
+          data.paymentCode ||
+          data.paymentDocumentNo ||
+          data.channel ||
+          data.startDate ||
+          data.endDate
         ),
       {
         message:
@@ -301,22 +301,33 @@ export const searchPaymentSchema =
 export const verifyPaymentSchema =
   z
     .object({
-      paymentId:
-        paymentIdField.optional(),
-
       paymentBatchId:
         paymentBatchIdField.optional(),
 
+      paymentId:
+        paymentIdField.optional(),
+
       transactionReference:
-        z.string().trim().optional(),
+        z
+          .string()
+          .trim()
+          .optional(),
+
+      paymentDocumentNo:
+        paymentDocumentNoField.optional(),
+
+      customerId:
+        customerNumberField.optional(),
     })
     .strict()
     .refine(
       (data) =>
         Boolean(
+          data.paymentBatchId ||
           data.paymentId ||
-            data.paymentBatchId ||
-            data.transactionReference
+          data.transactionReference ||
+          data.paymentDocumentNo ||
+          data.customerId
         ),
       {
         message:

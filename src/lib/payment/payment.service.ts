@@ -445,14 +445,14 @@ export class PaymentService {
             });
 
         if (!payment) {
-            throw paymentErrors.paymentNotFound(
+            return paymentErrors.paymentNotFound(
                 paymentBatchId
             );
         }
-
         const gatewayResponse =
             await this.gateway.verifyPayment(
-                paymentBatchId
+                paymentBatchId,
+                Number(payment.amountPaid)
             );
 
         if (
@@ -467,12 +467,14 @@ export class PaymentService {
 
             await this.db.registration.update({
                 where: {
-                    id:
-                        payment.registrationId,
+                    id: payment.registrationId,
                 },
                 data: {
                     paymentStatus:
                         PaymentStatus.SUCCESSFUL,
+
+                    registrationStatus:
+                        "CONFIRMED",
                 },
             });
 
