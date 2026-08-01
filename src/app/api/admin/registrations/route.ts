@@ -1,20 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AdminRole } from "@prisma/client";
 import { ZodError } from "zod";
-
-import {
-  requireAdmin,
-  requireAnyRole,
-} from "@/lib/auth/rbac";
-
-import {
-  registrationService,
-  RegistrationServiceError,
+import {requireAdmin,requireAnyRole} from "@/lib/auth/rbac";
+import {registrationService,RegistrationServiceError,
 } from "@/lib/registration/registration.service";
-
-import {
-  listRegistrationsSchema,
-} from "@/lib/registration/registration.validation";
+import {listRegistrationsSchema} from "@/lib/registration/registration.validation";
 
 export async function GET(
   request: NextRequest
