@@ -18,7 +18,8 @@
     "db:destroy": "tsx scripts/dev-db.ts destroy",
     "db:seed": "tsx scripts/seed.ts",
     "rate-limit": "tsx scripts/rate-limit.ts",
-    "test-email": "tsx scripts/test-email.ts"
+    "test-email": "tsx scripts/test-email.ts",
+    "vercel-env": "tsx scripts/vercel-env.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",
