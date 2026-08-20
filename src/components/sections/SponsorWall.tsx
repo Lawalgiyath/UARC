@@ -22,10 +22,12 @@ export function SponsorWall({
   sponsors,
   heading = "Our sponsors",
   showCta = true,
+  className,
 }: {
   sponsors: WallSponsor[];
   heading?: string;
   showCta?: boolean;
+  className?: string;
 }) {
   // Sponsors are stored with the tier's display label, so group on that.
   const byTier = SPONSOR_TIER_ORDER.map((key) => ({
@@ -35,7 +37,7 @@ export function SponsorWall({
   })).filter((group) => group.members.length > 0);
 
   return (
-    <section id="sponsor-wall">
+    <section id="sponsor-wall" className={className}>
       <div className="wrap">
         <div className="section-head">
           <div className="eyebrow">Supported by</div>

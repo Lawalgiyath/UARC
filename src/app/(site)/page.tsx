@@ -99,7 +99,7 @@ export default async function HomePage() {
         priority
       />
 
-      <section id="tracks">
+      <section id="tracks" className="band-tint">
         <div className="wrap">
           <div className="section-head">
             <div className="eyebrow">II. Subthemes</div>
@@ -155,7 +155,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <SponsorWall sponsors={sponsors} />
+      <SponsorWall sponsors={sponsors} className="band-tint" />
     </>
   );
 }

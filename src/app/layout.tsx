@@ -1,8 +1,41 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { Source_Serif_4, Inter, IBM_Plex_Mono } from "next/font/google";
 import { CONFERENCE, CONTACT, SOCIALS } from "@/lib/conference";
 import { UNIVERSITY } from "@/lib/university";
 import "./globals.css";
+
+// The site previously led with Seravek and Iowan Old Style, which exist only on
+// macOS: on Windows and Android every page fell back to Segoe UI and Palatino
+// Linotype, so what most delegates saw was never what was designed. These three
+// are downloaded at build time and served from our own origin, which also keeps
+// them inside the Content Security Policy and avoids a request to Google on
+// every page load.
+//
+// Source Serif for anything with authority, Inter for reading, IBM Plex Mono
+// for the references, dates and figures the design leans on throughout.
+
+const displaySerif = Source_Serif_4({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-display",
+  // Only the weights the design actually uses, to keep the payload honest.
+  weight: ["400", "600", "700"],
+  style: ["normal", "italic"],
+});
+
+const bodySans = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-body",
+});
+
+const mono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-mono",
+  weight: ["400", "500", "600"],
+});
 
 const description = `${CONFERENCE.theme}. ${CONFERENCE.dates}, ${CONFERENCE.venueFull}.`;
 
@@ -67,7 +100,10 @@ const eventJsonLd = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      className={`${displaySerif.variable} ${bodySans.variable} ${mono.variable}`}
+    >
       <body>
         {children}
         <script
