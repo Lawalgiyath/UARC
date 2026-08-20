@@ -9,6 +9,7 @@ import { guardPublicWrite } from "@/lib/security";
 import { cardPaymentAvailable, REMITA } from "@/lib/remita";
 import { sendEmail } from "@/lib/email";
 import { CONFERENCE, CONTACT } from "@/lib/conference";
+import { notificationChannels } from "@/lib/notify";
 
 // Registering does not take any money.
 //
@@ -106,7 +107,7 @@ export async function POST(request: Request) {
     void sendEmail({
       to: data.email,
       subject: `How to pay for your registration, reference ${reference}`,
-      text: `Dear ${data.fullName},\n\nYour place at the ${CONFERENCE.edition} ${CONFERENCE.name} is reserved. It is confirmed once payment is received.\n\nReference: ${reference}\nCategory: ${fee.label}\nAmount to pay: ${amountLabel}\n\nTO PAY\n1. Go to ${REMITA.siteLabel} and click "${REMITA.portalLinkText}".\n2. Choose the customer category "${REMITA.customerCategory}".\n3. Fill in the form:\n     Name of payee: ${data.fullName}\n     Mobile number: ${data.phone}\n     Email address: ${data.email}\n     Payment item: ${REMITA.paymentItem}\n     Amount: ${amountLabel}\n4. Print the slip and note the 12 digit RRR.\n5. Pay the slip at any commercial bank.\n6. Return to ${process.env.NEXT_PUBLIC_SITE_URL || ""}/register/payment and upload the receipt with your RRR.\n\nThe Secretariat checks the receipt within ${REMITA.verificationDays} working days and confirms your registration by email and SMS.\n\nHelp with payment: WhatsApp ${REMITA.whatsApp.display} or ${CONTACT.email}`,
+      text: `Dear ${data.fullName},\n\nYour place at the ${CONFERENCE.edition} ${CONFERENCE.name} is reserved. It is confirmed once payment is received.\n\nReference: ${reference}\nCategory: ${fee.label}\nAmount to pay: ${amountLabel}\n\nTO PAY\n1. Go to ${REMITA.siteLabel} and click "${REMITA.portalLinkText}".\n2. Choose the customer category "${REMITA.customerCategory}".\n3. Fill in the form:\n     Name of payee: ${data.fullName}\n     Mobile number: ${data.phone}\n     Email address: ${data.email}\n     Payment item: ${REMITA.paymentItem}\n     Amount: ${amountLabel}\n4. Print the slip and note the 12 digit RRR.\n5. Pay the slip at any commercial bank.\n6. Return to ${process.env.NEXT_PUBLIC_SITE_URL || ""}/register/payment and upload the receipt with your RRR.\n\nThe Secretariat checks the receipt within ${REMITA.verificationDays} working days and confirms your registration by ${notificationChannels()}.\n\nHelp with payment: WhatsApp ${REMITA.whatsApp.display} or ${CONTACT.email}`,
     }).catch((err) => console.error("[registrations] payment instructions email failed", err));
 
     return NextResponse.json({

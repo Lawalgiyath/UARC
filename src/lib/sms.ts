@@ -9,7 +9,7 @@ export async function sendSms({ to, body }: SendSmsArgs): Promise<void> {
   const from = process.env.TWILIO_FROM_NUMBER;
 
   if (!sid || !token || !from) {
-    console.warn(`[sms] Twilio env vars not set, skipping SMS to ${to}`);
+    console.warn(`\u250C\u2500 SMS NOT SENT (Twilio env vars unset)\n\u2502  To:   ${to}\n\u2502  Body: ${body}\n\u2514\u2500`);
     return;
   }
 

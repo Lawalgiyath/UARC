@@ -134,7 +134,7 @@ export const REMITA_COPY = {
   lede: `All conference payments go through Remita, on the University of Lagos payment portal. You generate a payment reference on the portal, pay it at any commercial bank, then come back here with the receipt.`,
   whyManual:
     "The bank step cannot be skipped: this is the university's own collection route, and a payment made any other way cannot be reconciled against the conference account.",
-  afterDeclaring: `Your place is held as soon as you submit the receipt. The Secretariat verifies it, normally within ${REMITA.verificationDays} working days, and you receive a confirmation by email and SMS. Nothing further is needed from you in the meantime.`,
+  afterDeclaring: `Your place is held as soon as you submit the receipt. The Secretariat verifies it, normally within ${REMITA.verificationDays} working days, and you receive a confirmation by email. Nothing further is needed from you in the meantime.`,
   keepReceipt:
     "Keep the original receipt until you have collected your delegate pack at the registration desk.",
 };

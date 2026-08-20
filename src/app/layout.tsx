@@ -104,7 +104,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       lang="en"
       className={`${displaySerif.variable} ${bodySans.variable} ${mono.variable}`}
     >
-      <body>
+      {/*
+        Grammarly and similar extensions write attributes onto <body>
+        (data-gr-ext-installed, data-new-gr-c-s-check-loaded) before React
+        hydrates, which React then reports as a server/client mismatch. There
+        is nothing to fix in our markup: this suppresses the warning for this
+        one element only, one level deep, which is exactly what the flag is
+        for. Mismatches anywhere inside the app still surface normally.
+      */}
+      <body suppressHydrationWarning>
         {children}
         <script
           type="application/ld+json"
