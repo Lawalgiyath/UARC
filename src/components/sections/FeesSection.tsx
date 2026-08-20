@@ -20,8 +20,9 @@ export function FeesSection() {
           <div className="eyebrow">IV. Registration Fees</div>
           <h2>Conference fee schedule</h2>
           <p>
-            Fees cover conference materials, session access and meals during sessions. Payment is completed
-            on this site by card, bank transfer or USSD, in naira or dollars depending on category.
+            Fees cover conference materials, session access and meals during sessions. Payment is made
+            through the University of Lagos Remita portal and settled at any commercial bank; the
+            registration form works out what you owe and gives you the exact figures to enter.
           </p>
         </div>
         <div className="table-scroll">

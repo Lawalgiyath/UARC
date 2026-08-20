@@ -2,6 +2,9 @@
 
 import { FormEvent, useState } from "react";
 import { LogoUpload, type UploadedLogo } from "@/components/LogoUpload";
+import { RemitaSteps } from "@/components/RemitaSteps";
+import { PaymentDeclaration } from "@/components/PaymentDeclaration";
+import { REMITA_COPY } from "@/lib/remita";
 import { AcademicIcon } from "@/components/icons/AcademicIcons";
 import {
   EXHIBIT_PACKAGES,
@@ -17,11 +20,17 @@ function formatAmount(amount: number, currency: string) {
 
 export function ExhibitorApply({ taken }: { taken: Record<string, number> }) {
   const [packageKey, setPackageKey] = useState<ExhibitPackage>("STANDARD");
-  const [paymentMethod, setPaymentMethod] = useState<"ONLINE" | "TRANSFER">("ONLINE");
+  const [reserved, setReserved] = useState<{
+    reference: string;
+    amountLabel: string;
+    payerName: string;
+    email: string;
+    phone: string;
+  } | null>(null);
   const [logo, setLogo] = useState<UploadedLogo | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [awaitingTransfer, setAwaitingTransfer] = useState<string | null>(null);
+
 
   const definition = EXHIBIT_PACKAGES[packageKey];
   const used = taken[definition.label] ?? 0;
@@ -45,7 +54,6 @@ export function ExhibitorApply({ taken }: { taken: Record<string, number> }) {
           description: formData.get("description") || "",
           websiteUrl: formData.get("websiteUrl") || "",
           packageKey,
-          paymentMethod,
           logoUrl: logo?.url || "",
           logoPublicId: logo?.publicId || "",
         }),
@@ -57,7 +65,14 @@ export function ExhibitorApply({ taken }: { taken: Record<string, number> }) {
         window.location.href = json.authorizationUrl;
         return;
       }
-      setAwaitingTransfer(json.reference);
+      setReserved({
+        reference: json.reference,
+        amountLabel: json.amountLabel,
+        payerName: json.payerName,
+        email: json.email,
+        phone: json.phone,
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send your application.");
     } finally {
@@ -65,22 +80,38 @@ export function ExhibitorApply({ taken }: { taken: Record<string, number> }) {
     }
   }
 
-  if (awaitingTransfer) {
+  if (reserved) {
     return (
-      <div className="confirm-panel" id="apply">
-        <p>
-          <strong>Application received.</strong> Your reference is:
-        </p>
-        <p className="ref">{awaitingTransfer}</p>
-        <p className="confirm-note">
-          Your stand is held for fourteen days while the invoice is settled. Build up is{" "}
-          {EXHIBITION.buildUp}; your stand number and exhibitor passes are issued once payment is
-          received.
-        </p>
-        <p className="confirm-note">
-          Questions: <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a> or{" "}
-          <a href={`tel:${CONTACT.phones[2].e164}`}>{CONTACT.phones[2].display}</a>.
-        </p>
+      <div id="apply">
+        <div className="confirm-panel">
+          <p>
+            <strong>Application received.</strong> Your reference is:
+          </p>
+          <p className="ref">{reserved.reference}</p>
+          <p className="confirm-note">
+            Your stand is held for fourteen days while payment is settled. Build up is{" "}
+            {EXHIBITION.buildUp}; your stand number and exhibitor passes are issued once the
+            Secretariat has checked your receipt.
+          </p>
+          <p className="confirm-note">
+            Questions: <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a> or{" "}
+            <a href={`tel:${CONTACT.phones[2].e164}`}>{CONTACT.phones[2].display}</a>.
+          </p>
+        </div>
+
+        <RemitaSteps
+          amountLabel={reserved.amountLabel}
+          payerName={reserved.payerName}
+          reference={reserved.reference}
+          email={reserved.email}
+          phone={reserved.phone}
+        />
+
+        <PaymentDeclaration
+          reference={reserved.reference}
+          email={reserved.email}
+          amountLabel={reserved.amountLabel}
+        />
       </div>
     );
   }
@@ -168,27 +199,17 @@ export function ExhibitorApply({ taken }: { taken: Record<string, number> }) {
             <LogoUpload folder="uarc/exhibitors" value={logo} onChange={setLogo} />
           </div>
 
-          <div className="field full">
-            <label>How would you like to pay?</label>
-            <div className="pay-methods">
-              <label className={paymentMethod === "ONLINE" ? "is-selected" : ""}>
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  checked={paymentMethod === "ONLINE"}
-                  onChange={() => setPaymentMethod("ONLINE")}
-                />
-                Online now, by card or transfer
-              </label>
-              <label className={paymentMethod === "TRANSFER" ? "is-selected" : ""}>
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  checked={paymentMethod === "TRANSFER"}
-                  onChange={() => setPaymentMethod("TRANSFER")}
-                />
-                Send me an invoice
-              </label>
+          <div className="method-panel">
+            <span className="method-icon">
+              <AcademicIcon name="city" size={22} />
+            </span>
+            <div>
+              <h3>{REMITA_COPY.heading}</h3>
+              <p>{REMITA_COPY.lede}</p>
+              <p className="method-note">
+                Nothing is charged here. Your stand is held for fourteen days from the moment you
+                apply, which is ample time to get a payment through a finance office.
+              </p>
             </div>
           </div>
 
@@ -207,9 +228,7 @@ export function ExhibitorApply({ taken }: { taken: Record<string, number> }) {
               ? "Fully booked"
               : submitting
                 ? "Sending..."
-                : paymentMethod === "ONLINE"
-                  ? "Continue to payment"
-                  : "Request an invoice"}
+                : "Apply and show payment steps"}
           </button>
         </fieldset>
       </form>

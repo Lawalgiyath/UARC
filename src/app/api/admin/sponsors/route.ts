@@ -10,7 +10,16 @@ export async function GET() {
 const patchSchema = z.object({
   id: z.string().min(1),
   status: z
-    .enum(["PENDING", "AWAITING_TRANSFER", "PAID", "CONFIRMED", "FAILED", "CANCELLED"])
+    .enum([
+      "PENDING",
+      "AWAITING_PAYMENT",
+      "DECLARED",
+      "PAID",
+      "CONFIRMED",
+      "REJECTED",
+      "FAILED",
+      "CANCELLED",
+    ])
     .optional(),
   /** Nothing appears on the public sponsor wall until this is switched on. */
   displayOnSite: z.boolean().optional(),

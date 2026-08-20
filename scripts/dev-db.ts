@@ -16,7 +16,7 @@
  * Postgres someone already has installed.
  */
 
-import { rm } from "node:fs/promises";
+import { readdir, rm } from "node:fs/promises";
 import { resolve } from "node:path";
 import EmbeddedPostgres from "embedded-postgres";
 
@@ -30,10 +30,27 @@ const pg = new EmbeddedPostgres({
   persistent: true,
 });
 
+/** True when `.pgdata` holds a cluster already, so initdb must not run. */
+async function clusterExists(): Promise<boolean> {
+  try {
+    const entries = await readdir(DATA_DIR);
+    return entries.length > 0;
+  } catch {
+    return false;
+  }
+}
+
 async function start() {
-  // `initialise` creates the cluster the first time and is a no-op once the
-  // data directory exists, so this script is safe to run repeatedly.
-  await pg.initialise();
+  // `initialise` shells out to initdb, which refuses to run against a
+  // directory that is not empty. It is only correct on the very first start;
+  // every start after that goes straight to `start`.
+  if (await clusterExists()) {
+    console.log("Reusing the cluster in .pgdata");
+  } else {
+    console.log("First run: creating a new cluster in .pgdata");
+    await pg.initialise();
+  }
+
   await pg.start();
 
   try {

@@ -2,11 +2,13 @@
 
 import { FormEvent, useState } from "react";
 import { LogoUpload, type UploadedLogo } from "@/components/LogoUpload";
+import { RemitaSteps } from "@/components/RemitaSteps";
+import { PaymentDeclaration } from "@/components/PaymentDeclaration";
+import { REMITA_COPY } from "@/lib/remita";
 import { AcademicIcon } from "@/components/icons/AcademicIcons";
 import {
   SPONSOR_TIERS,
   SPONSOR_TIER_ORDER,
-  SPONSOR_BANK_DETAILS,
   type SponsorTier,
 } from "@/lib/sponsorship";
 import { CONTACT } from "@/lib/conference";
@@ -17,11 +19,19 @@ function formatAmount(amount: number, currency: string) {
 
 export function SponsorApply() {
   const [tier, setTier] = useState<SponsorTier>("GOLD");
-  const [paymentMethod, setPaymentMethod] = useState<"ONLINE" | "TRANSFER">("ONLINE");
+  // Everything goes through Remita; the reserved state below carries the
+  // details the applicant needs to take to the portal.
+  const [reserved, setReserved] = useState<{
+    reference: string;
+    amountLabel: string;
+    payerName: string;
+    email: string;
+    phone: string;
+  } | null>(null);
   const [logo, setLogo] = useState<UploadedLogo | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [awaitingTransfer, setAwaitingTransfer] = useState<string | null>(null);
+
 
   const definition = SPONSOR_TIERS[tier];
 
@@ -43,7 +53,6 @@ export function SponsorApply() {
           websiteUrl: formData.get("websiteUrl") || "",
           message: formData.get("message") || "",
           tier,
-          paymentMethod,
           logoUrl: logo?.url || "",
           logoPublicId: logo?.publicId || "",
         }),
@@ -55,7 +64,14 @@ export function SponsorApply() {
         window.location.href = json.authorizationUrl;
         return;
       }
-      setAwaitingTransfer(json.reference);
+      setReserved({
+        reference: json.reference,
+        amountLabel: json.amountLabel,
+        payerName: json.payerName,
+        email: json.email,
+        phone: json.phone,
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send your application.");
     } finally {
@@ -63,22 +79,38 @@ export function SponsorApply() {
     }
   }
 
-  if (awaitingTransfer) {
+  if (reserved) {
     return (
-      <div className="confirm-panel" id="apply">
-        <p>
-          <strong>Application received.</strong> Your reference is:
-        </p>
-        <p className="ref">{awaitingTransfer}</p>
-        <p className="confirm-note">
-          The Secretariat will send an invoice carrying the university&rsquo;s bank details to the
-          address you gave. {SPONSOR_BANK_DETAILS.note} Your sponsorship is confirmed, and your logo
-          goes up on the sponsor wall, once payment is received.
-        </p>
-        <p className="confirm-note">
-          Questions in the meantime: <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a> or{" "}
-          <a href={`tel:${CONTACT.phones[0].e164}`}>{CONTACT.phones[0].display}</a>.
-        </p>
+      <div id="apply">
+        <div className="confirm-panel">
+          <p>
+            <strong>Application received.</strong> Your reference is:
+          </p>
+          <p className="ref">{reserved.reference}</p>
+          <p className="confirm-note">
+            Your sponsorship is confirmed, and your logo goes up on the sponsor wall, once the
+            Secretariat has checked your payment. The steps below have also been emailed to{" "}
+            {reserved.email}, so your finance office can work from them directly.
+          </p>
+          <p className="confirm-note">
+            Questions in the meantime: <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a> or{" "}
+            <a href={`tel:${CONTACT.phones[0].e164}`}>{CONTACT.phones[0].display}</a>.
+          </p>
+        </div>
+
+        <RemitaSteps
+          amountLabel={reserved.amountLabel}
+          payerName={reserved.payerName}
+          reference={reserved.reference}
+          email={reserved.email}
+          phone={reserved.phone}
+        />
+
+        <PaymentDeclaration
+          reference={reserved.reference}
+          email={reserved.email}
+          amountLabel={reserved.amountLabel}
+        />
       </div>
     );
   }
@@ -163,32 +195,18 @@ export function SponsorApply() {
             </div>
           </div>
 
-          <div className="field full">
-            <label>How would you like to pay?</label>
-            <div className="pay-methods">
-              <label className={paymentMethod === "ONLINE" ? "is-selected" : ""}>
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  checked={paymentMethod === "ONLINE"}
-                  onChange={() => setPaymentMethod("ONLINE")}
-                />
-                Online now, by card or transfer
-              </label>
-              <label className={paymentMethod === "TRANSFER" ? "is-selected" : ""}>
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  checked={paymentMethod === "TRANSFER"}
-                  onChange={() => setPaymentMethod("TRANSFER")}
-                />
-                Send me an invoice
-              </label>
-            </div>
-            <span className="hint">
-              Most institutional sponsors pay against an invoice through their finance office.
-              Either route confirms the same sponsorship.
+          <div className="method-panel">
+            <span className="method-icon">
+              <AcademicIcon name="city" size={22} />
             </span>
+            <div>
+              <h3>{REMITA_COPY.heading}</h3>
+              <p>{REMITA_COPY.lede}</p>
+              <p className="method-note">
+                Nothing is charged here. The next screen gives you a reference and the exact
+                figures for the portal, which most finance offices can work from directly.
+              </p>
+            </div>
           </div>
 
           <div className="price-out">
@@ -197,11 +215,7 @@ export function SponsorApply() {
           </div>
 
           <button className="btn solid" type="submit" disabled={submitting}>
-            {submitting
-              ? "Sending..."
-              : paymentMethod === "ONLINE"
-                ? "Continue to payment"
-                : "Request an invoice"}
+            {submitting ? "Sending..." : "Apply and show payment steps"}
           </button>
         </fieldset>
       </form>

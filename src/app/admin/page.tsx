@@ -18,6 +18,68 @@ export default async function AdminPage() {
       getAbstractDeadline(),
     ]);
 
+  // Anyone who has declared a payment, from all three registers, oldest first
+  // so the queue is worked in the order people sent things in. Those still
+  // waiting on a decision come first.
+  const payments = [
+    ...registrations
+      .filter((r) => r.rrr !== null)
+      .map((r) => ({
+        kind: "registration" as const,
+        id: r.id,
+        reference: r.reference,
+        payer: r.fullName,
+        detail: `${r.category}, ${r.institution}`,
+        email: r.email,
+        amount: r.amount,
+        currency: r.currency,
+        status: r.status as string,
+        rrr: r.rrr,
+        receiptUrl: r.receiptUrl,
+        declaredAt: r.declaredAt?.toISOString() ?? null,
+        paymentNote: r.paymentNote,
+      })),
+    ...sponsors
+      .filter((s) => s.rrr !== null)
+      .map((s) => ({
+        kind: "sponsor" as const,
+        id: s.id,
+        reference: s.reference,
+        payer: s.contactName,
+        detail: `${s.tier}, ${s.organisation}`,
+        email: s.email,
+        amount: s.amount,
+        currency: s.currency,
+        status: s.status as string,
+        rrr: s.rrr,
+        receiptUrl: s.receiptUrl,
+        declaredAt: s.declaredAt?.toISOString() ?? null,
+        paymentNote: s.paymentNote,
+      })),
+    ...exhibitors
+      .filter((e) => e.rrr !== null)
+      .map((e) => ({
+        kind: "exhibitor" as const,
+        id: e.id,
+        reference: e.reference,
+        payer: e.contactName,
+        detail: `${e.packageKey}, ${e.organisation}`,
+        email: e.email,
+        amount: e.amount,
+        currency: e.currency,
+        status: e.status as string,
+        rrr: e.rrr,
+        receiptUrl: e.receiptUrl,
+        declaredAt: e.declaredAt?.toISOString() ?? null,
+        paymentNote: e.paymentNote,
+      })),
+  ].sort((a, b) => {
+    const aWaiting = a.status === "DECLARED" ? 0 : 1;
+    const bWaiting = b.status === "DECLARED" ? 0 : 1;
+    if (aWaiting !== bWaiting) return aWaiting - bWaiting;
+    return (a.declaredAt ?? "").localeCompare(b.declaredAt ?? "");
+  });
+
   return (
     <AdminDashboard
       initialSubmissions={submissions.map((s) => ({
@@ -69,6 +131,7 @@ export default async function AdminPage() {
         standNumber: e.standNumber,
         displayOnSite: e.displayOnSite,
       }))}
+      initialPayments={payments}
       certificateCount={certificateCount}
       abstractDeadlineIso={deadline.toISOString()}
     />

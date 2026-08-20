@@ -125,10 +125,11 @@ export async function getExhibitAvailability(): Promise<Record<string, number>> 
   try {
     const rows = await db.exhibitor.groupBy({
       by: ["packageKey"],
-      where: { status: { in: ["PENDING", "AWAITING_TRANSFER", "PAID", "CONFIRMED"] } },
-      _count: { _all: true },
+      // Anything not refused, refunded or abandoned is holding a stand.
+      where: { status: { in: ["PENDING", "AWAITING_PAYMENT", "DECLARED", "PAID", "CONFIRMED"] } },
+      _count: true,
     });
-    return Object.fromEntries(rows.map((row) => [row.packageKey, row._count._all]));
+    return Object.fromEntries(rows.map((row) => [row.packageKey, row._count]));
   } catch (err) {
     console.error("[publicData] could not read stand availability", err);
     return {};

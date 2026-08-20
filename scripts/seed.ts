@@ -191,6 +191,8 @@ async function seed() {
         verification: "NOT_REQUIRED" as const,
       },
       {
+        // Receipt sent, waiting on the Secretariat: this is what the
+        // Payments queue in the dashboard is for.
         reference: "UARC26-REG-2006",
         fullName: "Ms Folake Adeyemi",
         email: "folake.adeyemi@example.edu",
@@ -199,9 +201,25 @@ async function seed() {
         category: "Early bird",
         amount: 30000,
         currency: "NGN",
-        paystackRef: "UARC26-REG-2006",
-        status: "PENDING" as const,
+        status: "DECLARED" as const,
         listPublicly: true,
+        verification: "NOT_REQUIRED" as const,
+        rrr: "3004-5247-0729",
+        receiptUrl: "https://example.com/demo-receipt.jpg",
+        declaredAt: new Date(),
+      },
+      {
+        // Registered but has not been to the bank yet.
+        reference: "UARC26-REG-2007",
+        fullName: "Dr Salisu Yakubu",
+        email: "s.yakubu@example.edu.ng",
+        phone: "+2348030000007",
+        institution: "University of Ibadan",
+        category: "Regular",
+        amount: 40000,
+        currency: "NGN",
+        status: "PENDING" as const,
+        listPublicly: false,
         verification: "NOT_REQUIRED" as const,
       },
     ].map((data) => db.registration.create({ data }))
@@ -298,7 +316,7 @@ async function seed() {
         amount: 500_000,
         currency: "NGN",
         // Awaiting a transfer, so it should NOT appear on the public wall.
-        status: "AWAITING_TRANSFER" as const,
+        status: "AWAITING_PAYMENT" as const,
         displayOnSite: false,
       },
     ].map((data) => db.sponsor.create({ data }))
@@ -357,10 +375,14 @@ async function seed() {
   console.log("");
   console.log("Demo data inserted:");
   console.log("  5 abstracts (2 accepted, 3 pending)");
-  console.log("  6 registrations (5 paid, 1 pending, 1 student check waiting)");
+  console.log("  7 registrations (3 paid, 1 receipt awaiting check, 1 unpaid)");
   console.log("  1 delegate checked in, with a certificate issued");
-  console.log("  5 sponsorships (4 on the public wall, 1 awaiting transfer)");
+  console.log("  5 sponsorships (4 on the public wall, 1 awaiting payment)");
   console.log("  3 exhibitors");
+  console.log("");
+  console.log("Payment queue to try in the dashboard: UARC26-REG-2006 (receipt declared)");
+  console.log("Payment page to try at /register/payment:");
+  console.log("  UARC26-REG-2007  +  s.yakubu@example.edu.ng   (not paid yet)");
   console.log("");
   console.log("Certificate codes to try at /verify:");
   console.log("  H4KM-9TR2-BXQ7   attendance");

@@ -10,7 +10,16 @@ export async function GET() {
 const patchSchema = z.object({
   id: z.string().min(1),
   status: z
-    .enum(["PENDING", "AWAITING_TRANSFER", "PAID", "CONFIRMED", "FAILED", "CANCELLED"])
+    .enum([
+      "PENDING",
+      "AWAITING_PAYMENT",
+      "DECLARED",
+      "PAID",
+      "CONFIRMED",
+      "REJECTED",
+      "FAILED",
+      "CANCELLED",
+    ])
     .optional(),
   standNumber: z.string().trim().max(20).nullable().optional(),
   displayOnSite: z.boolean().optional(),

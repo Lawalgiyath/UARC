@@ -6,11 +6,32 @@ import { UnilagLogo } from "@/components/UnilagLogo";
 
 type PartnerStatus =
   | "PENDING"
-  | "AWAITING_TRANSFER"
+  | "AWAITING_PAYMENT"
+  | "DECLARED"
   | "PAID"
   | "CONFIRMED"
+  | "REJECTED"
   | "FAILED"
   | "CANCELLED";
+
+type RegistrationStatus = "PENDING" | "DECLARED" | "PAID" | "REJECTED" | "FAILED";
+
+/** A payment somebody has declared, awaiting or having had a decision. */
+export interface PaymentRow {
+  kind: "registration" | "sponsor" | "exhibitor";
+  id: string;
+  reference: string;
+  payer: string;
+  detail: string;
+  email: string;
+  amount: number;
+  currency: string;
+  status: string;
+  rrr: string | null;
+  receiptUrl: string | null;
+  declaredAt: string | null;
+  paymentNote: string | null;
+}
 
 interface SubmissionRow {
   id: string;
@@ -30,7 +51,7 @@ interface RegistrationRow {
   category: string;
   amount: number;
   currency: string;
-  status: "PENDING" | "PAID" | "FAILED";
+  status: RegistrationStatus;
   verification: "NOT_REQUIRED" | "PENDING" | "VERIFIED" | "REJECTED";
   studentIdNumber: string | null;
   studentInstitutionEmail: string | null;
@@ -65,9 +86,10 @@ interface ExhibitorRow {
   displayOnSite: boolean;
 }
 
-type Tab = "submissions" | "registrations" | "verification" | "sponsors" | "exhibitors";
+type Tab = "payments" | "submissions" | "registrations" | "verification" | "sponsors" | "exhibitors";
 
 const TABS: { key: Tab; label: string }[] = [
+  { key: "payments", label: "Payments" },
   { key: "submissions", label: "Abstracts" },
   { key: "registrations", label: "Registrations" },
   { key: "verification", label: "Student checks" },
@@ -77,9 +99,11 @@ const TABS: { key: Tab; label: string }[] = [
 
 const PARTNER_STATUSES: PartnerStatus[] = [
   "PENDING",
-  "AWAITING_TRANSFER",
+  "AWAITING_PAYMENT",
+  "DECLARED",
   "PAID",
   "CONFIRMED",
+  "REJECTED",
   "FAILED",
   "CANCELLED",
 ];
@@ -93,6 +117,7 @@ export function AdminDashboard({
   initialRegistrations,
   initialSponsors,
   initialExhibitors,
+  initialPayments,
   certificateCount,
   abstractDeadlineIso,
 }: {
@@ -100,11 +125,17 @@ export function AdminDashboard({
   initialRegistrations: RegistrationRow[];
   initialSponsors: SponsorRow[];
   initialExhibitors: ExhibitorRow[];
+  initialPayments: PaymentRow[];
   certificateCount: number;
   abstractDeadlineIso: string;
 }) {
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>("submissions");
+  // Payments open first: checking receipts is the daily job now that money
+  // arrives through a bank rather than a card.
+  const [tab, setTab] = useState<Tab>("payments");
+  const [payments, setPayments] = useState(initialPayments);
+  const [rejecting, setRejecting] = useState<string | null>(null);
+  const [rejectNote, setRejectNote] = useState("");
   const [submissions, setSubmissions] = useState(initialSubmissions);
   const [registrations, setRegistrations] = useState(initialRegistrations);
   const [sponsors, setSponsors] = useState(initialSponsors);
@@ -116,6 +147,43 @@ export function AdminDashboard({
   const [notice, setNotice] = useState<string | null>(null);
 
   const pendingChecks = registrations.filter((r) => r.verification === "PENDING");
+  const awaitingPayment = payments.filter((p) => p.status === "DECLARED");
+
+  /**
+   * Accept or refuse a declared payment. Accepting is what actually marks a
+   * registration as paid; nothing automatic ever does.
+   */
+  async function decidePayment(row: PaymentRow, decision: "ACCEPT" | "REJECT", note?: string) {
+    const res = await fetch("/api/admin/payments", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reference: row.reference, decision, note }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setNotice(json.error || "That decision could not be saved. Please try again.");
+      return;
+    }
+
+    const status = decision === "ACCEPT" ? "PAID" : "REJECTED";
+    setPayments((prev) =>
+      prev.map((p) => (p.reference === row.reference ? { ...p, status, paymentNote: note ?? null } : p))
+    );
+    if (row.kind === "registration") {
+      setRegistrations((prev) =>
+        prev.map((r) =>
+          r.reference === row.reference ? { ...r, status: status as RegistrationStatus } : r
+        )
+      );
+    }
+    setRejecting(null);
+    setRejectNote("");
+    setNotice(
+      decision === "ACCEPT"
+        ? `${row.payer} confirmed as paid. Receipt and SMS sent.`
+        : `${row.payer} told the receipt was not accepted, with your reason.`
+    );
+  }
 
   const stats = useMemo(() => {
     const paid = registrations.filter((r) => r.status === "PAID");
@@ -267,6 +335,10 @@ export function AdminDashboard({
               <div className="l">Sponsorship and exhibition</div>
             </div>
             <div>
+              <div className="n tnum">{awaitingPayment.length}</div>
+              <div className="l">Receipts to check</div>
+            </div>
+            <div>
               <div className="n tnum">{pendingChecks.length}</div>
               <div className="l">Student checks waiting</div>
             </div>
@@ -303,9 +375,153 @@ export function AdminDashboard({
                 {item.key === "verification" && pendingChecks.length > 0 && (
                   <span className="tab-badge">{pendingChecks.length}</span>
                 )}
+                {item.key === "payments" && awaitingPayment.length > 0 && (
+                  <span className="tab-badge">{awaitingPayment.length}</span>
+                )}
               </button>
             ))}
           </div>
+
+          {tab === "payments" && (
+            <>
+              <p className="admin-note">
+                Payments made through the university&rsquo;s Remita portal and paid at a bank. Open
+                each receipt, check the RRR and the amount against the conference account, then
+                accept or refuse it. Accepting is what marks a registration as paid and releases the
+                confirmation email and SMS; nothing else in the system does that.
+              </p>
+
+              {payments.length === 0 ? (
+                <div className="admin-table-wrap">
+                  <p className="admin-empty admin-empty-block">
+                    No payments have been declared yet. They appear here as delegates, sponsors and
+                    exhibitors send in their receipts.
+                  </p>
+                </div>
+              ) : (
+                <ul className="payment-queue">
+                  {payments.map((row) => (
+                    <li key={row.reference} className={`payment-card is-${row.status.toLowerCase()}`}>
+                      <div className="payment-card-head">
+                        <div>
+                          <div className="payment-card-ref mono">{row.reference}</div>
+                          <h3>{row.payer}</h3>
+                          <div className="payment-card-detail">{row.detail}</div>
+                          <div className="payment-card-email">{row.email}</div>
+                        </div>
+                        <div className="payment-card-amount">
+                          <span className="k">Expected</span>
+                          <span className="v tnum">{money(row.amount, row.currency)}</span>
+                          <span className={`pill-status ${row.status.toLowerCase()}`}>{row.status}</span>
+                        </div>
+                      </div>
+
+                      <dl className="payment-card-facts">
+                        <div>
+                          <dt>RRR</dt>
+                          <dd className="mono">{row.rrr ?? "—"}</dd>
+                        </div>
+                        <div>
+                          <dt>Declared</dt>
+                          <dd>
+                            {row.declaredAt
+                              ? new Date(row.declaredAt).toLocaleDateString("en-GB", {
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                                })
+                              : "—"}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>Receipt</dt>
+                          <dd>
+                            {row.receiptUrl ? (
+                              <a href={row.receiptUrl} target="_blank" rel="noreferrer noopener">
+                                Open receipt
+                              </a>
+                            ) : (
+                              "Not attached"
+                            )}
+                          </dd>
+                        </div>
+                      </dl>
+
+                      {row.paymentNote && (
+                        <p className="payment-card-note">Reason given: {row.paymentNote}</p>
+                      )}
+
+                      {row.status === "DECLARED" && (
+                        <div className="payment-card-actions">
+                          {rejecting === row.reference ? (
+                            <div className="reject-box">
+                              <div className="field">
+                                <label htmlFor={`note-${row.id}`}>
+                                  Why can this receipt not be accepted?
+                                </label>
+                                <input
+                                  id={`note-${row.id}`}
+                                  type="text"
+                                  maxLength={400}
+                                  autoFocus
+                                  placeholder="The amount paid is ₦10,000 short of the regular rate."
+                                  value={rejectNote}
+                                  onChange={(e) => setRejectNote(e.target.value)}
+                                />
+                                <span className="hint">
+                                  Sent to the payer word for word, so write it to them.
+                                </span>
+                              </div>
+                              <div className="reject-actions">
+                                <button
+                                  type="button"
+                                  className="btn solid small"
+                                  disabled={rejectNote.trim().length < 3}
+                                  onClick={() => decidePayment(row, "REJECT", rejectNote.trim())}
+                                >
+                                  Send refusal
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn ghost small"
+                                  onClick={() => {
+                                    setRejecting(null);
+                                    setRejectNote("");
+                                  }}
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                className="btn solid small"
+                                onClick={() => decidePayment(row, "ACCEPT")}
+                              >
+                                Confirm payment received
+                              </button>
+                              <button
+                                type="button"
+                                className="btn ghost small"
+                                onClick={() => {
+                                  setRejecting(row.reference);
+                                  setRejectNote("");
+                                }}
+                              >
+                                Refuse receipt
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
+          )}
 
           {tab === "submissions" && (
             <div className="admin-table-wrap">

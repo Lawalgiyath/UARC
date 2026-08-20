@@ -7,7 +7,12 @@ import { guardPublicWrite } from "@/lib/security";
 // only and rate limited: without that, the endpoint is an open invitation to
 // fill the university's storage account.
 
-const ALLOWED_FOLDERS = new Set(["uarc/submissions", "uarc/sponsors", "uarc/exhibitors"]);
+const ALLOWED_FOLDERS = new Set([
+  "uarc/submissions",
+  "uarc/sponsors",
+  "uarc/exhibitors",
+  "uarc/receipts",
+]);
 
 export async function POST(request: Request) {
   const blocked = await guardPublicWrite(request, "upload");

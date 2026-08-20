@@ -13,10 +13,28 @@ enum SubmissionStatus {
   REJECTED
 }
 
+/// Payment by Remita is not instant, so a registration passes through a stage
+/// the old card-only flow had no name for: the delegate has paid at the bank
+/// and sent the receipt, but nobody has checked it yet.
 enum RegistrationStatus {
+  /// Registered, nothing paid yet.
   PENDING
+  /// RRR and receipt submitted, waiting on the Secretariat.
+  DECLARED
+  /// Receipt checked and accepted. Only PAID counts as registered.
   PAID
+  /// Receipt checked and refused, with a reason.
+  REJECTED
+  /// Card payment failed. Only reachable on the Paystack route.
   FAILED
+}
+
+/// How a payment was, or will be, made.
+enum PaymentMethod {
+  /// The university's Remita portal, paid at a bank, receipt uploaded here.
+  REMITA
+  /// Card or transfer through Paystack, if credentials are configured.
+  PAYSTACK
 }
 
 /// Student rates are only released once the claim has been checked.
@@ -27,13 +45,16 @@ enum VerificationStatus {
   REJECTED
 }
 
-/// Sponsors and exhibitors may pay online or by bank transfer against an
-/// invoice, so their lifecycle has one more state than a delegate's.
+/// Sponsors and exhibitors follow the same Remita route as delegates, with one
+/// extra state at the end: PAID means the money is in, CONFIRMED means the
+/// Secretariat has also agreed the logo, the stand or the programme entry.
 enum PartnerStatus {
   PENDING
-  AWAITING_TRANSFER
+  AWAITING_PAYMENT
+  DECLARED
   PAID
   CONFIRMED
+  REJECTED
   FAILED
   CANCELLED
 }
@@ -82,6 +103,22 @@ model Registration {
   paystackRef  String?             @unique
   status       RegistrationStatus  @default(PENDING)
 
+  /// Remita unless Paystack credentials are configured and the delegate chose
+  /// a card. Recorded per registration, because the two coexist once card
+  /// payment is switched on.
+  paymentMethod   PaymentMethod  @default(REMITA)
+  /// The 12 digit Remita Retrieval Reference, stored as 1234-5678-9012.
+  rrr             String?
+  /// The uploaded bank or Remita receipt. Held in Cloudinary, not here.
+  receiptUrl      String?
+  receiptPublicId String?
+  /// When the delegate said they had paid.
+  declaredAt      DateTime?
+  /// When the Secretariat accepted or refused the receipt.
+  paymentCheckedAt DateTime?
+  /// Why a receipt was refused, shown to the delegate.
+  paymentNote      String?
+
   /// Country of residence, so international delegates can be supported with
   /// visa letters and dial-in guidance.
   country      String?
@@ -112,6 +149,7 @@ model Registration {
   @@index([status])
   @@index([verification])
   @@index([listPublicly, status])
+  @@index([rrr])
 }
 
 model Sponsor {
@@ -126,6 +164,14 @@ model Sponsor {
   currency      String
   paystackRef   String?       @unique
   status        PartnerStatus @default(PENDING)
+
+  paymentMethod    PaymentMethod @default(REMITA)
+  rrr              String?
+  receiptUrl       String?
+  receiptPublicId  String?
+  declaredAt       DateTime?
+  paymentCheckedAt DateTime?
+  paymentNote      String?
 
   /// Shown on the sponsor wall once the sponsorship is confirmed and the
   /// Secretariat has ticked `displayOnSite`.
@@ -154,6 +200,14 @@ model Exhibitor {
   currency      String
   paystackRef   String?       @unique
   status        PartnerStatus @default(PENDING)
+
+  paymentMethod    PaymentMethod @default(REMITA)
+  rrr              String?
+  receiptUrl       String?
+  receiptPublicId  String?
+  declaredAt       DateTime?
+  paymentCheckedAt DateTime?
+  paymentNote      String?
 
   description   String?
   websiteUrl    String?

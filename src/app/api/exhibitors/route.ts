@@ -5,6 +5,7 @@ import { generateUniqueReference } from "@/lib/reference";
 import { initializeTransaction } from "@/lib/paystack";
 import { EXHIBIT_PACKAGES, isExhibitPackage } from "@/lib/exhibition";
 import { guardPublicWrite } from "@/lib/security";
+import { cardPaymentAvailable, REMITA } from "@/lib/remita";
 import { sendEmail } from "@/lib/email";
 import { CONFERENCE, CONTACT } from "@/lib/conference";
 
@@ -18,7 +19,7 @@ const exhibitorSchema = z.object({
   websiteUrl: z.string().trim().url().max(300).optional().or(z.literal("")),
   logoUrl: z.string().trim().url().max(500).optional().or(z.literal("")),
   logoPublicId: z.string().trim().max(300).optional().or(z.literal("")),
-  paymentMethod: z.enum(["ONLINE", "TRANSFER"]),
+  paymentMethod: z.enum(["REMITA", "PAYSTACK"]).optional(),
 });
 
 export async function POST(request: Request) {
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
   const taken = await db.exhibitor.count({
     where: {
       packageKey: pkg.label,
-      status: { in: ["PENDING", "AWAITING_TRANSFER", "PAID", "CONFIRMED"] },
+      status: { in: ["PENDING", "AWAITING_PAYMENT", "DECLARED", "PAID", "CONFIRMED"] },
     },
   });
   if (taken >= pkg.capacity) {
@@ -58,7 +59,12 @@ export async function POST(request: Request) {
     return existing !== null;
   });
 
-  const payingOnline = data.paymentMethod === "ONLINE";
+  const payingByCard = data.paymentMethod === "PAYSTACK" && cardPaymentAvailable();
+  const amountLabel =
+    pkg.currency === "USD"
+      ? `$${pkg.amount.toLocaleString("en-US")}`
+      : `₦${pkg.amount.toLocaleString("en-NG")}`;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
 
   await db.exhibitor.create({
     data: {
@@ -70,8 +76,9 @@ export async function POST(request: Request) {
       packageKey: pkg.label,
       amount: pkg.amount,
       currency: pkg.currency,
-      paystackRef: payingOnline ? reference : null,
-      status: payingOnline ? "PENDING" : "AWAITING_TRANSFER",
+      paystackRef: payingByCard ? reference : null,
+      paymentMethod: payingByCard ? "PAYSTACK" : "REMITA",
+      status: payingByCard ? "PENDING" : "AWAITING_PAYMENT",
       description: data.description || null,
       websiteUrl: data.websiteUrl || null,
       logoUrl: data.logoUrl || null,
@@ -82,20 +89,25 @@ export async function POST(request: Request) {
   void sendEmail({
     to: CONTACT.email,
     subject: `Exhibition application: ${data.organisation} (${pkg.label})`,
-    text: `An exhibition application has been received.\n\nOrganisation: ${data.organisation}\nPackage: ${pkg.label} (${pkg.size})\nAmount: ${pkg.currency} ${pkg.amount.toLocaleString("en-NG")}\nContact: ${data.contactName}\nEmail: ${data.email}\nPhone: ${data.phone}\nReference: ${reference}\nPayment: ${payingOnline ? "online now" : "by transfer against an invoice"}\nStands of this type now taken: ${taken + 1} of ${pkg.capacity}\n\n${data.description || ""}`.trim(),
+    text: `An exhibition application has been received.\n\nOrganisation: ${data.organisation}\nPackage: ${pkg.label} (${pkg.size})\nAmount: ${pkg.currency} ${pkg.amount.toLocaleString("en-NG")}\nContact: ${data.contactName}\nEmail: ${data.email}\nPhone: ${data.phone}\nReference: ${reference}\nPayment: ${payingByCard ? "by card" : "through Remita, receipt to follow"}\nStands of this type now taken: ${taken + 1} of ${pkg.capacity}\n\n${data.description || ""}`.trim(),
   }).catch((err) => console.error("[exhibitors] secretariat notification failed", err));
 
-  if (!payingOnline) {
+  if (!payingByCard) {
     void sendEmail({
       to: data.email,
       subject: `Exhibition application received, reference ${reference}`,
-      text: `Dear ${data.contactName},\n\nThank you for applying for a ${pkg.label} at the research fair alongside the ${CONFERENCE.edition} ${CONFERENCE.name}.\n\nReference: ${reference}\nStand: ${pkg.label}, ${pkg.size}\nAmount: ${pkg.currency} ${pkg.amount.toLocaleString("en-NG")}\n\nAn invoice follows from the Secretariat. Your stand is held for fourteen days pending payment, and your stand number is issued once payment is received.\n\n${CONTACT.email}\n${CONTACT.phones[0].display}`,
+      text: `Dear ${data.contactName},\n\nThank you for applying for a ${pkg.label} at the research fair alongside the ${CONFERENCE.edition} ${CONFERENCE.name}.\n\nReference: ${reference}\nStand: ${pkg.label}, ${pkg.size}\nAmount to pay: ${amountLabel}\n\nTO PAY\n1. Go to ${REMITA.siteLabel} and click "${REMITA.portalLinkText}".\n2. Choose the customer category "${REMITA.customerCategory}".\n3. Fill in the form, using ${REMITA.paymentItem} as the payment item and ${amountLabel} as the amount.\n4. Print the slip, note the 12 digit RRR, and pay it at any commercial bank.\n5. Send us the receipt at ${siteUrl}/register/payment, using this reference and email address.\n\nYour stand is held for fourteen days pending payment. The stand number is issued once the Secretariat has checked the receipt.\n\n${CONTACT.email}\n${CONTACT.phones[0].display}`,
     }).catch((err) => console.error("[exhibitors] applicant acknowledgement failed", err));
 
-    return NextResponse.json({ reference, awaitingTransfer: true });
+    return NextResponse.json({
+      reference,
+      paymentMethod: "REMITA",
+      amountLabel,
+      payerName: data.organisation,
+      email: data.email,
+      phone: data.phone,
+    });
   }
-
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
 
   try {
     const { authorizationUrl } = await initializeTransaction({

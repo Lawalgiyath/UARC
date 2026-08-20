@@ -5,6 +5,7 @@ import { generateUniqueReference } from "@/lib/reference";
 import { initializeTransaction } from "@/lib/paystack";
 import { SPONSOR_TIERS, isSponsorTier } from "@/lib/sponsorship";
 import { guardPublicWrite } from "@/lib/security";
+import { cardPaymentAvailable, REMITA } from "@/lib/remita";
 import { sendEmail } from "@/lib/email";
 import { CONFERENCE, CONTACT } from "@/lib/conference";
 
@@ -18,9 +19,8 @@ const sponsorSchema = z.object({
   logoUrl: z.string().trim().url().max(500).optional().or(z.literal("")),
   logoPublicId: z.string().trim().max(300).optional().or(z.literal("")),
   message: z.string().trim().max(1000).optional().or(z.literal("")),
-  // Institutional sponsors overwhelmingly pay against an invoice, so the
-  // online card route is offered rather than imposed.
-  paymentMethod: z.enum(["ONLINE", "TRANSFER"]),
+  // Everyone goes through Remita unless card credentials are configured.
+  paymentMethod: z.enum(["REMITA", "PAYSTACK"]).optional(),
 });
 
 export async function POST(request: Request) {
@@ -42,7 +42,12 @@ export async function POST(request: Request) {
     return existing !== null;
   });
 
-  const payingOnline = data.paymentMethod === "ONLINE";
+  const payingByCard = data.paymentMethod === "PAYSTACK" && cardPaymentAvailable();
+  const amountLabel =
+    tier.currency === "USD"
+      ? `$${tier.amount.toLocaleString("en-US")}`
+      : `₦${tier.amount.toLocaleString("en-NG")}`;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
 
   await db.sponsor.create({
     data: {
@@ -54,8 +59,9 @@ export async function POST(request: Request) {
       tier: tier.label,
       amount: tier.amount,
       currency: tier.currency,
-      paystackRef: payingOnline ? reference : null,
-      status: payingOnline ? "PENDING" : "AWAITING_TRANSFER",
+      paystackRef: payingByCard ? reference : null,
+      paymentMethod: payingByCard ? "PAYSTACK" : "REMITA",
+      status: payingByCard ? "PENDING" : "AWAITING_PAYMENT",
       websiteUrl: data.websiteUrl || null,
       logoUrl: data.logoUrl || null,
       logoPublicId: data.logoPublicId || null,
@@ -67,20 +73,25 @@ export async function POST(request: Request) {
   void sendEmail({
     to: CONTACT.email,
     subject: `Sponsorship application: ${data.organisation} (${tier.label})`,
-    text: `A sponsorship application has been received.\n\nOrganisation: ${data.organisation}\nTier: ${tier.label}\nAmount: ${tier.currency} ${tier.amount.toLocaleString("en-NG")}\nContact: ${data.contactName}\nEmail: ${data.email}\nPhone: ${data.phone}\nReference: ${reference}\nPayment: ${payingOnline ? "online now" : "by transfer against an invoice"}\n\n${data.message || ""}`.trim(),
+    text: `A sponsorship application has been received.\n\nOrganisation: ${data.organisation}\nTier: ${tier.label}\nAmount: ${tier.currency} ${tier.amount.toLocaleString("en-NG")}\nContact: ${data.contactName}\nEmail: ${data.email}\nPhone: ${data.phone}\nReference: ${reference}\nPayment: ${payingByCard ? "by card" : "through Remita, receipt to follow"}\n\n${data.message || ""}`.trim(),
   }).catch((err) => console.error("[sponsors] secretariat notification failed", err));
 
-  if (!payingOnline) {
+  if (!payingByCard) {
     void sendEmail({
       to: data.email,
       subject: `Sponsorship application received, reference ${reference}`,
-      text: `Dear ${data.contactName},\n\nThank you for offering to sponsor the ${CONFERENCE.edition} ${CONFERENCE.name} at the ${tier.label} level.\n\nReference: ${reference}\nAmount: ${tier.currency} ${tier.amount.toLocaleString("en-NG")}\n\nAn invoice with the university's bank details follows from the Secretariat. Your sponsorship is confirmed, and your logo goes up on the site, once payment is received.\n\n${CONTACT.email}\n${CONTACT.phones[0].display}`,
+      text: `Dear ${data.contactName},\n\nThank you for offering to sponsor the ${CONFERENCE.edition} ${CONFERENCE.name} at the ${tier.label} level.\n\nReference: ${reference}\nAmount to pay: ${amountLabel}\n\nTO PAY\n1. Go to ${REMITA.siteLabel} and click "${REMITA.portalLinkText}".\n2. Choose the customer category "${REMITA.customerCategory}".\n3. Fill in the form:\n     Name of payee: ${data.organisation}\n     Mobile number: ${data.phone}\n     Email address: ${data.email}\n     Payment item: ${REMITA.paymentItem}\n     Amount: ${amountLabel}\n4. Print the slip and note the 12 digit RRR.\n5. Pay the slip at any commercial bank.\n6. Send us the receipt at ${siteUrl}/register/payment, using this reference and email address.\n\nYour sponsorship is confirmed, and your logo goes up on the site, once the Secretariat has checked the receipt.\n\n${CONTACT.email}\n${CONTACT.phones[0].display}`,
     }).catch((err) => console.error("[sponsors] applicant acknowledgement failed", err));
 
-    return NextResponse.json({ reference, awaitingTransfer: true });
+    return NextResponse.json({
+      reference,
+      paymentMethod: "REMITA",
+      amountLabel,
+      payerName: data.organisation,
+      email: data.email,
+      phone: data.phone,
+    });
   }
-
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
 
   try {
     const { authorizationUrl } = await initializeTransaction({
