@@ -21,8 +21,15 @@ export function UniversityMasthead() {
 
       <div className="wrap masthead-grid">
         <div className="masthead-body">
-          <div className="masthead-crest">
-            <UnilagLogo height={92} variant="plate" />
+          {/* The crest hangs on a ceremonial ribbon that drops from behind the
+              header and ends in a swallowtail, the way a bookmark ribbon falls
+              out of a bound volume. It is anchored to the top of the section,
+              so on scroll it slides back under the sticky header rather than
+              floating free. */}
+          <div className="masthead-ribbon">
+            <span className="masthead-ribbon-crest">
+              <UnilagLogo height={78} />
+            </span>
           </div>
 
           <h1 className="masthead-title">{UNIVERSITY.name}</h1>
