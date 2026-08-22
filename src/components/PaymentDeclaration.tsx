@@ -86,7 +86,13 @@ export function PaymentDeclaration({
       });
       if (!uploadRes.ok) throw new Error("Upload to cloud storage failed.");
       const uploaded = await uploadRes.json();
-      setReceipt({ url: uploaded.secure_url, publicId: uploaded.public_id, fileName: file.name });
+      // Cloudinary hands back a URL that already carries a signature, and that
+      // signature never expires. Keeping it would mean the database row and
+      // the Secretariat's alert email each held a working link to somebody's
+      // receipt. Strip it: the stored URL records where the file is, and the
+      // dashboard signs a fresh one when a person actually needs to look.
+      const stored = String(uploaded.secure_url).replace(/\/s--[^/]+--\//, "/");
+      setReceipt({ url: stored, publicId: uploaded.public_id, fileName: file.name });
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : "Upload failed, please try again.");
     } finally {

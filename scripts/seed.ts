@@ -14,6 +14,7 @@
  *   npm run db:seed -- --clear   delete it again
  */
 
+import "./load-env";
 import { PrismaClient } from "@prisma/client";
 
 const db = new PrismaClient();

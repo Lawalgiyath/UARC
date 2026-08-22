@@ -9,6 +9,7 @@
  *   npm run rate-limit -- --clear  clear them all
  */
 
+import "./load-env";
 import { PrismaClient } from "@prisma/client";
 
 const db = new PrismaClient();

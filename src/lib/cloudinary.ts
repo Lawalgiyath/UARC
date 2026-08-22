@@ -45,35 +45,58 @@ export const PRIVATE_FOLDERS = new Set(["uarc/receipts"]);
 /**
  * Builds a signed delivery URL for an asset uploaded as `authenticated`.
  *
- * Cloudinary's scheme: SHA-1 the path to be signed with the API secret
- * appended, base64url the digest, keep the first eight characters, and put it
- * in the URL as `s--XXXXXXXX--`.
+ * Cloudinary's scheme, established by uploading a file and comparing what it
+ * handed back: SHA-1 over `<public_id>.<format><api_secret>`, base64url the
+ * digest, keep the first eight characters, and place it in the path as
+ * `s--XXXXXXXX--`. The extension is part of what is signed. Leaving it out
+ * produces a signature Cloudinary rejects with a 401, which is exactly what
+ * the first version of this function did.
  */
 export function signedDeliveryUrl(input: {
   publicId: string;
   /** image, video or raw. PDFs and photographs are both `image`. */
   resourceType: string;
+  /** png, jpg, pdf. Signed along with the id, so it cannot be guessed wrong. */
+  format: string;
 }): string {
   const apiSecret = process.env.CLOUDINARY_API_SECRET;
   if (!apiSecret) throw new Error("CLOUDINARY_API_SECRET is not set");
   const { cloudName } = cloudinaryConfig();
 
+  const path = `${input.publicId}.${input.format}`;
   const signature = createHash("sha1")
-    .update(input.publicId + apiSecret)
+    .update(path + apiSecret)
     .digest("base64")
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
     .slice(0, 8);
 
-  return `https://res.cloudinary.com/${cloudName}/${input.resourceType}/authenticated/s--${signature}--/${input.publicId}`;
+  return `https://res.cloudinary.com/${cloudName}/${input.resourceType}/authenticated/s--${signature}--/${path}`;
 }
 
 /**
- * Works out the resource type from the URL Cloudinary returned at upload time,
- * which is the only place we record it. The shape is
+ * Cloudinary returns an already-signed URL for an authenticated upload, and
+ * that signature does not expire. Storing it would defeat the point: the
+ * database row and the alert email would each carry a working link to a
+ * stranger's receipt. This removes the signature, leaving a URL that records
+ * where the file is and returns 401 to anybody who opens it.
+ */
+export function stripSignature(secureUrl: string): string {
+  return secureUrl.replace(/\/s--[^/]+--\//, "/");
+}
+
+/**
+ * Works out the resource type from a stored delivery URL, which is the only
+ * place we record it. The shape is
  * `https://res.cloudinary.com/<cloud>/<resourceType>/<type>/...`.
  */
 export function resourceTypeFromUrl(url: string): string {
   const match = /res\.cloudinary\.com\/[^/]+\/([^/]+)\//.exec(url);
   return match?.[1] ?? "image";
+}
+
+/** The file extension off the end of a stored delivery URL. */
+export function formatFromUrl(url: string): string {
+  const match = /\.([a-zA-Z0-9]{1,5})(?:\?|$)/.exec(url);
+  return match?.[1] ?? "";
 }

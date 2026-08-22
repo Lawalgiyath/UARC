@@ -127,7 +127,7 @@ export async function POST(request: Request) {
       : `Payment to check: ${target.reference} (${amount})`,
     text: `A payment has been declared and needs checking.\n\nReference: ${target.reference}\nPayer: ${target.payerName}\nFor: ${target.purpose}\nExpected amount: ${amount}\nPayer says they paid: ${
       data.declaredAmount !== undefined ? formatAmount(data.declaredAmount, target.currency) : "not stated"
-    }\nDated: ${data.paidOn || "not stated"}\nPaid via: ${data.paidVia || "not stated"}\nRRR: ${rrr}\nReceipt: ${data.receiptUrl}\n\nAUTOMATIC CHECKS: ${checks.verdict}\n${findings}\n\nVerify it in the Secretariat dashboard, Payments tab.`,
+    }\nDated: ${data.paidOn || "not stated"}\nPaid via: ${data.paidVia || "not stated"}\nRRR: ${rrr}\n\nThe receipt is not linked here on purpose: it is stored privately and only\nopens for a signed-in member of the Secretariat.\n\nAUTOMATIC CHECKS: ${checks.verdict}\n${findings}\n\nVerify it in the Secretariat dashboard, Payments tab.`,
   }).catch((err) => console.error("[payments] secretariat notification failed", err));
 
   return NextResponse.json({

@@ -20,7 +20,8 @@
     "rate-limit": "tsx scripts/rate-limit.ts",
     "test-email": "tsx scripts/test-email.ts",
     "vercel-env": "tsx scripts/vercel-env.ts",
-    "remita-check": "tsx scripts/remita-check.ts"
+    "remita-check": "tsx scripts/remita-check.ts",
+    "storage-check": "tsx scripts/storage-check.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",

@@ -102,7 +102,11 @@ export const PRIVACY = {
     { name: "Vercel", role: "Runs the website itself", where: "United States and the European Union" },
     { name: "Neon", role: "Holds the database of registrations and payments", where: "European Union" },
     { name: "Cloudinary", role: "Stores uploaded receipts and logos", where: "European Union" },
-    { name: "The university's email provider", role: "Delivers the emails we send you", where: "Outside Nigeria" },
+    {
+      name: "Google (Gmail)",
+      role: "Delivers the emails the Secretariat sends you about your registration",
+      where: "United States and the European Union",
+    },
     {
       name: "Remita and Tranzgate",
       role: "Take the payment on the university's behalf. Payment happens on their systems, not ours",

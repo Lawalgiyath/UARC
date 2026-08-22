@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { signedDeliveryUrl, resourceTypeFromUrl } from "@/lib/cloudinary";
+import { signedDeliveryUrl, resourceTypeFromUrl, formatFromUrl } from "@/lib/cloudinary";
 import { getAbstractDeadline } from "@/lib/settings";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
 
@@ -19,7 +19,11 @@ function viewableReceipt(url: string | null, publicId: string | null): string | 
   if (!url) return null;
   if (!publicId || !url.includes("/authenticated/")) return url;
   try {
-    return signedDeliveryUrl({ publicId, resourceType: resourceTypeFromUrl(url) });
+    return signedDeliveryUrl({
+      publicId,
+      resourceType: resourceTypeFromUrl(url),
+      format: formatFromUrl(url),
+    });
   } catch {
     // No Cloudinary secret configured: better to show the raw link than none.
     return url;

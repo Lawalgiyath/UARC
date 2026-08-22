@@ -7,6 +7,7 @@
  * configured it says exactly what is missing rather than failing quietly.
  */
 
+import "./load-env";
 import { sendEmail, verifyEmailTransport } from "../src/lib/email";
 import { CONFERENCE, CONTACT } from "../src/lib/conference";
 
