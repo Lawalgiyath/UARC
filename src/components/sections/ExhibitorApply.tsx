@@ -98,7 +98,7 @@ export function ExhibitorApply({ taken }: { taken: Record<string, number> }) {
           </p>
           <p className="confirm-note">
             Questions: <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a> or{" "}
-            <a href={`tel:${CONTACT.phones[2].e164}`}>{CONTACT.phones[2].display}</a>.
+            <a href={`tel:${CONTACT.phones[0].e164}`}>{CONTACT.phones[0].display}</a>.
           </p>
         </div>
 

@@ -16,19 +16,16 @@ const ROUTES = [
     icon: "upload" as const,
     heading: "About an abstract",
     body: "Quote your submission reference. Status questions are answered fastest through the tracker on the submission page.",
-    phoneIndex: 1,
   },
   {
     icon: "ticket" as const,
     heading: "About registration or payment",
     body: "Quote your registration reference and the email address you used. Receipts are reissued on request.",
-    phoneIndex: 2,
   },
   {
     icon: "handshake" as const,
     heading: "Sponsorship, exhibition and press",
     body: "Sponsorship tiers, exhibition stands, invoices and media accreditation all go through the Secretariat.",
-    phoneIndex: 0,
   },
 ];
 
@@ -70,7 +67,7 @@ export default function ContactPage() {
               </ul>
               <p className="contact-note">
                 Office hours are 09:00 to 16:00, Monday to Friday, {CONTACT.timezone}. WhatsApp
-                messages to the first number are read but answered more slowly than email.
+                messages to this number are read but answered more slowly than email.
               </p>
             </div>
 
@@ -114,12 +111,12 @@ export default function ContactPage() {
 
           <div className="section-head contact-routes-head">
             <div className="eyebrow">Who to ask</div>
-            <h2>Reaching the right desk first time</h2>
+            <h2>What to have ready when you call</h2>
           </div>
 
           <div className="contact-routes">
             {ROUTES.map((route) => {
-              const phone = CONTACT.phones[route.phoneIndex];
+              const phone = CONTACT.phones[0];
               return (
                 <div className="contact-route" key={route.heading}>
                   <span className="contact-route-icon">

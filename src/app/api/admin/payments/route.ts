@@ -189,7 +189,7 @@ export async function PATCH(request: Request) {
     void sendEmail({
       to: payer.email,
       subject: `We could not accept your receipt, reference ${ref}`,
-      text: `Dear ${payer.name},\n\nWe were unable to confirm the payment for ${ref}.\n\nReason: ${note}\n\nYour place is still held. Once the point above is resolved, send the receipt again at ${siteUrl}/register/payment using this reference and the email address you registered with.\n\nIf you believe this is a mistake, reply to this email or call ${CONTACT.phones[2].display} with your RRR to hand.\n\n${CONTACT.email}`,
+      text: `Dear ${payer.name},\n\nWe were unable to confirm the payment for ${ref}.\n\nReason: ${note}\n\nYour place is still held. Once the point above is resolved, send the receipt again at ${siteUrl}/register/payment using this reference and the email address you registered with.\n\nIf you believe this is a mistake, reply to this email or call ${CONTACT.phones[0].display} with your RRR to hand.\n\n${CONTACT.email}`,
     }).catch((err) => console.error("[admin/payments] rejection email failed", err));
   }
 
