@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { signUploadParams, cloudinaryConfig } from "@/lib/cloudinary";
+import { signUploadParams, cloudinaryConfig, PRIVATE_FOLDERS } from "@/lib/cloudinary";
 import { guardPublicWrite } from "@/lib/security";
 
 // Hands out a short lived signature so a browser can upload straight to
@@ -23,8 +23,14 @@ export async function POST(request: Request) {
   const folder = ALLOWED_FOLDERS.has(requested) ? requested : "uarc/submissions";
 
   const timestamp = Math.floor(Date.now() / 1000);
-  const signature = signUploadParams({ folder, timestamp });
+  // Receipts go up as `authenticated`, so Cloudinary will not serve them from
+  // a plain URL. The browser has to send the same value it was signed with, or
+  // Cloudinary rejects the upload, which is why it is returned here too.
+  const type = PRIVATE_FOLDERS.has(folder) ? "authenticated" : "upload";
+  const signature = signUploadParams(
+    type === "authenticated" ? { folder, timestamp, type } : { folder, timestamp }
+  );
   const { cloudName, apiKey } = cloudinaryConfig();
 
-  return NextResponse.json({ timestamp, signature, apiKey, cloudName, folder });
+  return NextResponse.json({ timestamp, signature, apiKey, cloudName, folder, type });
 }

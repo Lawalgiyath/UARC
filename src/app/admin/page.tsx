@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { signedDeliveryUrl, resourceTypeFromUrl } from "@/lib/cloudinary";
 import { getAbstractDeadline } from "@/lib/settings";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
 
@@ -6,6 +7,24 @@ import { AdminDashboard } from "@/components/admin/AdminDashboard";
 // authenticated Secretariat user; it must never be cached or built as a
 // static page.
 export const dynamic = "force-dynamic";
+
+/**
+ * Receipts are uploaded as private, so the stored URL will not open on its
+ * own. The Secretariat's copy is signed here, on the server, where the API
+ * secret lives. A receipt that predates this change was uploaded publicly and
+ * still has a working URL, so those are passed through untouched rather than
+ * signed into a 404.
+ */
+function viewableReceipt(url: string | null, publicId: string | null): string | null {
+  if (!url) return null;
+  if (!publicId || !url.includes("/authenticated/")) return url;
+  try {
+    return signedDeliveryUrl({ publicId, resourceType: resourceTypeFromUrl(url) });
+  } catch {
+    // No Cloudinary secret configured: better to show the raw link than none.
+    return url;
+  }
+}
 
 export default async function AdminPage() {
   const [submissions, registrations, sponsors, exhibitors, certificateCount, deadline] =
@@ -35,7 +54,7 @@ export default async function AdminPage() {
         currency: r.currency,
         status: r.status as string,
         rrr: r.rrr,
-        receiptUrl: r.receiptUrl,
+        receiptUrl: viewableReceipt(r.receiptUrl, r.receiptPublicId),
         declaredAt: r.declaredAt?.toISOString() ?? null,
         paymentNote: r.paymentNote,
         declaredAmount: r.declaredAmount,
@@ -57,7 +76,7 @@ export default async function AdminPage() {
         currency: s.currency,
         status: s.status as string,
         rrr: s.rrr,
-        receiptUrl: s.receiptUrl,
+        receiptUrl: viewableReceipt(s.receiptUrl, s.receiptPublicId),
         declaredAt: s.declaredAt?.toISOString() ?? null,
         paymentNote: s.paymentNote,
         declaredAmount: s.declaredAmount,
@@ -79,7 +98,7 @@ export default async function AdminPage() {
         currency: e.currency,
         status: e.status as string,
         rrr: e.rrr,
-        receiptUrl: e.receiptUrl,
+        receiptUrl: viewableReceipt(e.receiptUrl, e.receiptPublicId),
         declaredAt: e.declaredAt?.toISOString() ?? null,
         paymentNote: e.paymentNote,
         declaredAmount: e.declaredAmount,

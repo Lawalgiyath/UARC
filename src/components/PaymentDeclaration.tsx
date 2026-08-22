@@ -68,7 +68,7 @@ export function PaymentDeclaration({
         body: JSON.stringify({ folder: "uarc/receipts" }),
       });
       if (!signRes.ok) throw new Error("Could not prepare the upload.");
-      const { timestamp, signature, apiKey, cloudName, folder } = await signRes.json();
+      const { timestamp, signature, apiKey, cloudName, folder, type } = await signRes.json();
 
       const form = new FormData();
       form.append("file", file);
@@ -76,6 +76,9 @@ export function PaymentDeclaration({
       form.append("timestamp", String(timestamp));
       form.append("signature", signature);
       form.append("folder", folder);
+      // Signed as part of the request, so it cannot be dropped to make the
+      // receipt public.
+      if (type && type !== "upload") form.append("type", type);
 
       const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
         method: "POST",
