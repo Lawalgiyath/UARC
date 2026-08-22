@@ -28,7 +28,8 @@ function checkHashShape(hash: string): boolean {
         "[auth] The usual cause: a bcrypt hash is full of $ characters, and .env files\n" +
         "[auth] expand $NAME as a variable reference, which eats part of the hash.\n" +
         '[auth] In .env, escape them: ADMIN_PASSWORD_HASH="\\$2a\\$12\\$..."\n' +
-        "[auth] In a hosting dashboard, paste the raw hash with no escaping.\n" +
+        "[auth] Vercel expands them too, so escape it there as well. A raw hash\n" +
+        "[auth] arrives 52 characters long, with $2a$12$X eaten off the front.\n" +
         '[auth] Regenerate with: npm run hash-password -- "your password"'
     );
   }
