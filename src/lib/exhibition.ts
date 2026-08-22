@@ -93,8 +93,8 @@ export function isExhibitPackage(value: string): value is ExhibitPackage {
 
 export const EXHIBITION = {
   venue: "Research Fair concourse, Jelili Adebisi Omotola Hall",
-  buildUp: "Monday 19 October 2026, 10:00 to 18:00",
-  open: "Tuesday 20 to Thursday 22 October 2026, 08:30 to 17:00",
-  breakDown: "Thursday 22 October 2026, from 17:00",
+  buildUp: "Tuesday 13 October 2026, 10:00 to 18:00",
+  open: "Wednesday 14 to Friday 16 October 2026, 08:30 to 17:00",
+  breakDown: "Friday 16 October 2026, from 17:00",
   applicationCloses: "Friday 25 September 2026",
 } as const;

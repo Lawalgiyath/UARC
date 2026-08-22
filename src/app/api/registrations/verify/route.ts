@@ -31,7 +31,7 @@ export async function GET(request: Request) {
         });
         await sendSms({
           to: registration.phone,
-          body: `UNILAG ARC: payment confirmed. Registration reference ${reference}. See you at Omotola Hall, 20-22 Oct 2026.`,
+          body: `UNILAG ARC: payment confirmed. Registration reference ${reference}. See you at Omotola Hall, 14-16 Oct 2026.`,
         });
       } catch (err) {
         console.error("[registrations] confirmation notification failed", err);

@@ -15,8 +15,8 @@ export const CONFERENCE = {
   /** Sits directly under the "19th Edition" line, per the Secretariat's brief. */
   editionCaption:
     "Three days of plenaries, parallel sessions and a research fair, convened by the Central Research Committee of the University of Lagos and open to researchers within and outside Nigeria.",
-  dates: "October 20 – 22, 2026",
-  datesShort: "Oct 20–22, 2026",
+  dates: "October 14 – 16, 2026",
+  datesShort: "Oct 14–16, 2026",
   venue: "Jelili Adebisi Omotola Hall",
   venueFull: "Jelili Adebisi Omotola Hall, University of Lagos, Akoka, Yaba, Lagos, Nigeria",
   abstractDeadlineLabel: "Monday, 24 August 2026",

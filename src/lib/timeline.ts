@@ -21,8 +21,8 @@ export function computeStatus(phase: TimelinePhase, now: Date = new Date()): Pha
 export const FIXED_PHASES: Omit<TimelinePhase, "opensAt" | "closesAt">[] = [
   { title: "Review and notification of acceptance", sub: "Decisions sent by email with reference code", dateLabel: "Mon, 21 Sep 2026" },
   { title: "Early bird registration", sub: "Discounted fee, see pricing below", dateLabel: "Closes 25 Sep 2026" },
-  { title: "Regular registration", sub: "Standard fee applies", dateLabel: "Closes 16 Oct 2026" },
-  { title: "Conference sessions", sub: "Jelili Adebisi Omotola Hall, UNILAG", dateLabel: "20 - 22 Oct 2026" },
+  { title: "Regular registration", sub: "Standard fee applies", dateLabel: "Closes 10 Oct 2026" },
+  { title: "Conference sessions", sub: "Jelili Adebisi Omotola Hall, UNILAG", dateLabel: "14 - 16 Oct 2026" },
 ];
 
 export function buildTimeline(abstractOpensAt: string, abstractClosesAt: string): TimelinePhase[] {
@@ -36,7 +36,7 @@ export function buildTimeline(abstractOpensAt: string, abstractClosesAt: string)
     },
     { ...FIXED_PHASES[0], opensAt: "2026-08-25T00:00:00+01:00", closesAt: "2026-09-21T23:59:00+01:00" },
     { ...FIXED_PHASES[1], opensAt: "2026-06-15T00:00:00+01:00", closesAt: "2026-09-25T23:59:00+01:00" },
-    { ...FIXED_PHASES[2], opensAt: "2026-09-26T00:00:00+01:00", closesAt: "2026-10-16T23:59:00+01:00" },
-    { ...FIXED_PHASES[3], opensAt: "2026-10-20T00:00:00+01:00", closesAt: "2026-10-22T23:59:00+01:00" },
+    { ...FIXED_PHASES[2], opensAt: "2026-09-26T00:00:00+01:00", closesAt: "2026-10-10T23:59:00+01:00" },
+    { ...FIXED_PHASES[3], opensAt: "2026-10-14T00:00:00+01:00", closesAt: "2026-10-16T23:59:00+01:00" },
   ];
 }

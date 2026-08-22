@@ -74,8 +74,8 @@ const eventJsonLd = {
   "@type": "Event",
   name: `${CONFERENCE.edition} ${CONFERENCE.name}`,
   description: CONFERENCE.theme,
-  startDate: "2026-10-20",
-  endDate: "2026-10-22",
+  startDate: "2026-10-14",
+  endDate: "2026-10-16",
   eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
   eventStatus: "https://schema.org/EventScheduled",
   location: {
