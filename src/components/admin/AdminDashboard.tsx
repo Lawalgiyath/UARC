@@ -16,6 +16,8 @@ type PartnerStatus =
 
 type RegistrationStatus = "PENDING" | "DECLARED" | "PAID" | "REJECTED" | "FAILED";
 
+import { FLAG_LABELS } from "@/lib/paymentChecks";
+
 /** A payment somebody has declared, awaiting or having had a decision. */
 export interface PaymentRow {
   kind: "registration" | "sponsor" | "exhibitor";
@@ -31,6 +33,12 @@ export interface PaymentRow {
   receiptUrl: string | null;
   declaredAt: string | null;
   paymentNote: string | null;
+  /** What the payer said, and what the automatic checks made of it. */
+  declaredAmount: number | null;
+  paidOn: string | null;
+  paidVia: string | null;
+  checkFlags: string[];
+  checkVerdict: string | null;
 }
 
 interface SubmissionRow {
@@ -416,10 +424,58 @@ export function AdminDashboard({
                         </div>
                       </div>
 
+                      {row.checkVerdict && (
+                        <div className={`check-band is-${row.checkVerdict.toLowerCase()}`}>
+                          <span className="check-verdict">
+                            {row.checkVerdict === "CLEAR" ? "Checks found nothing" : "Needs attention"}
+                          </span>
+                          {row.checkFlags.length > 0 ? (
+                            <ul className="check-flags">
+                              {row.checkFlags.map((code) => (
+                                <li key={code}>{FLAG_LABELS[code] ?? code}</li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <span className="check-caveat">
+                              Nothing contradicts the claim. That is not the same as the money
+                              having been seen: confirm against the account statement.
+                            </span>
+                          )}
+                        </div>
+                      )}
+
                       <dl className="payment-card-facts">
                         <div>
                           <dt>RRR</dt>
                           <dd className="mono">{row.rrr ?? "—"}</dd>
+                        </div>
+                        <div>
+                          <dt>Payer says paid</dt>
+                          <dd className="tnum">
+                            {row.declaredAmount !== null ? (
+                              <span className={row.declaredAmount !== row.amount ? "is-off" : undefined}>
+                                {money(row.declaredAmount, row.currency)}
+                              </span>
+                            ) : (
+                              "—"
+                            )}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>Dated</dt>
+                          <dd>
+                            {row.paidOn
+                              ? new Date(row.paidOn).toLocaleDateString("en-GB", {
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                                })
+                              : "—"}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>Paid via</dt>
+                          <dd>{row.paidVia ?? "—"}</dd>
                         </div>
                         <div>
                           <dt>Declared</dt>

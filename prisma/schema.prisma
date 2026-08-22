@@ -68,8 +68,8 @@ enum CertificateKind {
 }
 
 model Submission {
-  id                 String            @id @default(cuid())
-  reference          String            @unique
+  id                 String           @id @default(cuid())
+  reference          String           @unique
   authorName         String
   email              String
   phone              String
@@ -80,40 +80,53 @@ model Submission {
   abstractText       String
   manuscriptUrl      String?
   manuscriptPublicId String?
-  status             SubmissionStatus  @default(PENDING)
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
+  status             SubmissionStatus @default(PENDING)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
 
-  certificates       Certificate[]
+  certificates Certificate[]
 
   @@index([email])
   @@index([status])
 }
 
 model Registration {
-  id           String              @id @default(cuid())
-  reference    String              @unique
-  fullName     String
-  email        String
-  phone        String
-  institution  String
-  category     String
-  amount       Int
-  currency     String
-  paystackRef  String?             @unique
-  status       RegistrationStatus  @default(PENDING)
+  id          String             @id @default(cuid())
+  reference   String             @unique
+  fullName    String
+  email       String
+  phone       String
+  institution String
+  category    String
+  amount      Int
+  currency    String
+  paystackRef String?            @unique
+  status      RegistrationStatus @default(PENDING)
 
   /// Remita unless Paystack credentials are configured and the delegate chose
   /// a card. Recorded per registration, because the two coexist once card
   /// payment is switched on.
-  paymentMethod   PaymentMethod  @default(REMITA)
+  paymentMethod    PaymentMethod @default(REMITA)
   /// The 12 digit Remita Retrieval Reference, stored as 1234-5678-9012.
-  rrr             String?
+  rrr              String?
   /// The uploaded bank or Remita receipt. Held in Cloudinary, not here.
-  receiptUrl      String?
-  receiptPublicId String?
+  receiptUrl       String?
+  receiptPublicId  String?
   /// When the delegate said they had paid.
-  declaredAt      DateTime?
+  declaredAt       DateTime?
+  /// What the payer says they paid, in whole units of the currency. Typed in
+  /// rather than read off the receipt, so it is a claim to be checked, not a
+  /// fact. Recording it as a number is what makes any check possible at all.
+  declaredAmount   Int?
+  /// The date printed on the receipt, as the payer read it.
+  paidOn           DateTime?
+  /// Bank branch or channel the payment went through, in the payer's words.
+  paidVia          String?
+  /// Machine codes from the automatic checks, e.g. AMOUNT_SHORT. Empty when
+  /// nothing was found. See lib/paymentChecks.ts.
+  checkFlags       String[]      @default([])
+  /// CLEAR or REVIEW, decided by those checks the moment a payment is declared.
+  checkVerdict     String?
   /// When the Secretariat accepted or refused the receipt.
   paymentCheckedAt DateTime?
   /// Why a receipt was refused, shown to the delegate.
@@ -121,11 +134,11 @@ model Registration {
 
   /// Country of residence, so international delegates can be supported with
   /// visa letters and dial-in guidance.
-  country      String?
+  country String?
 
   /// Delegates choose whether their name appears on the public list. Default
   /// off: publishing an attendee list without consent is not ours to do.
-  listPublicly Boolean             @default(false)
+  listPublicly Boolean @default(false)
 
   /// Student verification. `studentIdNumber` is a matriculation or student
   /// number; `studentInstitutionEmail` is the institutional address the claim
@@ -137,11 +150,11 @@ model Registration {
   verificationNote        String?
 
   /// Set at the registration desk, and the trigger for issuing a certificate.
-  attended     Boolean             @default(false)
-  attendedAt   DateTime?
+  attended   Boolean   @default(false)
+  attendedAt DateTime?
 
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   certificates Certificate[]
 
@@ -153,23 +166,36 @@ model Registration {
 }
 
 model Sponsor {
-  id            String        @id @default(cuid())
-  reference     String        @unique
-  organisation  String
-  contactName   String
-  email         String
-  phone         String
-  tier          String
-  amount        Int
-  currency      String
-  paystackRef   String?       @unique
-  status        PartnerStatus @default(PENDING)
+  id           String        @id @default(cuid())
+  reference    String        @unique
+  organisation String
+  contactName  String
+  email        String
+  phone        String
+  tier         String
+  amount       Int
+  currency     String
+  paystackRef  String?       @unique
+  status       PartnerStatus @default(PENDING)
 
   paymentMethod    PaymentMethod @default(REMITA)
   rrr              String?
   receiptUrl       String?
   receiptPublicId  String?
   declaredAt       DateTime?
+  /// What the payer says they paid, in whole units of the currency. Typed in
+  /// rather than read off the receipt, so it is a claim to be checked, not a
+  /// fact. Recording it as a number is what makes any check possible at all.
+  declaredAmount   Int?
+  /// The date printed on the receipt, as the payer read it.
+  paidOn           DateTime?
+  /// Bank branch or channel the payment went through, in the payer's words.
+  paidVia          String?
+  /// Machine codes from the automatic checks, e.g. AMOUNT_SHORT. Empty when
+  /// nothing was found. See lib/paymentChecks.ts.
+  checkFlags       String[]      @default([])
+  /// CLEAR or REVIEW, decided by those checks the moment a payment is declared.
+  checkVerdict     String?
   paymentCheckedAt DateTime?
   paymentNote      String?
 
@@ -178,34 +204,47 @@ model Sponsor {
   websiteUrl    String?
   logoUrl       String?
   logoPublicId  String?
-  displayOnSite Boolean       @default(false)
+  displayOnSite Boolean @default(false)
   message       String?
 
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([status])
   @@index([displayOnSite, status])
 }
 
 model Exhibitor {
-  id            String        @id @default(cuid())
-  reference     String        @unique
-  organisation  String
-  contactName   String
-  email         String
-  phone         String
-  packageKey    String
-  amount        Int
-  currency      String
-  paystackRef   String?       @unique
-  status        PartnerStatus @default(PENDING)
+  id           String        @id @default(cuid())
+  reference    String        @unique
+  organisation String
+  contactName  String
+  email        String
+  phone        String
+  packageKey   String
+  amount       Int
+  currency     String
+  paystackRef  String?       @unique
+  status       PartnerStatus @default(PENDING)
 
   paymentMethod    PaymentMethod @default(REMITA)
   rrr              String?
   receiptUrl       String?
   receiptPublicId  String?
   declaredAt       DateTime?
+  /// What the payer says they paid, in whole units of the currency. Typed in
+  /// rather than read off the receipt, so it is a claim to be checked, not a
+  /// fact. Recording it as a number is what makes any check possible at all.
+  declaredAmount   Int?
+  /// The date printed on the receipt, as the payer read it.
+  paidOn           DateTime?
+  /// Bank branch or channel the payment went through, in the payer's words.
+  paidVia          String?
+  /// Machine codes from the automatic checks, e.g. AMOUNT_SHORT. Empty when
+  /// nothing was found. See lib/paymentChecks.ts.
+  checkFlags       String[]      @default([])
+  /// CLEAR or REVIEW, decided by those checks the moment a payment is declared.
+  checkVerdict     String?
   paymentCheckedAt DateTime?
   paymentNote      String?
 
@@ -214,10 +253,10 @@ model Exhibitor {
   logoUrl       String?
   logoPublicId  String?
   standNumber   String?
-  displayOnSite Boolean       @default(false)
+  displayOnSite Boolean @default(false)
 
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([status])
   @@index([displayOnSite, status])
@@ -228,22 +267,22 @@ model Exhibitor {
 /// /verify without being able to enumerate the register, because the code is
 /// long and random and lookups are rate limited.
 model Certificate {
-  id             String          @id @default(cuid())
-  code           String          @unique
-  kind           CertificateKind
-  recipientName  String
-  institution    String?
+  id            String          @id @default(cuid())
+  code          String          @unique
+  kind          CertificateKind
+  recipientName String
+  institution   String?
   /// Paper title, for presentation and poster certificates.
-  paperTitle     String?
-  track          String?
-  issuedAt       DateTime        @default(now())
-  revokedAt      DateTime?
-  revokedReason  String?
+  paperTitle    String?
+  track         String?
+  issuedAt      DateTime        @default(now())
+  revokedAt     DateTime?
+  revokedReason String?
 
   registrationId String?
-  registration   Registration?   @relation(fields: [registrationId], references: [id], onDelete: SetNull)
+  registration   Registration? @relation(fields: [registrationId], references: [id], onDelete: SetNull)
   submissionId   String?
-  submission     Submission?     @relation(fields: [submissionId], references: [id], onDelete: SetNull)
+  submission     Submission?   @relation(fields: [submissionId], references: [id], onDelete: SetNull)
 
   @@index([registrationId])
   @@index([submissionId])

@@ -24,6 +24,12 @@ export interface PaymentTarget {
   receiptUrl: string | null;
   paymentNote: string | null;
   declaredAt: Date | null;
+  /** What the payer said they paid, and what the automatic checks made of it. */
+  declaredAmount: number | null;
+  paidOn: Date | null;
+  paidVia: string | null;
+  checkFlags: string[];
+  checkVerdict: string | null;
 }
 
 export function kindFromReference(reference: string): PaymentKind | null {
@@ -66,6 +72,11 @@ export async function findPaymentTarget(
       receiptUrl: row.receiptUrl,
       paymentNote: row.paymentNote,
       declaredAt: row.declaredAt,
+      declaredAmount: row.declaredAmount,
+      paidOn: row.paidOn,
+      paidVia: row.paidVia,
+      checkFlags: row.checkFlags,
+      checkVerdict: row.checkVerdict,
     };
   }
 
@@ -87,6 +98,11 @@ export async function findPaymentTarget(
       receiptUrl: row.receiptUrl,
       paymentNote: row.paymentNote,
       declaredAt: row.declaredAt,
+      declaredAmount: row.declaredAmount,
+      paidOn: row.paidOn,
+      paidVia: row.paidVia,
+      checkFlags: row.checkFlags,
+      checkVerdict: row.checkVerdict,
     };
   }
 
@@ -107,18 +123,37 @@ export async function findPaymentTarget(
     receiptUrl: row.receiptUrl,
     paymentNote: row.paymentNote,
     declaredAt: row.declaredAt,
+    declaredAmount: row.declaredAmount,
+    paidOn: row.paidOn,
+    paidVia: row.paidVia,
+    checkFlags: row.checkFlags,
+    checkVerdict: row.checkVerdict,
   };
 }
 
 /** Records an RRR and receipt against a target, moving it to DECLARED. */
 export async function recordDeclaration(
   target: PaymentTarget,
-  input: { rrr: string; receiptUrl: string; receiptPublicId: string | null }
+  input: {
+    rrr: string;
+    receiptUrl: string;
+    receiptPublicId: string | null;
+    declaredAmount: number | null;
+    paidOn: Date | null;
+    paidVia: string | null;
+    checkFlags: string[];
+    checkVerdict: string;
+  }
 ): Promise<void> {
   const data = {
     rrr: input.rrr,
     receiptUrl: input.receiptUrl,
     receiptPublicId: input.receiptPublicId,
+    declaredAmount: input.declaredAmount,
+    paidOn: input.paidOn,
+    paidVia: input.paidVia,
+    checkFlags: input.checkFlags,
+    checkVerdict: input.checkVerdict,
     declaredAt: new Date(),
     // A re-declaration after a rejection clears the old reason, so the
     // delegate is not left staring at a note about a receipt they replaced.

@@ -32,6 +32,9 @@ export function PaymentDeclaration({
   onDeclared?: () => void;
 }) {
   const [rrr, setRrr] = useState("");
+  const [paidAmount, setPaidAmount] = useState("");
+  const [paidOn, setPaidOn] = useState("");
+  const [paidVia, setPaidVia] = useState("");
   const [receipt, setReceipt] = useState<UploadedReceipt | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -41,6 +44,15 @@ export function PaymentDeclaration({
 
   const rrrLooksValid = normaliseRrr(rrr) !== null;
   const rrrTyped = rrr.replace(/\D/g, "").length > 0;
+
+  // The amount is checked properly on the server; this is only so a payer who
+  // typed 4000 instead of 40000 is told before they submit and start waiting.
+  const expectedDigits = (amountLabel ?? "").replace(/[^0-9]/g, "");
+  const currencySymbol = amountLabel?.trim().startsWith("$") ? "$" : "₦";
+  const amountMismatch =
+    paidAmount.length > 0 && expectedDigits.length > 0 && paidAmount !== expectedDigits;
+  // A receipt cannot be dated after today.
+  const today = new Date().toISOString().slice(0, 10);
 
   async function handleFile(file: File) {
     setUploadError(null);
@@ -97,6 +109,12 @@ export function PaymentDeclaration({
           rrr,
           receiptUrl: receipt.url,
           receiptPublicId: receipt.publicId,
+          // Sent as a plain number so the server can compare it against the
+          // fee. An empty box is left out entirely rather than sent as zero,
+          // which would read as a payment of nothing.
+          ...(paidAmount.trim() ? { declaredAmount: Number(paidAmount.replace(/[^0-9]/g, "")) } : {}),
+          paidOn,
+          paidVia,
         }),
       });
       const json = await res.json();
@@ -166,6 +184,59 @@ export function PaymentDeclaration({
           </span>
         </div>
 
+        <div className="field-grid">
+          <div className="field">
+            <label htmlFor="paidAmount">Amount you paid</label>
+            <div className="amount-input">
+              <span aria-hidden="true">{currencySymbol}</span>
+              <input
+                id="paidAmount"
+                className="tnum"
+                inputMode="numeric"
+                placeholder={expectedDigits}
+                value={paidAmount}
+                maxLength={12}
+                onChange={(e) => setPaidAmount(e.target.value.replace(/[^0-9]/g, ""))}
+                required
+              />
+            </div>
+            <span className={`hint ${amountMismatch ? "is-warning" : ""}`}>
+              {amountMismatch
+                ? `That does not match the ${amountLabel} expected. Send it anyway if it is what the receipt says, and the Secretariat will look into it.`
+                : "As printed on the receipt, without kobo."}
+            </span>
+          </div>
+
+          <div className="field">
+            <label htmlFor="paidOn">Date on the receipt</label>
+            <input
+              id="paidOn"
+              type="date"
+              value={paidOn}
+              max={today}
+              onChange={(e) => setPaidOn(e.target.value)}
+              required
+            />
+            <span className="hint">The day the bank took the money.</span>
+          </div>
+        </div>
+
+        <div className="field">
+          <label htmlFor="paidVia">Where you paid</label>
+          <input
+            id="paidVia"
+            type="text"
+            placeholder="e.g. First Bank, Akoka branch"
+            value={paidVia}
+            maxLength={120}
+            onChange={(e) => setPaidVia(e.target.value)}
+          />
+          <span className="hint">
+            The bank and branch, or the channel if you paid online. This is what lets the
+            Secretariat find your payment on the account statement.
+          </span>
+        </div>
+
         <div className="field">
           <label>Receipt</label>
           <label className={`upload-zone ${uploading ? "dragging" : ""}`}>
@@ -192,7 +263,7 @@ export function PaymentDeclaration({
         <button
           className="btn solid"
           type="submit"
-          disabled={submitting || uploading || !rrrLooksValid || !receipt}
+          disabled={submitting || uploading || !rrrLooksValid || !receipt || !paidAmount || !paidOn}
         >
           {submitting ? "Submitting..." : "Submit payment for checking"}
         </button>

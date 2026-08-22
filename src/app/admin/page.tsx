@@ -38,6 +38,11 @@ export default async function AdminPage() {
         receiptUrl: r.receiptUrl,
         declaredAt: r.declaredAt?.toISOString() ?? null,
         paymentNote: r.paymentNote,
+        declaredAmount: r.declaredAmount,
+        paidOn: r.paidOn?.toISOString() ?? null,
+        paidVia: r.paidVia,
+        checkFlags: r.checkFlags,
+        checkVerdict: r.checkVerdict,
       })),
     ...sponsors
       .filter((s) => s.rrr !== null)
@@ -55,6 +60,11 @@ export default async function AdminPage() {
         receiptUrl: s.receiptUrl,
         declaredAt: s.declaredAt?.toISOString() ?? null,
         paymentNote: s.paymentNote,
+        declaredAmount: s.declaredAmount,
+        paidOn: s.paidOn?.toISOString() ?? null,
+        paidVia: s.paidVia,
+        checkFlags: s.checkFlags,
+        checkVerdict: s.checkVerdict,
       })),
     ...exhibitors
       .filter((e) => e.rrr !== null)
@@ -72,6 +82,11 @@ export default async function AdminPage() {
         receiptUrl: e.receiptUrl,
         declaredAt: e.declaredAt?.toISOString() ?? null,
         paymentNote: e.paymentNote,
+        declaredAmount: e.declaredAmount,
+        paidOn: e.paidOn?.toISOString() ?? null,
+        paidVia: e.paidVia,
+        checkFlags: e.checkFlags,
+        checkVerdict: e.checkVerdict,
       })),
   ].sort((a, b) => {
     const aWaiting = a.status === "DECLARED" ? 0 : 1;

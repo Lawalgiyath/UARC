@@ -50,6 +50,7 @@ export function SiteFooter() {
             <Link href="/accommodation">Accommodation</Link>
             <Link href="/contact">Contact the Secretariat</Link>
             <Link href="/faq">FAQ</Link>
+            <Link href="/privacy">Privacy notice</Link>
           </div>
 
           <div className="footer-contact">

@@ -292,6 +292,19 @@ export function RegisterSection() {
                 </label>
               </div>
 
+              <div className="consent-row">
+                <label className="consent-label">
+                  <input type="checkbox" name="privacyAccepted" required />
+                  <span>
+                    <strong>I have read how my data will be used.</strong>
+                    We keep your name, contact details and payment record to run the conference, and
+                    the site is hosted outside Nigeria. The{" "}
+                    <Link href="/privacy">privacy notice</Link> says exactly what is collected,
+                    where it goes, how long it is kept and what you can ask us to delete.
+                  </span>
+                </label>
+              </div>
+
               <div className="price-out">
                 <span>Amount due</span>
                 <span className="amt tnum">{formatAmount(fee.amount, fee.currency)}</span>

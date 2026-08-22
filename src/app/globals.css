@@ -1884,6 +1884,97 @@ fieldset { min-width: 0; }
   .remita-inline-actions .btn { width: 100%; text-align: center; }
 }
 
+/* The amount box on the declaration form, with the currency set outside the
+   input so the payer types digits only and the server gets a clean number. */
+.amount-input {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-raised);
+  padding-left: 0.75rem;
+  min-width: 0;
+}
+.amount-input > span { color: var(--text-muted); font-size: 1rem; }
+.amount-input input { border: 0; background: transparent; min-width: 0; }
+.amount-input input:focus { outline: none; }
+.amount-input:focus-within { border-color: var(--accent-text); }
+
+/* What the automatic checks found, at the top of a payment in the Secretariat
+   panel. The verdict is deliberately worded as a finding, not a decision:
+   without Remita's confirmation nothing here proves money arrived. */
+.check-band {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 0.9rem;
+  margin: 1rem 0;
+  padding: 0.7rem 0.9rem;
+  border-left: 3px solid var(--line-strong);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--bg-sunken);
+  font-size: 0.875rem;
+}
+.check-band.is-clear { border-left-color: var(--crest-green); }
+.check-band.is-review { border-left-color: var(--gold); }
+.check-verdict { font-weight: 600; }
+.check-band.is-clear .check-verdict { color: var(--crest-green); }
+.check-caveat { color: var(--text-muted); max-width: 40rem; }
+.check-flags { display: flex; flex-wrap: wrap; gap: 0.4rem; list-style: none; margin: 0; padding: 0; }
+.check-flags > li {
+  border: 1px solid var(--gold);
+  color: var(--accent-text);
+  border-radius: 999px;
+  padding: 0.1rem 0.6rem;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+/* A figure that disagrees with what is owed. */
+.is-off { color: var(--accent-text); font-weight: 600; }
+
+/* The privacy notice. A legal page nobody reads is a legal page that has not
+   done its job, so it is set at reading width with real typographic hierarchy
+   rather than as a wall of small print. */
+.prose-page { max-width: 52rem; }
+.prose-page h1 { margin-bottom: 0.75rem; }
+.prose-page h2 {
+  font-size: 1.25rem;
+  margin: 2.5rem 0 0.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+}
+.prose-page p { margin-bottom: 1rem; max-width: 44rem; }
+.prose-page .lede { font-size: 1.0625rem; color: var(--text-muted); }
+
+.privacy-address { display: flex; flex-direction: column; gap: 0.2rem; font-style: normal; margin-bottom: 1rem; color: var(--text-muted); }
+
+.table-scroll { overflow-x: auto; margin-bottom: 1.25rem; }
+.privacy-table { width: 100%; border-collapse: collapse; font-size: 0.9063rem; min-width: 34rem; }
+.privacy-table th {
+  text-align: left;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0.5rem 0.75rem 0.5rem 0;
+  border-bottom: 1px solid var(--line-strong);
+  white-space: nowrap;
+}
+.privacy-table td { padding: 0.7rem 0.75rem 0.7rem 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.privacy-table tr:last-child td { border-bottom: 0; }
+
+.privacy-callout {
+  border-left: 3px solid var(--crest-green);
+  background: var(--bg-sunken);
+  padding: 0.9rem 1rem;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.privacy-rights { margin: 0 0 1rem 1.1rem; }
+.privacy-rights > li { margin-bottom: 0.5rem; max-width: 44rem; }
+.privacy-foot { color: var(--text-muted); font-size: 0.9063rem; margin-top: 2rem; }
+
 .remita-steps { display: flex; flex-direction: column; gap: 1.5rem; }
 .remita-steps > li { display: grid; grid-template-columns: auto auto 1fr; gap: 1rem; align-items: start; }
 .remita-n { font-size: 0.8125rem; color: var(--line-strong); font-weight: 600; padding-top: 0.2rem; }
