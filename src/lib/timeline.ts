@@ -22,7 +22,7 @@ export const FIXED_PHASES: Omit<TimelinePhase, "opensAt" | "closesAt">[] = [
   { title: "Review and notification of acceptance", sub: "Decisions sent by email with reference code", dateLabel: "Mon, 21 Sep 2026" },
   { title: "Early bird registration", sub: "Discounted fee, see pricing below", dateLabel: "Closes 25 Sep 2026" },
   { title: "Regular registration", sub: "Standard fee applies", dateLabel: "Closes 10 Oct 2026" },
-  { title: "Conference sessions", sub: "Jelili Adebisi Omotola Hall, UNILAG", dateLabel: "14 - 16 Oct 2026" },
+  { title: "Conference sessions", sub: "Jelili Omotola Halls, UNILAG", dateLabel: "14 - 16 Oct 2026" },
 ];
 
 export function buildTimeline(abstractOpensAt: string, abstractClosesAt: string): TimelinePhase[] {

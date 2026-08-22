@@ -27,11 +27,11 @@ export async function GET(request: Request) {
         await sendEmail({
           to: registration.email,
           subject: `Registration confirmed, reference ${reference}`,
-          text: `Dear ${registration.fullName},\n\nYour registration for the 19th UNILAG Annual Research Conference is confirmed.\n\nReference: ${reference}\nCategory: ${registration.category}\nAmount paid: ${registration.currency} ${registration.amount}\n\nBring this reference or this email to the registration desk at the Jelili Adebisi Omotola Hall.\n\nUNILAG Annual Research Conference Secretariat`,
+          text: `Dear ${registration.fullName},\n\nYour registration for the 19th UNILAG Annual Research Conference is confirmed.\n\nReference: ${reference}\nCategory: ${registration.category}\nAmount paid: ${registration.currency} ${registration.amount}\n\nBring this reference or this email to the registration desk at the Jelili Omotola Halls.\n\nUNILAG Annual Research Conference Secretariat`,
         });
         await sendSms({
           to: registration.phone,
-          body: `UNILAG ARC: payment confirmed. Registration reference ${reference}. See you at Omotola Hall, 14-16 Oct 2026.`,
+          body: `UNILAG ARC: payment confirmed. Registration reference ${reference}. See you at Omotola Halls, 14-16 Oct 2026.`,
         });
       } catch (err) {
         console.error("[registrations] confirmation notification failed", err);

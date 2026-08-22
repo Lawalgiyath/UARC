@@ -178,7 +178,7 @@ export const HOTELS: Hotel[] = [
     sn: 8,
     name: "UNILAG Guest Houses",
     address: "University of Lagos campus, Akoka, Lagos",
-    area: "Inside the campus gates, walking distance from Omotola Hall",
+    area: "Inside the campus gates, walking distance from Omotola Halls",
     phones: [
       { e164: "+2349135802663", display: "+234 913 580 2663" },
       { e164: "+2348142631511", display: "+234 814 263 1511" },
@@ -226,7 +226,7 @@ export const ACCOMMODATION_NOTES = {
   intro:
     "Delegates arrange and pay for their own accommodation. The hotels below were compiled by the University of Lagos for this conference, with the room classifications and rates each one quoted. Rates are per night, in naira, and are confirmed by the hotel at the time of booking.",
   campusFirst:
-    "The UNILAG Guest Houses sit inside the campus gates, a few minutes' walk from the Jelili Adebisi Omotola Hall. Delegates travelling from outside Lagos are advised to try it first: it removes the single biggest risk to arriving on time, which is Lagos traffic.",
+    "The UNILAG Guest Houses sit inside the campus gates, a few minutes' walk from the Jelili Omotola Halls. Delegates travelling from outside Lagos are advised to try it first: it removes the single biggest risk to arriving on time, which is Lagos traffic.",
   breakfast:
     "Breakfast is not included at Rockwell & Suites, ECWA Guest House, Sylva Link, Lagoon Hotel, NSPRI Guest House or Caritas Inn. It is included at Tyndale Residences, the UNILAG Guest Houses and AHI Residence, with one exception: the Standard room at Tyndale Residences does not include it.",
   traffic:
