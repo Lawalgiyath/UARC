@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AcademicIcon } from "@/components/icons/AcademicIcons";
+import { RemitaInline } from "@/components/RemitaInline";
 import { REMITA, remitaSteps, portalPaymentUrl } from "@/lib/remita";
 
 // The portal walkthrough, with the payer's own figures already filled in.
@@ -44,6 +45,7 @@ export function RemitaSteps({
   email,
   phone,
   amount,
+  onPaid,
 }: {
   amountLabel: string;
   payerName: string;
@@ -52,17 +54,54 @@ export function RemitaSteps({
   phone: string;
   /** The bare figure, for the portal's Amount box. */
   amount: number;
+  /** Let the surrounding page refresh once a payment settles. */
+  onPaid?: () => void;
 }) {
   const steps = remitaSteps({ amountLabel, payerName, reference, email, phone });
   // Opens the university's own portal with every field already populated.
   const portalHref = portalPaymentUrl({ payerName, email, phone, amount });
 
+  // Whether the payment can be taken on this page. Null until we have asked.
+  const [payHere, setPayHere] = useState<boolean | null>(null);
+  const [settled, setSettled] = useState(false);
+
+  if (settled) {
+    return (
+      <div className="remita">
+        <div className="remita-settled">
+          <span className="remita-inline-icon">
+            <AcademicIcon name="shield" size={26} />
+          </span>
+          <div>
+            <h3>Payment confirmed</h3>
+            <p>
+              Remita has confirmed your {amountLabel} against reference{" "}
+              <span className="mono">{reference}</span>. Your registration is complete and a
+              confirmation is on its way to {email}. There is no receipt to send.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="remita">
-      <div className="remita-head">
+      <RemitaInline
+        reference={reference}
+        email={email}
+        amountLabel={amountLabel}
+        onAvailability={setPayHere}
+        onPaid={() => {
+          setSettled(true);
+          onPaid?.();
+        }}
+      />
+
+      <div className={payHere ? "remita-head is-secondary" : "remita-head"}>
         <div>
-          <div className="eyebrow">Step 2 of 3</div>
-          <h3>Pay {amountLabel} through Remita</h3>
+          <div className="eyebrow">{payHere ? "Another way to pay" : "Step 2 of 3"}</div>
+          <h3>{payHere ? `Or pay ${amountLabel} on the university portal` : `Pay ${amountLabel} through Remita`}</h3>
           <p>
             This opens the University of Lagos payment portal with your name, mobile, email, the
             payment item and the amount already filled in. Check them, press Continue, and pay by

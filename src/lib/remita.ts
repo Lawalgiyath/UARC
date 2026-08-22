@@ -87,6 +87,15 @@ export function portalPaymentUrl(input: {
   return `${REMITA.portalUrl}?${params.toString()}`;
 }
 
+/**
+ * Remita's card modal, loaded in the browser.
+ *
+ * It lives here rather than beside the API client because that module imports
+ * node:crypto to sign requests, and a client component importing it drags the
+ * whole thing into the browser bundle, where it cannot build and should not be.
+ */
+export const REMITA_INLINE_SCRIPT = "https://login.remita.net/payment/v1/remita-pay-inline.bundle.js";
+
 export interface RemitaStep {
   n: number;
   icon: AcademicIconName;

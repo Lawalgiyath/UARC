@@ -223,6 +223,7 @@ export function PaymentPortal({
               email={status.email}
               phone={status.phone}
               amount={status.amount}
+              onPaid={lookUp}
             />
           )}
 

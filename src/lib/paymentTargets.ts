@@ -140,3 +140,56 @@ export async function recordDeclaration(
 export function alreadySettled(status: string): boolean {
   return status === "PAID" || status === "CONFIRMED";
 }
+
+/**
+ * Stores an RRR against a target without claiming anything has been paid.
+ *
+ * Used when we generate the reference ourselves through Remita's API: at that
+ * moment the money has not moved, so the status must not change. A delegate
+ * who generates an RRR and then walks away is still PENDING.
+ */
+export async function recordRrr(target: PaymentTarget, rrr: string): Promise<void> {
+  const data = { rrr };
+  if (target.kind === "registration") {
+    await db.registration.update({ where: { id: target.id }, data });
+  } else if (target.kind === "sponsor") {
+    await db.sponsor.update({ where: { id: target.id }, data });
+  } else {
+    await db.exhibitor.update({ where: { id: target.id }, data });
+  }
+}
+
+/**
+ * Marks a payment settled on Remita's word rather than a person's.
+ *
+ * This is the one place a payment becomes PAID without the Secretariat looking
+ * at a receipt, and it is only reached after Remita itself has confirmed the
+ * money against the RRR. The note records that, so the admin table shows why
+ * a row was confirmed with nothing attached to it.
+ */
+export async function markPaidByRemita(
+  target: PaymentTarget,
+  input: { rrr: string; amountPaid: number | null; paidAt: string | null; channel: string | null }
+): Promise<void> {
+  const when = input.paidAt ? `on ${input.paidAt}` : "";
+  const how = input.channel ? ` by ${input.channel.toLowerCase()}` : "";
+  // Remita reports the amount standing against the reference rather than a
+  // separately confirmed receipt, so this is worded as what Remita holds.
+  const paid = input.amountPaid !== null ? ` Remita records ${input.amountPaid}.` : "";
+
+  const data = {
+    rrr: input.rrr,
+    status: "PAID" as const,
+    paymentCheckedAt: new Date(),
+    declaredAt: target.declaredAt ?? new Date(),
+    paymentNote: `Confirmed automatically by Remita${how} ${when}.${paid}`.replace(/\s+/g, " ").trim(),
+  };
+
+  if (target.kind === "registration") {
+    await db.registration.update({ where: { id: target.id }, data });
+  } else if (target.kind === "sponsor") {
+    await db.sponsor.update({ where: { id: target.id }, data });
+  } else {
+    await db.exhibitor.update({ where: { id: target.id }, data });
+  }
+}

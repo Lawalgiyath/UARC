@@ -11,13 +11,13 @@
 // only post back to us or to Paystack.
 const CSP = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.paystack.co",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.paystack.co https://login.remita.net",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://upload.wikimedia.org https://unilag.edu.ng https://res.cloudinary.com",
+  "img-src 'self' data: blob: https://upload.wikimedia.org https://unilag.edu.ng https://res.cloudinary.com https://login.remita.net",
   "font-src 'self' data:",
-  "connect-src 'self' https://api.cloudinary.com https://api.paystack.co",
-  "frame-src https://checkout.paystack.com https://js.paystack.co",
-  "form-action 'self' https://checkout.paystack.com",
+  "connect-src 'self' https://api.cloudinary.com https://api.paystack.co https://login.remita.net https://remitademo.net",
+  "frame-src https://checkout.paystack.com https://js.paystack.co https://login.remita.net https://remitademo.net",
+  "form-action 'self' https://checkout.paystack.com https://login.remita.net",
   "frame-ancestors 'none'",
   "object-src 'none'",
   "base-uri 'self'",
