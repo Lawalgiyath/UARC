@@ -835,6 +835,7 @@ fieldset { min-width: 0; }
  */
 .masthead-ribbon {
   --ribbon-tail: 1.9rem;
+  --ribbon-chevron: 3px;
   position: relative;
   display: inline-flex;
   justify-content: center;
@@ -864,27 +865,39 @@ fieldset { min-width: 0; }
 
 /* A band of the crest's gold across the head of the ribbon, reading as the
    binding it hangs from. */
-.masthead-ribbon::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: calc(var(--ribbon-tail) + 1.15rem);
-  height: 2px;
-  background: var(--gold-soft);
-  opacity: 0.75;
-}
-/* A second, thinner rule below it: the paired banding of an academic ribbon. */
+/*
+ * The two bands above the tail are chevrons, not straight rules: they follow
+ * the same angle as the swallowtail notch below them, so the three cuts read
+ * as one gesture rather than a V with two unrelated lines floating over it.
+ *
+ * They are painted in the section's own background rather than gold, which
+ * makes them read as notches cut clean through the ribbon.
+ *
+ * Geometry, inside a box of height (tail + thickness): the top edge runs from
+ * (0, tail) up to the apex at (50%, 0) and back down to (100%, tail); the
+ * bottom edge is the same line pushed down by the thickness. Because both
+ * edges use the same rise over the same run, the chevron is exactly parallel
+ * to the notch.
+ */
+.masthead-ribbon::before,
 .masthead-ribbon::after {
   content: "";
   position: absolute;
   left: 0;
   right: 0;
-  bottom: calc(var(--ribbon-tail) + 0.75rem);
-  height: 1px;
-  background: var(--gold-soft);
-  opacity: 0.45;
+  height: calc(var(--ribbon-tail) + var(--ribbon-chevron));
+  background: var(--bg-raised);
+  clip-path: polygon(
+    0 var(--ribbon-tail),
+    50% 0,
+    100% var(--ribbon-tail),
+    100% calc(var(--ribbon-tail) + var(--ribbon-chevron)),
+    50% var(--ribbon-chevron),
+    0 calc(var(--ribbon-tail) + var(--ribbon-chevron))
+  );
 }
+.masthead-ribbon::before { bottom: calc(var(--ribbon-tail) + 0.95rem); }
+.masthead-ribbon::after { bottom: calc(var(--ribbon-tail) + 0.35rem); }
 
 .masthead-ribbon-crest {
   display: block;
@@ -903,7 +916,7 @@ fieldset { min-width: 0; }
 }
 
 @media (max-width: 700px) {
-  .masthead-ribbon { --ribbon-tail: 1.4rem; padding: 1.35rem 1.2rem calc(2.4rem + var(--ribbon-tail)); }
+  .masthead-ribbon { --ribbon-tail: 1.4rem; --ribbon-chevron: 2px; padding: 1.35rem 1.2rem calc(2.4rem + var(--ribbon-tail)); }
 }
 
 @media (prefers-color-scheme: dark) {

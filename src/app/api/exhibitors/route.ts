@@ -60,6 +60,7 @@ export async function POST(request: Request) {
   });
 
   const payingByCard = data.paymentMethod === "PAYSTACK" && cardPaymentAvailable();
+  const amount = pkg.amount;
   const amountLabel =
     pkg.currency === "USD"
       ? `$${pkg.amount.toLocaleString("en-US")}`
@@ -103,6 +104,7 @@ export async function POST(request: Request) {
       reference,
       paymentMethod: "REMITA",
       amountLabel,
+      amount,
       payerName: data.organisation,
       email: data.email,
       phone: data.phone,

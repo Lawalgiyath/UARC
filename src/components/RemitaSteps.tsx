@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AcademicIcon } from "@/components/icons/AcademicIcons";
-import { REMITA, remitaSteps } from "@/lib/remita";
+import { REMITA, remitaSteps, portalPaymentUrl } from "@/lib/remita";
 
 // The portal walkthrough, with the payer's own figures already filled in.
 //
@@ -43,15 +43,19 @@ export function RemitaSteps({
   reference,
   email,
   phone,
+  amount,
 }: {
   amountLabel: string;
   payerName: string;
   reference: string;
   email: string;
   phone: string;
+  /** The bare figure, for the portal's Amount box. */
+  amount: number;
 }) {
   const steps = remitaSteps({ amountLabel, payerName, reference, email, phone });
-  const portalHref = REMITA.directPortalUrl ?? REMITA.siteUrl;
+  // Opens the university's own portal with every field already populated.
+  const portalHref = portalPaymentUrl({ payerName, email, phone, amount });
 
   return (
     <div className="remita">
@@ -60,15 +64,21 @@ export function RemitaSteps({
           <div className="eyebrow">Step 2 of 3</div>
           <h3>Pay {amountLabel} through Remita</h3>
           <p>
-            The University of Lagos collects conference fees through its Remita portal. You generate
-            a payment slip there, pay it at any commercial bank, then come back here with the
-            receipt.
+            This opens the University of Lagos payment portal with your name, mobile, email, the
+            payment item and the amount already filled in. Check them, press Continue, and pay by
+            card there or print the slip and take it to any commercial bank.
           </p>
         </div>
-        <a className="btn solid" href={portalHref} target="_blank" rel="noreferrer noopener">
-          Open {REMITA.siteLabel}
+        <a className="btn solid remita-cta" href={portalHref} target="_blank" rel="noreferrer noopener">
+          Pay {amountLabel} on the UNILAG portal
         </a>
       </div>
+
+      <p className="remita-prefill-note">
+        Opens {REMITA.portalHost}, the university&rsquo;s own payment portal. Nothing on this site
+        takes your card details. If the link does not carry your details across, the steps below
+        are the same payment done by hand.
+      </p>
 
       <ol className="remita-steps">
         {steps.map((step) => (

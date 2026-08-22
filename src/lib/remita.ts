@@ -1,38 +1,47 @@
 // Payment by Remita, which is how the University of Lagos actually collects
 // money for the conference.
 //
-// There is no payment API in this flow. A delegate generates a Remita
-// Retrieval Reference (RRR) on the university's payment portal, walks into a
-// commercial bank to pay it, and comes back with a receipt. Until Paystack
-// credentials arrive, this is the only live route, and it is the one the
-// Secretariat has run for years, previously through a Google Form.
+// The university's portal is run by Tranzgate, and its InitiatePayment page
+// accepts the payer's details as query parameters. That is what lets this app
+// hand a delegate a single link that opens the official portal with the name,
+// mobile, email, payment item and amount already filled in, leaving nothing to
+// do but press Continue. The parameter names were established by probing the
+// live page:
 //
-// What the site automates is everything around that walk to the bank: it works
-// out the exact amount owed from the fee schedule, issues a reference to quote,
-// spells out the portal steps with the delegate's own figures filled in,
-// captures the RRR and the receipt in one place, and gives the Secretariat a
-// queue to verify against rather than a spreadsheet of form responses.
+//     clientid=25              University of Lagos (Others)
+//     paymentcode=19           "Research Conference & Fair"
+//     name / Email / Mobile    the payer's details
+//     Amount                   worked out here from the fee schedule
+//
+// Money still moves through Remita and lands in the university's account, as
+// it must: nothing here takes a payment or touches card details. What has gone
+// is the part delegates got wrong, which was picking the right payment item
+// out of sixty-six and typing the right amount.
+//
+// The manual steps are kept underneath the button, because a portal that is
+// down or a link that a mail client mangles should not leave anybody stuck.
 
 import type { AcademicIconName } from "@/components/icons/AcademicIcons";
 
 export const REMITA = {
   /**
-   * The Secretariat's instruction is to start at the university home page and
-   * follow the "Unilag payment portal" link. The deeper URL that circulates
-   * online, unilag.edu.ng/remita/, currently returns a server error, so
-   * sending delegates straight there would strand them. If the Secretariat
-   * confirms a working direct link, set `directPortalUrl` and the steps below
-   * pick it up automatically.
+   * The university's live payment portal, run by Tranzgate. Verified against
+   * the link published on conference.unilag.edu.ng/payment-info.
    */
+  portalUrl: "https://pay.tranzgate.com.ng/InitiatePayment.aspx",
+  portalHost: "pay.tranzgate.com.ng",
+
+  /** Identifies University of Lagos (Others) on the portal. */
+  clientId: "25",
+  /** The "Research Conference & Fair" item in the portal's payment list. */
+  paymentCode: "19",
+  paymentItem: "Research Conference & Fair",
+  customerCategory: "Others",
+
+  /** Fallback for the written steps, if someone has to navigate by hand. */
   siteUrl: "https://unilag.edu.ng",
   siteLabel: "www.unilag.edu.ng",
   portalLinkText: "Unilag payment portal",
-  directPortalUrl: null as string | null,
-
-  /** Chosen on the portal's first screen. Delegates are not students or staff. */
-  customerCategory: "Others",
-  /** Picked from the portal's payment item drop-down. Must match exactly. */
-  paymentItem: "Research Conference Fair",
 
   /** Where a stuck delegate should turn. */
   whatsApp: { e164: "+2347042015134", display: "+234 704 201 5134" },
@@ -40,6 +49,43 @@ export const REMITA = {
   /** How long the Secretariat takes to check a receipt, in working days. */
   verificationDays: 2,
 } as const;
+
+/**
+ * The portal expects a Nigerian mobile in local 0-prefixed form; we store
+ * numbers in international form so they dial from anywhere.
+ */
+export function localMobile(phone: string): string {
+  const digits = phone.replace(/[^0-9+]/g, "");
+  if (digits.startsWith("+234")) return "0" + digits.slice(4);
+  if (digits.startsWith("234")) return "0" + digits.slice(3);
+  return digits;
+}
+
+/**
+ * A link straight into the university's portal with everything filled in.
+ *
+ * The amount goes in as a plain integer: the portal's Amount box rejects
+ * grouping separators and a currency symbol.
+ */
+export function portalPaymentUrl(input: {
+  payerName: string;
+  email: string;
+  phone: string;
+  amount: number;
+}): string {
+  const params = new URLSearchParams({
+    clientid: REMITA.clientId,
+    remita: "1",
+    create: "1",
+    customerid: "OneTimeCustomer",
+    name: input.payerName,
+    Email: input.email,
+    Mobile: localMobile(input.phone),
+    Amount: String(Math.round(input.amount)),
+    paymentcode: REMITA.paymentCode,
+  });
+  return `${REMITA.portalUrl}?${params.toString()}`;
+}
 
 export interface RemitaStep {
   n: number;

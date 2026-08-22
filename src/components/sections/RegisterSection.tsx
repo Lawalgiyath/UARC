@@ -33,6 +33,8 @@ function formatAmount(amount: number, currency: string) {
 interface Reserved {
   reference: string;
   amountLabel: string;
+  /** The bare figure, for the portal's Amount box. */
+  amount: number;
   categoryLabel: string;
   fullName: string;
   email: string;
@@ -84,6 +86,7 @@ export function RegisterSection() {
       setReserved({
         reference: json.reference,
         amountLabel: json.amountLabel,
+        amount: json.amount,
         categoryLabel: json.categoryLabel,
         fullName: String(formData.get("fullName") ?? ""),
         email: String(formData.get("email") ?? ""),
@@ -140,6 +143,7 @@ export function RegisterSection() {
             reference={reserved.reference}
             email={reserved.email}
             phone={reserved.phone}
+            amount={reserved.amount}
           />
 
           <PaymentDeclaration

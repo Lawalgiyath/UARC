@@ -23,6 +23,8 @@ export function ExhibitorApply({ taken }: { taken: Record<string, number> }) {
   const [reserved, setReserved] = useState<{
     reference: string;
     amountLabel: string;
+  /** The bare figure, for the portal's Amount box. */
+  amount: number;
     payerName: string;
     email: string;
     phone: string;
@@ -68,6 +70,7 @@ export function ExhibitorApply({ taken }: { taken: Record<string, number> }) {
       setReserved({
         reference: json.reference,
         amountLabel: json.amountLabel,
+        amount: json.amount,
         payerName: json.payerName,
         email: json.email,
         phone: json.phone,
@@ -105,6 +108,7 @@ export function ExhibitorApply({ taken }: { taken: Record<string, number> }) {
           reference={reserved.reference}
           email={reserved.email}
           phone={reserved.phone}
+          amount={reserved.amount}
         />
 
         <PaymentDeclaration

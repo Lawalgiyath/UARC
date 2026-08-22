@@ -222,6 +222,7 @@ export function PaymentPortal({
               reference={status.reference}
               email={status.email}
               phone={status.phone}
+              amount={status.amount}
             />
           )}
 

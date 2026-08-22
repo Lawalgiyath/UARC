@@ -24,6 +24,8 @@ export function SponsorApply() {
   const [reserved, setReserved] = useState<{
     reference: string;
     amountLabel: string;
+  /** The bare figure, for the portal's Amount box. */
+  amount: number;
     payerName: string;
     email: string;
     phone: string;
@@ -67,6 +69,7 @@ export function SponsorApply() {
       setReserved({
         reference: json.reference,
         amountLabel: json.amountLabel,
+        amount: json.amount,
         payerName: json.payerName,
         email: json.email,
         phone: json.phone,
@@ -104,6 +107,7 @@ export function SponsorApply() {
           reference={reserved.reference}
           email={reserved.email}
           phone={reserved.phone}
+          amount={reserved.amount}
         />
 
         <PaymentDeclaration

@@ -6,7 +6,7 @@ import { initializeTransaction } from "@/lib/paystack";
 import { FEE_SCHEDULE, isFeeCategory, type FeeCategory } from "@/lib/pricing";
 import { checkStudentClaim } from "@/lib/studentVerification";
 import { guardPublicWrite } from "@/lib/security";
-import { cardPaymentAvailable, REMITA } from "@/lib/remita";
+import { cardPaymentAvailable, REMITA, portalPaymentUrl } from "@/lib/remita";
 import { sendEmail } from "@/lib/email";
 import { CONFERENCE, CONTACT } from "@/lib/conference";
 import { notificationChannels } from "@/lib/notify";
@@ -100,6 +100,13 @@ export async function POST(request: Request) {
   });
 
   const amountLabel = formatAmount(fee.amount, fee.currency);
+  // One link that opens the university's portal with everything filled in.
+  const payLink = portalPaymentUrl({
+    payerName: data.fullName,
+    email: data.email,
+    phone: data.phone,
+    amount: fee.amount,
+  });
 
   if (!wantsCard) {
     // Emailed immediately, because the delegate is about to walk away from
@@ -107,7 +114,7 @@ export async function POST(request: Request) {
     void sendEmail({
       to: data.email,
       subject: `How to pay for your registration, reference ${reference}`,
-      text: `Dear ${data.fullName},\n\nYour place at the ${CONFERENCE.edition} ${CONFERENCE.name} is reserved. It is confirmed once payment is received.\n\nReference: ${reference}\nCategory: ${fee.label}\nAmount to pay: ${amountLabel}\n\nTO PAY\n1. Go to ${REMITA.siteLabel} and click "${REMITA.portalLinkText}".\n2. Choose the customer category "${REMITA.customerCategory}".\n3. Fill in the form:\n     Name of payee: ${data.fullName}\n     Mobile number: ${data.phone}\n     Email address: ${data.email}\n     Payment item: ${REMITA.paymentItem}\n     Amount: ${amountLabel}\n4. Print the slip and note the 12 digit RRR.\n5. Pay the slip at any commercial bank.\n6. Return to ${process.env.NEXT_PUBLIC_SITE_URL || ""}/register/payment and upload the receipt with your RRR.\n\nThe Secretariat checks the receipt within ${REMITA.verificationDays} working days and confirms your registration by ${notificationChannels()}.\n\nHelp with payment: WhatsApp ${REMITA.whatsApp.display} or ${CONTACT.email}`,
+      text: `Dear ${data.fullName},\n\nYour place at the ${CONFERENCE.edition} ${CONFERENCE.name} is reserved. It is confirmed once payment is received.\n\nReference: ${reference}\nCategory: ${fee.label}\nAmount to pay: ${amountLabel}\n\nTO PAY\nOpen this link. It is the University of Lagos payment portal, with your name, mobile, email, the payment item and the amount already filled in. Check them, press Continue, then pay by card or print the slip and take it to any commercial bank.\n\n${payLink}\n\nIf that link does not work, do it by hand:\n1. Go to ${REMITA.siteLabel} and click "${REMITA.portalLinkText}".\n2. Choose the customer category "${REMITA.customerCategory}".\n3. Fill in the form:\n     Name of payee: ${data.fullName}\n     Mobile number: ${data.phone}\n     Email address: ${data.email}\n     Payment item: ${REMITA.paymentItem}\n     Amount: ${amountLabel}\n4. Print the slip and note the 12 digit RRR.\n5. Pay the slip at any commercial bank.\n\nThen return to ${process.env.NEXT_PUBLIC_SITE_URL || ""}/register/payment and send us the receipt with your RRR.\n\nThe Secretariat checks the receipt within ${REMITA.verificationDays} working days and confirms your registration by ${notificationChannels()}.\n\nHelp with payment: WhatsApp ${REMITA.whatsApp.display} or ${CONTACT.email}`,
     }).catch((err) => console.error("[registrations] payment instructions email failed", err));
 
     return NextResponse.json({
