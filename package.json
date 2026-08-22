@@ -21,7 +21,8 @@
     "test-email": "tsx scripts/test-email.ts",
     "vercel-env": "tsx scripts/vercel-env.ts",
     "remita-check": "tsx scripts/remita-check.ts",
-    "storage-check": "tsx scripts/storage-check.ts"
+    "storage-check": "tsx scripts/storage-check.ts",
+    "responsive-check": "tsx scripts/responsive-check.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",
@@ -39,6 +40,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "embedded-postgres": "^18.4.0-beta.17",
+    "playwright": "^1.62.1",
     "prisma": "^5.20.0",
     "tsx": "^4.19.1",
     "typescript": "^5.6.2"

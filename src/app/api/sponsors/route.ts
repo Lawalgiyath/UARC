@@ -3,7 +3,10 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { generateUniqueReference } from "@/lib/reference";
 import { initializeTransaction } from "@/lib/paystack";
-import { SPONSOR_TIERS, isSponsorTier } from "@/lib/sponsorship";
+import { SPONSOR_TIERS, isSponsorTier,
+  resolveSponsorAmount,
+  type SponsorTier,
+} from "@/lib/sponsorship";
 import { guardPublicWrite } from "@/lib/security";
 import { cardPaymentAvailable, REMITA } from "@/lib/remita";
 import { sendEmail } from "@/lib/email";
@@ -15,6 +18,11 @@ const sponsorSchema = z.object({
   email: z.string().trim().email(),
   phone: z.string().trim().min(7).max(32),
   tier: z.string().refine(isSponsorTier, { message: "Unknown sponsorship tier" }),
+  /**
+   * Only read for the custom tier, and only through resolveSponsorAmount.
+   * Every fixed tier ignores it, so this cannot be used to underpay.
+   */
+  customAmount: z.number().int().positive().max(1_000_000_000).optional(),
   websiteUrl: z.string().trim().url().max(300).optional().or(z.literal("")),
   logoUrl: z.string().trim().url().max(500).optional().or(z.literal("")),
   logoPublicId: z.string().trim().max(300).optional().or(z.literal("")),
@@ -43,11 +51,18 @@ export async function POST(request: Request) {
   });
 
   const payingByCard = data.paymentMethod === "PAYSTACK" && cardPaymentAvailable();
-  const amount = tier.amount;
+  // The server decides the figure. For a fixed tier that is the tier's price
+  // whatever the browser sent; for the custom tier it is the pledge, checked
+  // against a floor and a ceiling.
+  const resolved = resolveSponsorAmount(data.tier as SponsorTier, data.customAmount);
+  if (!resolved.ok) {
+    return NextResponse.json({ error: resolved.error, field: "customAmount" }, { status: 400 });
+  }
+  const amount = resolved.amount;
   const amountLabel =
     tier.currency === "USD"
-      ? `$${tier.amount.toLocaleString("en-US")}`
-      : `₦${tier.amount.toLocaleString("en-NG")}`;
+      ? `$${amount.toLocaleString("en-US")}`
+      : `₦${amount.toLocaleString("en-NG")}`;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
 
   await db.sponsor.create({
@@ -58,7 +73,7 @@ export async function POST(request: Request) {
       email: data.email,
       phone: data.phone,
       tier: tier.label,
-      amount: tier.amount,
+      amount,
       currency: tier.currency,
       paystackRef: payingByCard ? reference : null,
       paymentMethod: payingByCard ? "PAYSTACK" : "REMITA",
@@ -74,7 +89,7 @@ export async function POST(request: Request) {
   void sendEmail({
     to: CONTACT.email,
     subject: `Sponsorship application: ${data.organisation} (${tier.label})`,
-    text: `A sponsorship application has been received.\n\nOrganisation: ${data.organisation}\nTier: ${tier.label}\nAmount: ${tier.currency} ${tier.amount.toLocaleString("en-NG")}\nContact: ${data.contactName}\nEmail: ${data.email}\nPhone: ${data.phone}\nReference: ${reference}\nPayment: ${payingByCard ? "by card" : "through Remita, receipt to follow"}\n\n${data.message || ""}`.trim(),
+    text: `A sponsorship application has been received.\n\nOrganisation: ${data.organisation}\nTier: ${tier.label}\nAmount: ${amountLabel}\nContact: ${data.contactName}\nEmail: ${data.email}\nPhone: ${data.phone}\nReference: ${reference}\nPayment: ${payingByCard ? "by card" : "through Remita, receipt to follow"}\n\n${data.message || ""}`.trim(),
   }).catch((err) => console.error("[sponsors] secretariat notification failed", err));
 
   if (!payingByCard) {
@@ -98,7 +113,7 @@ export async function POST(request: Request) {
   try {
     const { authorizationUrl } = await initializeTransaction({
       email: data.email,
-      amountMajorUnits: tier.amount,
+      amountMajorUnits: amount,
       currency: tier.currency,
       reference,
       callbackUrl: `${siteUrl}/api/sponsors/verify`,

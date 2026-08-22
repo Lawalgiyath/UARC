@@ -1715,6 +1715,36 @@ fieldset { min-width: 0; }
   .utility .wrap { justify-content: center; text-align: center; }
 }
 
+/* The header runs out of room well before the tablet breakpoint.
+   Brand lockup plus five nav links plus two call-to-action buttons need about
+   1130px, so between 920 and 1100 the row was pushing every page sideways by
+   90px. Collapse to the menu button earlier; the destinations are all still
+   one tap away, and nothing else about the layout needs to change this early. */
+@media (max-width: 1100px) {
+  nav.primary, .nav-ctas .btn.ghost { display: none; }
+  .nav-toggle { display: inline-flex; }
+  .mobile-nav { display: flex; }
+}
+
+/* A button whose label cannot wrap will push the page instead. These labels
+   are sentences ("Apply and show payment steps"), and on a 320px phone that is
+   wider than the screen. Let them wrap rather than overflow, and never let one
+   exceed its container. */
+@media (max-width: 620px) {
+  .btn { white-space: normal; max-width: 100%; }
+  /* The dotted leader between a room type and its rate cannot shrink below the
+     two labels it separates, so the row wraps instead at the narrowest sizes. */
+  .hotel-rooms li { flex-wrap: wrap; }
+  .room-leader { min-width: 1.5rem; }
+  /* 11rem of label plus a value plus a Copy button does not fit on a phone. */
+  .copy-field { grid-template-columns: 1fr auto; }
+  .copy-label { grid-column: 1 / -1; }
+  /* Hotel email addresses are long and have no spaces to break at, so an
+     inline-flex row holding one is wider than a 320px screen. Let the address
+     wrap inside itself rather than push the page. */
+  .hotel-contact { max-width: 100%; overflow-wrap: anywhere; }
+}
+
 @media (max-width: 920px) {
   nav.primary, .nav-ctas .btn.ghost { display: none; }
   .nav-toggle { display: inline-flex; }

@@ -6,7 +6,19 @@
 
 import type { AcademicIconName } from "@/components/icons/AcademicIcons";
 
-export type SponsorTier = "PLATINUM" | "GOLD" | "SILVER" | "BRONZE" | "SUPPORTER";
+/**
+ * The smallest sponsorship the Secretariat will process on a named figure, in
+ * naira. It sits deliberately above Silver: below this the fixed tiers already
+ * describe what a sponsor gets, and there is nothing to negotiate.
+ */
+export const CUSTOM_SPONSORSHIP_MINIMUM = 2_000_000;
+/**
+ * An upper bound, so a typo cannot raise an invoice for a billion naira and
+ * sit in the queue looking like a real pledge.
+ */
+export const CUSTOM_SPONSORSHIP_MAXIMUM = 500_000_000;
+
+export type SponsorTier = "PLATINUM" | "GOLD" | "SILVER" | "BRONZE" | "SUPPORTER" | "CUSTOM";
 
 export interface SponsorTierDefinition {
   label: string;
@@ -19,6 +31,12 @@ export interface SponsorTierDefinition {
   logoScale: 1 | 2 | 3;
   /** Complimentary delegate passes bundled with the tier. */
   passes: number;
+  /**
+   * A tier whose amount the sponsor names themselves. Everything else has a
+   * fixed price decided here; this one is a floor, and what they are billed is
+   * whatever they pledge above it.
+   */
+  custom?: true;
 }
 
 export const SPONSOR_TIERS: Record<SponsorTier, SponsorTierDefinition> = {
@@ -84,6 +102,27 @@ export const SPONSOR_TIERS: Record<SponsorTier, SponsorTierDefinition> = {
       "Two complimentary delegate passes",
     ],
   },
+  CUSTOM: {
+    label: "Choose your own amount",
+    // Not a price: the least the Secretariat will process as a sponsorship.
+    // Anything smaller is better handled as a donation to the faculty.
+    amount: CUSTOM_SPONSORSHIP_MINIMUM,
+    currency: "NGN",
+    icon: "quill",
+    logoScale: 2,
+    // Matched to Silver, the tier immediately below the floor. Whatever is
+    // agreed on top of this is agreed with the Secretariat, but nobody paying
+    // more than a Silver sponsor should receive less than one.
+    passes: 4,
+    custom: true,
+    summary:
+      "For an organisation giving between the tiers, or more than platinum. Name the figure and the Secretariat will agree the benefits against it before anything is announced.",
+    benefits: [
+      "Benefits agreed with the Secretariat against the amount pledged",
+      "Never less than the Silver sponsor package",
+      "Logo on the sponsor wall and in the book of abstracts",
+    ],
+  },
   SUPPORTER: {
     label: "Supporter",
     amount: 150_000,
@@ -106,6 +145,7 @@ export const SPONSOR_TIER_ORDER: SponsorTier[] = [
   "SILVER",
   "BRONZE",
   "SUPPORTER",
+  "CUSTOM",
 ];
 
 export function isSponsorTier(value: string): value is SponsorTier {
@@ -129,3 +169,39 @@ export const SPONSOR_BANK_DETAILS = {
   note:
     "Bank details are issued on the sponsorship invoice sent by the Secretariat once an application is received.",
 } as const;
+
+/**
+ * What a sponsor is actually billed.
+ *
+ * Every fixed tier ignores whatever the browser sent, which is the rule this
+ * file has always followed. CUSTOM is the single exception, and it is bounded
+ * on both sides: below the floor the Secretariat would rather take it as a
+ * donation, and above the ceiling it is almost certainly a mistyped figure.
+ */
+export function resolveSponsorAmount(
+  tier: SponsorTier,
+  requested: number | undefined
+): { ok: true; amount: number } | { ok: false; error: string } {
+  const definition = SPONSOR_TIERS[tier];
+  if (!definition.custom) return { ok: true, amount: definition.amount };
+
+  if (requested === undefined || !Number.isFinite(requested)) {
+    return { ok: false, error: "Please say how much you would like to sponsor." };
+  }
+  const amount = Math.round(requested);
+  if (amount < CUSTOM_SPONSORSHIP_MINIMUM) {
+    return {
+      ok: false,
+      error: `The smallest sponsorship we can process is ₦${CUSTOM_SPONSORSHIP_MINIMUM.toLocaleString(
+        "en-NG"
+      )}. For anything below that, please write to the Secretariat instead.`,
+    };
+  }
+  if (amount > CUSTOM_SPONSORSHIP_MAXIMUM) {
+    return {
+      ok: false,
+      error: "That figure looks like a mistake. Please contact the Secretariat directly.",
+    };
+  }
+  return { ok: true, amount };
+}

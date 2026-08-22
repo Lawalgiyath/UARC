@@ -9,6 +9,7 @@ import { AcademicIcon } from "@/components/icons/AcademicIcons";
 import {
   SPONSOR_TIERS,
   SPONSOR_TIER_ORDER,
+  CUSTOM_SPONSORSHIP_MINIMUM,
   type SponsorTier,
 } from "@/lib/sponsorship";
 import { CONTACT } from "@/lib/conference";
@@ -19,6 +20,9 @@ function formatAmount(amount: number, currency: string) {
 
 export function SponsorApply() {
   const [tier, setTier] = useState<SponsorTier>("GOLD");
+  // Only meaningful for the custom tier. Kept as a string so the box can be
+  // empty; the server decides what is actually owed either way.
+  const [customAmount, setCustomAmount] = useState("");
   // Everything goes through Remita; the reserved state below carries the
   // details the applicant needs to take to the portal.
   const [reserved, setReserved] = useState<{
@@ -36,6 +40,10 @@ export function SponsorApply() {
 
 
   const definition = SPONSOR_TIERS[tier];
+  const customValue = Number(customAmount.replace(/[^0-9]/g, "")) || 0;
+  // Checked again on the server; this is only so a sponsor is told before
+  // they submit rather than after.
+  const customTooSmall = customValue > 0 && customValue < CUSTOM_SPONSORSHIP_MINIMUM;
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -55,6 +63,9 @@ export function SponsorApply() {
           websiteUrl: formData.get("websiteUrl") || "",
           message: formData.get("message") || "",
           tier,
+          ...(definition.custom && customAmount
+            ? { customAmount: Number(customAmount.replace(/[^0-9]/g, "")) }
+            : {}),
           logoUrl: logo?.url || "",
           logoPublicId: logo?.publicId || "",
         }),
@@ -142,12 +153,42 @@ export function SponsorApply() {
                   </span>
                   <span className="tier-option-label">{def.label}</span>
                   <span className="tier-option-amount tnum">
-                    {formatAmount(def.amount, def.currency)}
+                    {def.custom ? `from ${formatAmount(def.amount, def.currency)}` : formatAmount(def.amount, def.currency)}
                   </span>
                 </label>
               );
             })}
           </div>
+
+          {definition.custom && (
+            <div className="field custom-amount-field">
+              <label htmlFor="customAmount">How much would you like to sponsor?</label>
+              <div className="amount-input">
+                <span aria-hidden="true">₦</span>
+                <input
+                  id="customAmount"
+                  className="tnum"
+                  inputMode="numeric"
+                  placeholder="3000000"
+                  value={customAmount}
+                  maxLength={11}
+                  onChange={(e) => setCustomAmount(e.target.value.replace(/[^0-9]/g, ""))}
+                  required
+                />
+              </div>
+              <span className={`hint ${customTooSmall ? "is-warning" : ""}`}>
+                {customTooSmall
+                  ? `The smallest sponsorship the Secretariat can process is ${formatAmount(
+                      CUSTOM_SPONSORSHIP_MINIMUM,
+                      "NGN"
+                    )}.`
+                  : `Anything from ${formatAmount(
+                      CUSTOM_SPONSORSHIP_MINIMUM,
+                      "NGN"
+                    )} upwards. The Secretariat will agree the benefits against what you pledge, and confirm them before anything is announced.`}
+              </span>
+            </div>
+          )}
 
           <div className="tier-detail">
             <h3>{definition.label}</h3>
@@ -215,10 +256,20 @@ export function SponsorApply() {
 
           <div className="price-out">
             <span>{definition.label}</span>
-            <span className="amt tnum">{formatAmount(definition.amount, definition.currency)}</span>
+            <span className="amt tnum">
+              {definition.custom
+                ? customValue > 0
+                  ? formatAmount(customValue, definition.currency)
+                  : "—"
+                : formatAmount(definition.amount, definition.currency)}
+            </span>
           </div>
 
-          <button className="btn solid" type="submit" disabled={submitting}>
+          <button
+            className="btn solid"
+            type="submit"
+            disabled={submitting || (definition.custom && (customValue <= 0 || customTooSmall))}
+          >
             {submitting ? "Sending..." : "Apply and show payment steps"}
           </button>
         </fieldset>

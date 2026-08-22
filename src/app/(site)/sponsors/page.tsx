@@ -65,7 +65,9 @@ export default async function SponsorsPage() {
                     </span>
                     <h3>{tier.label}</h3>
                     <div className="tier-card-amount tnum">
-                      {formatAmount(tier.amount, tier.currency)}
+                      {tier.custom
+                        ? `from ${formatAmount(tier.amount, tier.currency)}`
+                        : formatAmount(tier.amount, tier.currency)}
                     </div>
                   </header>
                   <p className="tier-card-summary">{tier.summary}</p>
@@ -75,6 +77,7 @@ export default async function SponsorsPage() {
                     ))}
                   </ul>
                   <div className="tier-card-foot">
+                    {tier.custom ? "At least " : ""}
                     {tier.passes} complimentary delegate {tier.passes === 1 ? "pass" : "passes"}
                   </div>
                 </article>
