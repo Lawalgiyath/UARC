@@ -330,6 +330,7 @@ section:last-of-type { border-bottom: none; }
 .band-tint { background: var(--bg-tint); }
 .band-sunken { background: var(--bg-sunken); }
 .section-head { max-width: 44rem; margin-bottom: 2.5rem; }
+.section-head h1,
 .section-head h2 { font-size: var(--step-3); margin-top: 0.7rem; }
 .section-head p { color: var(--text-muted); margin-top: 1rem; font-size: var(--step-0); }
 
@@ -648,7 +649,7 @@ table.admin-table select, table.admin-table input[type="text"] {
 
 footer.site { background: var(--bg-sunken); padding: 4rem 0 2rem; }
 .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 2.5rem; }
-.footer-grid h4 { font-size: 0.8125rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; }
+.footer-grid h2 { font-size: 0.8125rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; }
 .footer-grid a { display: block; color: var(--text); text-decoration: none; font-size: 0.9375rem; margin-bottom: 0.65rem; }
 .footer-grid a:hover { color: var(--accent-text); }
 .footer-grid p { font-size: 0.9375rem; color: var(--text-muted); margin-bottom: 0.65rem; }
@@ -1781,7 +1782,7 @@ fieldset { min-width: 0; }
   margin-bottom: 1.75rem;
 }
 .method-icon { color: var(--gold); flex: none; margin-top: 0.15rem; }
-.method-panel h3 { font-size: 1rem; margin-bottom: 0.35rem; }
+.method-panel h2 { font-size: 1rem; margin-bottom: 0.35rem; }
 .method-panel p { font-size: 0.9063rem; color: var(--text-muted); }
 .method-note { margin-top: 0.6rem; font-size: 0.8125rem !important; }
 

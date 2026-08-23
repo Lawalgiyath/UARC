@@ -108,7 +108,7 @@ export function RegisterSection() {
         <div className="wrap">
           <div className="section-head">
             <div className="eyebrow">Step 1 of 3 complete</div>
-            <h2>Your place is reserved</h2>
+            <h1>Your place is reserved</h1>
             <p>
               It is confirmed once payment reaches the university. Everything below has also been
               emailed to {reserved.email}, so you can close this page and pick it up later.
@@ -167,7 +167,7 @@ export function RegisterSection() {
       <div className="wrap">
         <div className="section-head">
           <div className="eyebrow">VI. Register &amp; Pay</div>
-          <h2>Registration and payment</h2>
+          <h1>Registration and payment</h1>
           <p>
             Fill this in and we work out what you owe, reserve your place, and hand you the exact
             figures to enter on the university&rsquo;s Remita portal. {REMITA_COPY.whyManual}
@@ -296,11 +296,13 @@ export function RegisterSection() {
                 <label className="consent-label">
                   <input type="checkbox" name="privacyAccepted" required />
                   <span>
-                    <strong>I have read how my data will be used.</strong>
+                    <strong>I accept the terms, and have read how my data will be used.</strong>
                     We keep your name, contact details and payment record to run the conference, and
                     the site is hosted outside Nigeria. The{" "}
                     <Link href="/privacy">privacy notice</Link> says exactly what is collected,
-                    where it goes, how long it is kept and what you can ask us to delete.
+                    where it goes, how long it is kept and what you can ask us to delete. The{" "}
+                    <Link href="/terms">terms and conditions</Link> cover fees, refunds and
+                    transfers.
                   </span>
                 </label>
               </div>
@@ -315,7 +317,7 @@ export function RegisterSection() {
                   <AcademicIcon name="city" size={22} />
                 </span>
                 <div>
-                  <h3>{REMITA_COPY.heading}</h3>
+                  <h2>{REMITA_COPY.heading}</h2>
                   <p>{REMITA_COPY.lede}</p>
                   <p className="method-note">
                     Nothing is charged on this page. The next screen gives you your reference and

@@ -40,7 +40,9 @@ export default function AdminLoginPage() {
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "2rem" }}>
             <UnilagLogo height={40} variant="crestOnly" />
             <div>
-              <div style={{ fontFamily: "'Iowan Old Style', Palatino, Georgia, serif", fontWeight: 600 }}>Secretariat</div>
+              <h1 style={{ fontFamily: "'Iowan Old Style', Palatino, Georgia, serif", fontWeight: 600, fontSize: "1rem" }}>
+                Secretariat
+              </h1>
               <div style={{ fontSize: "0.8125rem", color: "var(--text-muted)" }}>Administrator sign in</div>
             </div>
           </div>

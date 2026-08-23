@@ -36,7 +36,7 @@ const PAGES = [
   "/contact",
   "/past-editions",
   "/certificates",
-  "/privacy",
+  "/privacy", "/terms",
   "/admin/login",
 ];
 

@@ -61,7 +61,7 @@ export function Faq() {
       <div className="wrap">
         <div className="section-head">
           <div className="eyebrow">IX. Questions</div>
-          <h2>Frequently asked</h2>
+          <h1>Frequently asked</h1>
           <p>
             If your question is not here, the Secretariat answers email within two working days at{" "}
             <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>.

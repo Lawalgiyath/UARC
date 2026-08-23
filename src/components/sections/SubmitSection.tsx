@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { SUBMISSION_CONSENT } from "@/lib/terms";
 import { FormEvent, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { IconSearch } from "@/components/icons/AcademicIcons";
@@ -114,7 +116,7 @@ export function SubmitSection({
       <div className="wrap">
         <div className="section-head">
           <div className="eyebrow">V. Submit an Abstract</div>
-          <h2>Abstract submission portal</h2>
+          <h1>Abstract submission portal</h1>
           <p>
             Replaces email and paper form submission. Manuscripts upload directly to secure storage, and
             every submission receives an emailed and texted reference code the moment it is received.
@@ -210,6 +212,17 @@ export function SubmitSection({
                     {uploadError && <div className="form-error">{uploadError}</div>}
                   </div>
                 </div>
+                <div className="consent-row">
+                  <label className="consent-label">
+                    <input type="checkbox" name="publicationConsent" required />
+                    <span>
+                      <strong>Permission to publish, and confirmation the work is yours.</strong>
+                      {SUBMISSION_CONSENT} The full wording is in the{" "}
+                      <Link href="/terms">terms and conditions</Link>.
+                    </span>
+                  </label>
+                </div>
+
                 <button className="btn solid" type="submit" disabled={isClosed || submitting}>
                   {submitting ? "Submitting..." : "Submit Abstract"}
                 </button>
@@ -265,7 +278,7 @@ function SubmissionTracker() {
   }
 
   return (
-    <div className="tracker" id="track">
+    <div className="tracker" id="tracker">
       {/* Asked for by name: the tracker used to be an unlabelled pair of
           fields at the foot of the form, which nobody found. */}
       <div className="section-head tracker-head">

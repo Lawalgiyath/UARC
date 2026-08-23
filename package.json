@@ -22,7 +22,9 @@
     "vercel-env": "tsx scripts/vercel-env.ts",
     "remita-check": "tsx scripts/remita-check.ts",
     "storage-check": "tsx scripts/storage-check.ts",
-    "responsive-check": "tsx scripts/responsive-check.ts"
+    "responsive-check": "tsx scripts/responsive-check.ts",
+    "photo-licences": "tsx scripts/photo-licence-check.ts",
+    "a11y-check": "tsx scripts/a11y-check.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",

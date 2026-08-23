@@ -26,7 +26,7 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <h4>Conference</h4>
+            <h2>Conference</h2>
             <Link href="/about">Theme</Link>
             <Link href="/about#subthemes">Subthemes</Link>
             <Link href="/dates-and-fees">Dates &amp; fees</Link>
@@ -35,7 +35,7 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <h4>Take part</h4>
+            <h2>Take part</h2>
             <Link href="/submit">Submit an abstract</Link>
             <Link href="/register">Register and pay</Link>
             <Link href="/delegates">Who is coming</Link>
@@ -44,17 +44,18 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <h4>Partner and visit</h4>
+            <h2>Partner and visit</h2>
             <Link href="/sponsors">Sponsorship</Link>
             <Link href="/exhibit">Exhibition stands</Link>
             <Link href="/accommodation">Accommodation</Link>
             <Link href="/contact">Contact the Secretariat</Link>
             <Link href="/faq">FAQ</Link>
             <Link href="/privacy">Privacy notice</Link>
+            <Link href="/terms">Terms and conditions</Link>
           </div>
 
           <div className="footer-contact">
-            <h4>Reach us</h4>
+            <h2>Reach us</h2>
             {/* International dialling form throughout: delegates join this
                 conference from outside Nigeria and a bare 0-prefixed number
                 does not work from abroad. */}
