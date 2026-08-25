@@ -55,7 +55,7 @@ export function Subthemes() {
                     </ul>
                   </div>
                   <div>
-                    <h4>Who the panel expects</h4>
+                    <h4>Expected participants and contributors</h4>
                     <p>{track.disciplines}</p>
                   </div>
                 </div>

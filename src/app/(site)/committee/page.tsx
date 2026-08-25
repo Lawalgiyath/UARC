@@ -30,9 +30,9 @@ export default function CommitteePage() {
       <PhotoFrame
         photo={CAMPUS_PHOTOS.lagoonFountain}
         caption="The lagoon front fountain, University of Lagos."
-        className="photo-band"
-        sizes="100vw"
-        maxHeight="20rem"
+        className="photo-whole"
+        sizes="(max-width: 1180px) 100vw, 1180px"
+        whole
       />
 
       <Committee />

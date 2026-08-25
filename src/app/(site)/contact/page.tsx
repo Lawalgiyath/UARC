@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SocialLinks } from "@/components/SocialLinks";
+import { GettingHere } from "@/components/GettingHere";
 import { IconPattern } from "@/components/IconPattern";
 import { AcademicIcon, IconMail, IconPhone, IconPin } from "@/components/icons/AcademicIcons";
 import { CONFERENCE, CONTACT, CRC, SOCIALS, SOCIAL_HASHTAGS } from "@/lib/conference";
@@ -108,6 +109,8 @@ export default function ContactPage() {
               </p>
             </div>
           </div>
+
+          <GettingHere />
 
           <div className="section-head contact-routes-head">
             <div className="eyebrow">Who to ask</div>

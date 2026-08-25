@@ -100,6 +100,11 @@ export default function PrivacyPage() {
             appears on the public delegate list only if you ticked the box asking for it.
           </p>
 
+          <h2>Why it may lawfully be held outside Nigeria</h2>
+          {PRIVACY.transferBasis.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
+          ))}
+
           <h2>How long it is kept</h2>
           <div className="table-scroll">
             <table className="privacy-table">
@@ -124,6 +129,9 @@ export default function PrivacyPage() {
 
           <h2>Cookies</h2>
           <p>{PRIVACY.cookiesNotice}</p>
+
+          <h2>The map on the contact page</h2>
+          <p>{PRIVACY.mapNotice}</p>
 
           <h2>What you can ask for</h2>
           <ul className="privacy-rights">

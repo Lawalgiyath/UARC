@@ -671,6 +671,75 @@ footer.site { background: var(--bg-sunken); padding: 4rem 0 2rem; }
 .editorial-grid .photo-frame { border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-card); }
 .editorial-grid .vine-slot { color: var(--gold); margin-bottom: 1.25rem; }
 
+/* A photograph shown whole, inside the reading column rather than bled to the
+   window edge. Full bleed plus a fixed height means cropping, and cropping is
+   what this class exists to avoid. */
+.photo-whole {
+  max-width: 1180px;
+  margin: 0 auto 2.5rem;
+  padding: 0 1.5rem;
+}
+.photo-whole .photo-frame {
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+.photo-whole img { width: 100%; height: auto; display: block; }
+.photo-whole figcaption {
+  padding: 0.75rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+/* Getting to the venue. Two cards side by side, then the map, which is a
+   placeholder until somebody asks for the real thing. */
+.getting-here { padding: 3rem 0 1rem; }
+.getting-here-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.75rem;
+}
+.getting-here-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--bg-raised);
+  padding: clamp(1.25rem, 1rem + 1vw, 1.75rem);
+  min-width: 0;
+}
+.getting-here-icon { color: var(--crest-green); display: inline-flex; }
+.getting-here-card h3 { font-size: 1.0625rem; margin: 0.5rem 0 0.75rem; }
+.getting-here-address { display: flex; flex-direction: column; gap: 0.15rem; font-style: normal; color: var(--text-muted); margin-bottom: 1.1rem; }
+.getting-here-links { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.getting-here-links .btn { font-size: 0.8125rem; }
+.getting-here-notes { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.getting-here-notes > li { font-size: 0.9063rem; color: var(--text-muted); }
+
+.getting-here-map {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-sunken);
+}
+.getting-here-map iframe { display: block; width: 100%; height: clamp(20rem, 45vh, 28rem); border: 0; }
+.getting-here-map-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+  padding: clamp(2rem, 1.5rem + 3vw, 3.5rem) 1.5rem;
+}
+.getting-here-map-placeholder h3 { font-size: 1.0625rem; margin: 0; }
+.getting-here-map-placeholder p { font-size: 0.9063rem; color: var(--text-muted); max-width: 34rem; margin: 0; }
+.getting-here-map-placeholder .btn { margin-top: 0.5rem; }
+.getting-here-map-alt { font-size: 0.8125rem !important; }
+
+@media (max-width: 620px) {
+  .getting-here-links { flex-direction: column; }
+  .getting-here-links .btn { width: 100%; text-align: center; }
+}
+
 .photo-credit-list { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.75rem; }
 .photo-credit-list a { color: var(--text-muted); text-decoration: underline; }
 

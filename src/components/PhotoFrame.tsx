@@ -14,6 +14,7 @@ export function PhotoFrame({
   maxHeight,
   className,
   aspectRatio,
+  whole = false,
 }: {
   photo: CampusPhoto;
   /** Leading sentence of the caption. The photo credit is appended to it. */
@@ -24,9 +25,18 @@ export function PhotoFrame({
   className?: string;
   /** Overrides the photo's own crop, for layouts that need a specific shape. */
   aspectRatio?: number;
+  /**
+   * Shows the entire photograph, cropping nothing.
+   *
+   * A fixed frame height with object-fit: cover keeps a band tidy but throws
+   * away whatever does not fit, and on a portrait or 4:3 photograph in a wide
+   * band that is most of the picture. Where the photograph is the point rather
+   * than the texture, this lets it keep its own shape.
+   */
+  whole?: boolean;
 }) {
-  const ratio = aspectRatio ?? photo.crop?.aspectRatio;
-  const objectPosition = photo.crop?.objectPosition ?? "center";
+  const ratio = whole ? undefined : (aspectRatio ?? photo.crop?.aspectRatio);
+  const objectPosition = whole ? "center" : (photo.crop?.objectPosition ?? "center");
 
   // The frame needs a definite height for `object-fit: cover` to have anything
   // to cover, and only one of the two ways of giving it one may apply at a
@@ -34,7 +44,9 @@ export function PhotoFrame({
   // *width* to satisfy both, which turns a full bleed band into a small
   // rectangle; so an explicit height wins when a caller asks for one, and the
   // crop still governs which part of the photograph survives.
-  const frameStyle = maxHeight
+  const frameStyle = whole
+    ? undefined
+    : maxHeight
     ? { height: maxHeight }
     : ratio
       ? { aspectRatio: String(ratio) }

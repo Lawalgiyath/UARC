@@ -49,9 +49,9 @@ export default function AccommodationPage() {
       <PhotoFrame
         photo={CAMPUS_PHOTOS.lagoonFountain}
         caption="The lagoon front, University of Lagos, Akoka."
-        className="photo-band"
-        sizes="100vw"
-        maxHeight="20rem"
+        className="photo-whole"
+        sizes="(max-width: 1180px) 100vw, 1180px"
+        whole
       />
 
       <section id="hotels">

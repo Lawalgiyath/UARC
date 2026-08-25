@@ -99,12 +99,21 @@ export const PRIVACY = {
    * to "service providers" as not disclosing a transfer at all.
    */
   processors: [
-    { name: "Vercel", role: "Runs the website itself", where: "United States and the European Union" },
+    {
+      name: "Vercel",
+      role: "Runs the website itself",
+      where: "European Union (Frankfurt), pinned in vercel.json",
+    },
     { name: "Neon", role: "Holds the database of registrations and payments", where: "European Union" },
     { name: "Cloudinary", role: "Stores uploaded receipts and logos", where: "European Union" },
     {
       name: "Google (Gmail)",
       role: "Delivers the emails the Secretariat sends you about your registration",
+      where: "United States and the European Union",
+    },
+    {
+      name: "Google Maps",
+      role: "Draws the venue map on the contact page, and only if you press the button asking for it",
       where: "United States and the European Union",
     },
     {
@@ -162,6 +171,31 @@ export const PRIVACY = {
   /** Session cookie only; no analytics, no advertising, no third-party tracking. */
   cookiesNotice:
     "The public pages of this site set no cookies at all. There is no analytics, no advertising and no third-party tracking. The Secretariat's own dashboard sets one cookie so that staff stay signed in; it does nothing else and is deleted when they sign out.",
+
+  /**
+   * The one third party a visitor can invite onto the page, and only by
+   * pressing a button. Spelled out because a map that loads itself is exactly
+   * how a no-tracking claim quietly stops being true.
+   */
+  mapNotice:
+    "The contact page offers a map of the venue, which comes from Google. It is not loaded until you press the button asking for it. If you do, Google sets its own cookies and can see that you requested the map, under Google's terms rather than ours. If you would rather not, the direction links beside it open Google or Apple Maps in a new tab and load nothing into this page.",
+
+  /**
+   * Why the data may lawfully sit outside Nigeria.
+   *
+   * Section 41 of the NDPA permits a transfer where an adequate level of
+   * protection is ensured, and section 43 lists the grounds a transfer may
+   * otherwise rest on, including that it is necessary to perform a contract
+   * with the data subject. Both apply here, and both are named, because
+   * "we use cloud hosting" is not a legal basis.
+   */
+  transferBasis: [
+    "The application and the database both run inside the European Union, in Frankfurt, and uploaded receipts are stored in the European Union as well. The EU's data protection regime is among the strictest in the world, which is the adequacy section 41 is concerned with.",
+    "The transfer is also necessary to perform the contract you entered into when you registered. The conference cannot register you, take your payment or issue your certificate without processing your details somewhere, and this is where.",
+    "The site was moved to Frankfurt deliberately. It previously ran in the United States while the database sat in Frankfurt, which put two jurisdictions in the path of every query instead of one, and sent every lookup across the Atlantic and back.",
+    "Payment itself never leaves Nigeria. Remita and Tranzgate handle it on the University's own portal, so card details are processed in Nigeria under Nigerian rules and never reach this site at all.",
+    "If the University later requires this data to be held in Nigeria, it can be moved. Nothing here depends on a particular provider and the database is ordinary PostgreSQL.",
+  ],
 
   breach:
     "If personal data held for this conference is ever exposed, the University will report it to the Nigeria Data Protection Commission within 72 hours of becoming aware of it, and will tell the people affected directly where the risk to them is significant.",
