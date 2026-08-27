@@ -10,16 +10,21 @@ export const CONFERENCE = {
   shortName: "UNILAG Annual Research Conference",
   subtitle: "An International Conference of the Sciences and Humanities",
   theme:
-    "Sustainable Frontiers: Integrating Systems for Food Security, Health, Housing and Humanity for Combating Global Challenges",
+    "Sustainable Frontiers: Integrating Systems for Food Security, Health, Housing, and Humanity to Combat Global Challenges",
   themeShort: "Sustainable Frontiers",
   /** Sits directly under the "19th Edition" line, per the Secretariat's brief. */
   editionCaption:
     "Three days of plenaries, parallel sessions and a research fair, convened by the Central Research Committee of the University of Lagos and open to researchers within and outside Nigeria.",
   dates: "October 14 – 16, 2026",
   datesShort: "Oct 14–16, 2026",
+  /** Sessions run from nine each morning, per the Secretariat's notice. */
+  dailyStart: "9:00 a.m. daily",
   venue: "Jelili Omotola Halls",
   venueFull: "Jelili Omotola Halls, University of Lagos, Akoka, Yaba, Lagos, Nigeria",
-  abstractDeadlineLabel: "Monday, 24 August 2026",
+  abstractDeadlineLabel: "Monday, 14 September 2026",
+  /** Who it is open to, quoted from the Secretariat's announcement. */
+  openTo:
+    "Faculty members, researchers, academics and postgraduate students from universities and research institutes within and outside Nigeria.",
 } as const;
 
 /**
@@ -28,6 +33,36 @@ export const CONFERENCE = {
  * Conference Planning Committee Secretariat, inside the Research Management
  * Office, is who delegates actually write to.
  */
+/**
+ * The three things the Secretariat highlights alongside the paper sessions.
+ * Announced 27 August 2026; none of them were described on the site before.
+ */
+import type { AcademicIconName } from "@/components/icons/AcademicIcons";
+
+export interface Highlight {
+  title: string;
+  body: string;
+  icon: AcademicIconName;
+}
+
+export const HIGHLIGHTS: Highlight[] = [
+  {
+    title: "Academia–Industry Forum",
+    body: "Where the research meets the people who can use it. Industry is in the room to hear what the university is working on, and to say what it needs.",
+    icon: "handshake",
+  },
+  {
+    title: "From Thesis to Wealth",
+    body: "A colloquium on turning research into something that earns: commercialisation, spin-outs and the route from a finished thesis to a working business.",
+    icon: "megaphone",
+  },
+  {
+    title: "Exhibition of Products and Innovations",
+    body: "Organisations, vendors, departments and research groups show what they have built. Space runs from open floor to a premium booth.",
+    icon: "booth",
+  },
+];
+
 export const CRC = {
   abbr: "CRC",
   name: "Central Research Committee",

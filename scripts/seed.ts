@@ -385,6 +385,10 @@ async function seed() {
   console.log("Payment page to try at /register/payment:");
   console.log("  UARC26-REG-2007  +  s.yakubu@example.edu.ng   (not paid yet)");
   console.log("");
+  console.log("Payment queue to try in the dashboard: UARC26-REG-2006 (receipt declared)");
+  console.log("Payment page to try at /register/payment:");
+  console.log("  UARC26-REG-2007  +  s.yakubu@example.edu.ng   (not paid yet)");
+  console.log("");
   console.log("Certificate codes to try at /verify:");
   console.log("  H4KM-9TR2-BXQ7   attendance");
   console.log("  P2WD-6NCF-3JVA   presentation");

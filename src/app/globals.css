@@ -740,6 +740,25 @@ footer.site { background: var(--bg-sunken); padding: 4rem 0 2rem; }
   .getting-here-links .btn { width: 100%; text-align: center; }
 }
 
+/* The three things running alongside the paper sessions. */
+.highlights-section { padding: 3rem 0; }
+.highlight-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  gap: 1.5rem;
+}
+.highlight-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--bg-raised);
+  padding: clamp(1.25rem, 1rem + 1vw, 1.75rem);
+  min-width: 0;
+  box-shadow: var(--shadow-card);
+}
+.highlight-icon { color: var(--crest-green); display: inline-flex; margin-bottom: 0.6rem; }
+.highlight-card h3 { font-size: 1.0625rem; margin-bottom: 0.5rem; }
+.highlight-card p { font-size: 0.9063rem; color: var(--text-muted); margin: 0; }
+
 .photo-credit-list { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.75rem; }
 .photo-credit-list a { color: var(--text-muted); text-decoration: underline; }
 

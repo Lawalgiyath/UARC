@@ -18,10 +18,15 @@ export interface ExhibitPackageDefinition {
   capacity: number;
 }
 
+// Prices here must match what the Secretariat publishes. The announcement of
+// 27 August names the two ends of the range, Open Space at 100,000 and Premium
+// Booths at 1,000,000; the two tiers in between are ours and are not quoted
+// publicly, so they are the ones to check with the Secretariat if the range
+// ever appears inconsistent.
 export const EXHIBIT_PACKAGES: Record<ExhibitPackage, ExhibitPackageDefinition> = {
   PREMIUM: {
-    label: "Premium stand",
-    amount: 750_000,
+    label: "Premium booth",
+    amount: 1_000_000,
     currency: "NGN",
     icon: "booth",
     size: "3 m × 3 m, corner position",
@@ -67,14 +72,14 @@ export const EXHIBIT_PACKAGES: Record<ExhibitPackage, ExhibitPackageDefinition> 
     ],
   },
   ACADEMIC: {
-    label: "Departmental and research group stand",
+    label: "Open space",
     amount: 100_000,
     currency: "NGN",
     icon: "microscope",
     size: "One dressed table, research fair aisle",
     capacity: 40,
     summary:
-      "Concessionary rate for university departments, research groups and student teams showing their work.",
+      "Bare floor space at the entry rate, for university departments, research groups, student teams and vendors bringing their own display.",
     includes: [
       "One dressed table in the research fair aisle",
       "Poster board behind the table",

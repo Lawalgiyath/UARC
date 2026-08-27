@@ -26,6 +26,18 @@ const ITEMS = [
     a: "Normally within two working days of the receipt reaching us. Your place is held from the moment you send it, and you are told by email and SMS once it is confirmed. If a receipt cannot be accepted you are told exactly why, and your place is still held while you sort it out.",
   },
   {
+    q: "How do I actually pay?",
+    a: "Through Remita, on the University of Lagos payment portal. Register on this site first: it works out what you owe, reserves your place and gives you a reference. Then go to unilag.edu.ng, open the Unilag payment portal, choose the customer category \"Others\", pick \"Research Conference Fair\" as the payment item, and enter the amount shown. Print the slip, pay it at any commercial bank, then come back to the payment page with your RRR and a photograph of the receipt.",
+  },
+  {
+    q: "Why can I not just pay by card on the site?",
+    a: "Because the university collects conference fees through Remita, and a payment made any other way cannot be reconciled against the conference account. What the site does instead is remove the guesswork around it: the amount, the payment item and your reference are all worked out for you, and the receipt goes straight to the Secretariat rather than into an inbox.",
+  },
+  {
+    q: "How long until my payment is confirmed?",
+    a: "Normally within two working days of the receipt reaching us. Your place is held from the moment you send it, and you are told by email and SMS once it is confirmed. If a receipt cannot be accepted you are told exactly why, and your place is still held while you sort it out.",
+  },
+  {
     q: "How is the student rate checked?",
     a: "Student registrations ask for a matriculation or student number and an institutional email address. Addresses on recognised academic domains clear immediately; anything else is reviewed by the Secretariat, usually within two working days, and you can still pay straight away. Bring your student ID card to the registration desk.",
   },

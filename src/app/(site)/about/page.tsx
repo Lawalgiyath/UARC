@@ -7,7 +7,7 @@ import { IconPattern } from "@/components/IconPattern";
 import { AcademicIcon } from "@/components/icons/AcademicIcons";
 import { CAMPUS_PHOTOS } from "@/lib/media";
 import { AUTHOR_PROMISES, VISIBILITY_CHANNELS } from "@/lib/university";
-import { CONFERENCE } from "@/lib/conference";
+import { CONFERENCE, HIGHLIGHTS } from "@/lib/conference";
 
 export const metadata: Metadata = {
   title: "Theme and Subthemes | 19th UNILAG Annual Research Conference",
@@ -142,6 +142,27 @@ export default function AboutPage() {
             Presenting does not transfer copyright. Authors keep their work, and publication in a
             UNILAG journal follows that journal&rsquo;s own peer review, on its own timetable.
           </p>
+        </div>
+      </section>
+
+      <section id="highlights" className="highlights-section">
+        <div className="wrap">
+          <div className="section-head">
+            <div className="eyebrow">Alongside the papers</div>
+            <h2>Conference highlights</h2>
+            <p className="section-lede">{CONFERENCE.openTo}</p>
+          </div>
+          <div className="highlight-grid">
+            {HIGHLIGHTS.map((h) => (
+              <article className="highlight-card" key={h.title}>
+                <span className="highlight-icon">
+                  <AcademicIcon name={h.icon} size={26} />
+                </span>
+                <h3>{h.title}</h3>
+                <p>{h.body}</p>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
