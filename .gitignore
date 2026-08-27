@@ -11,3 +11,11 @@ build
 
 .vercel
 .env*
+
+# Handover document: contains live passwords, never commit it.
+UARC-Handover.docx
+*-Handover.docx
+
+# Handover document: contains live passwords, never commit it.
+UARC-Handover.docx
+*-Handover.docx
