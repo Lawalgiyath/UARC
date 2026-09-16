@@ -168,13 +168,15 @@ chown -R "$APP_USER:$APP_USER" /opt/uarc
 
 log "Installing dependencies and building"
 cd "$APP_DIR"
-sudo -u "$APP_USER" -H env "PATH=$PATH" npm ci --omit=dev --no-audit --no-fund
+# Dev dependencies stay installed. TypeScript is one, and Next.js needs it at
+# build time to read the @/ path aliases from tsconfig.json; pruning it after
+# the first build is what made every later build on this server fail with
+# "Module not found". --include=dev is explicit because shared.env sets
+# NODE_ENV=production, which otherwise makes npm skip them silently.
+sudo -u "$APP_USER" -H env "PATH=$PATH" npm ci --include=dev --no-audit --no-fund
 sudo -u "$APP_USER" -H env "PATH=$PATH" DATABASE_URL="$DATABASE_URL" npx prisma generate
 sudo -u "$APP_USER" -H env "PATH=$PATH" DATABASE_URL="$DATABASE_URL" npx prisma migrate deploy
-# The build needs dev dependencies; install them, build, then drop them again.
-sudo -u "$APP_USER" -H env "PATH=$PATH" npm ci --no-audit --no-fund
 sudo -u "$APP_USER" -H env "PATH=$PATH" npm run build
-sudo -u "$APP_USER" -H env "PATH=$PATH" npm prune --omit=dev
 
 # --------------------------------------------------------------- the service
 log "Installing the systemd service"
@@ -278,8 +280,10 @@ cat <<SUMMARY
     Secrets     ${SHARED_ENV}
     Database    postgresql, local, database "${DB_NAME}"
 
-    To deploy a change: copy the new code over ${APP_DIR}, then
-        cd ${APP_DIR} && npm ci && npm run build && systemctl restart uarc
+    To deploy a change, never build in place. Upload a release bundle and run
+        /opt/uarc/bin/deploy.sh /opt/uarc/incoming/<bundle>.tar.gz <commit>
+    and to undo the last one
+        /opt/uarc/bin/rollback.sh
 
     Still to do, and not by this script:
       - Back the database up. A conference register with no backup is one
