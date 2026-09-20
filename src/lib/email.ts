@@ -2,13 +2,13 @@ import nodemailer, { type Transporter } from "nodemailer";
 
 // Email goes out by whichever route is configured, checked in this order:
 //
-//   1. SMTP  (SMTP_HOST / SMTP_USER / SMTP_PASS)  — works with Gmail, Zoho,
+//   1. SMTP  (SMTP_HOST / SMTP_USER / SMTP_PASS): works with Gmail, Zoho,
 //      Outlook, or the university's own mail server. This is the quickest
 //      route to a working demo: a Gmail App Password needs no domain, no
 //      sender verification and no approval queue.
-//   2. SendGrid (SENDGRID_API_KEY / SENDGRID_FROM_EMAIL) — better for volume
+//   2. SendGrid (SENDGRID_API_KEY / SENDGRID_FROM_EMAIL): better for volume
 //      once the conference is live and sending hundreds of confirmations.
-//   3. Neither — the message is printed to the server log in full, so a flow
+//   3. Neither: the message is printed to the server log in full, so a flow
 //      can still be walked end to end and the wording checked. Nothing is
 //      silently swallowed.
 //
@@ -136,7 +136,7 @@ export async function sendEmail(args: SendEmailArgs): Promise<void> {
 
 /**
  * Proves the mail route works without walking a whole registration.
- * Used by `npm run test-email`.
+ * Used by `npm run check:email`.
  */
 export async function verifyEmailTransport(): Promise<string> {
   if (smtpConfigured()) {

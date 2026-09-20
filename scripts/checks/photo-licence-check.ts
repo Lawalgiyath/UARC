@@ -1,4 +1,4 @@
-import "./load-env";
+import "../lib/load-env";
 
 /**
  * Checks every campus photograph against Wikimedia Commons.
@@ -10,14 +10,14 @@ import "./load-env";
  * the footer that does not match Commons is worse than no claim, because it
  * looks deliberate.
  *
- *   npm run photo-licences
+ *   npm run check:photo-licences
  *
  * It asks Commons for the licence and author it actually holds for each file
  * and reports any that disagree with what we publish, plus any that no longer
  * resolve.
  */
 
-import { CAMPUS_PHOTOS } from "../src/lib/media";
+import { CAMPUS_PHOTOS } from "../../src/lib/media";
 
 const API = "https://commons.wikimedia.org/w/api.php";
 

@@ -1,21 +1,25 @@
+# Dependencies and build output
 node_modules
 .next
-.pgdata
 out
 build
-.env
-.env.local
-*.log
-.DS_Store
 *.tsbuildinfo
 
+# Local development database, created by `npm run db:start`
+.pgdata
+
+# Secrets. Every value the site needs is listed in README.md; the file itself
+# is never committed.
+.env
+.env.*
+
+# Deployment platform state
 .vercel
-.env*
 
 # Handover document: contains live passwords, never commit it.
-UARC-Handover.docx
 *-Handover.docx
 
-# Handover document: contains live passwords, never commit it.
-UARC-Handover.docx
-*-Handover.docx
+# Editor and operating system noise
+*.log
+.DS_Store
+Thumbs.db

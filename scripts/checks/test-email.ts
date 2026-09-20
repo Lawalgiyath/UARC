@@ -1,20 +1,20 @@
 /**
  * Proves the mail route works, without walking a whole registration.
  *
- *   npm run test-email -- you@example.com
+ *   npm run check:email -- you@example.com
  *
  * Checks the credentials first, then sends one real message. If nothing is
  * configured it says exactly what is missing rather than failing quietly.
  */
 
-import "./load-env";
-import { sendEmail, verifyEmailTransport } from "../src/lib/email";
-import { CONFERENCE, CONTACT } from "../src/lib/conference";
+import "../lib/load-env";
+import { sendEmail, verifyEmailTransport } from "../../src/lib/email";
+import { CONFERENCE, CONTACT } from "../../src/lib/conference";
 
 const to = process.argv[2];
 
 if (!to) {
-  console.error('Usage: npm run test-email -- "you@example.com"');
+  console.error('Usage: npm run check:email -- "you@example.com"');
   process.exit(1);
 }
 

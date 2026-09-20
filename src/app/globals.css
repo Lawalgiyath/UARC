@@ -759,6 +759,48 @@ footer.site { background: var(--bg-sunken); padding: 4rem 0 2rem; }
 .highlight-card h3 { font-size: 1.0625rem; margin-bottom: 0.5rem; }
 .highlight-card p { font-size: 0.9063rem; color: var(--text-muted); margin: 0; }
 
+/* The session formats listed under "Featuring" on the Secretariat's flyer. */
+.featuring-strip {
+  margin-top: 1.5rem;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+}
+.featuring-strip .k {
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.featuring-strip ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.featuring-strip li {
+  font-size: 0.9063rem;
+  font-weight: 600;
+}
+.featuring-strip li + li::before {
+  content: "\00B7";
+  margin-right: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+.publication-note {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
 .photo-credit-list { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.75rem; }
 .photo-credit-list a { color: var(--text-muted); text-decoration: underline; }
 

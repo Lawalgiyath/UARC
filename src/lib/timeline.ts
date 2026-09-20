@@ -17,17 +17,18 @@ export function computeStatus(phase: TimelinePhase, now: Date = new Date()): Pha
 }
 
 // Early bird registration and abstract submission were both extended to Monday
-// 14 September 2026. That compresses review: submissions used to close seven
-// weeks before the conference and now close four, so the review window below
-// is a fortnight rather than a month. The Secretariat should confirm it.
+// 14 September 2026. Notification of acceptance is Monday 21 September 2026,
+// the date given on the Secretariat's flyer of 18 September. That leaves one
+// week between the close of submissions and the decisions going out, which is
+// tight for peer review; the Secretariat has been asked to confirm it.
 //
-// Fixed milestones from the conference flyer, plus two provisional registration
-// cutoffs the Secretariat should confirm before launch (flagged in the UI note).
+// The regular registration cutoff below is still provisional and is flagged as
+// such in the UI note on the dates page.
 export const FIXED_PHASES: Omit<TimelinePhase, "opensAt" | "closesAt">[] = [
-  { title: "Review and notification of acceptance", sub: "Decisions sent by email with reference code", dateLabel: "By 30 Sep 2026" },
+  { title: "Notification of acceptance", sub: "Decisions sent by email with reference code", dateLabel: "21 Sep 2026" },
   { title: "Early bird registration", sub: "Discounted fee, see pricing below", dateLabel: "Closes 14 Sep 2026" },
   { title: "Regular registration", sub: "Standard fee applies", dateLabel: "Closes 10 Oct 2026" },
-  { title: "Conference sessions", sub: "Jelili Omotola Halls, UNILAG", dateLabel: "14 - 16 Oct 2026" },
+  { title: "Conference sessions", sub: "Jelili Adebisi Omotola Hall, UNILAG", dateLabel: "14 to 16 Oct 2026" },
 ];
 
 export function buildTimeline(abstractOpensAt: string, abstractClosesAt: string): TimelinePhase[] {
@@ -39,7 +40,7 @@ export function buildTimeline(abstractOpensAt: string, abstractClosesAt: string)
       opensAt: abstractOpensAt,
       closesAt: abstractClosesAt,
     },
-    { ...FIXED_PHASES[0], opensAt: "2026-09-15T00:00:00+01:00", closesAt: "2026-09-30T23:59:00+01:00" },
+    { ...FIXED_PHASES[0], opensAt: "2026-09-15T00:00:00+01:00", closesAt: "2026-09-21T23:59:00+01:00" },
     { ...FIXED_PHASES[1], opensAt: "2026-06-15T00:00:00+01:00", closesAt: "2026-09-14T23:59:00+01:00" },
     { ...FIXED_PHASES[2], opensAt: "2026-09-15T00:00:00+01:00", closesAt: "2026-10-10T23:59:00+01:00" },
     { ...FIXED_PHASES[3], opensAt: "2026-10-14T00:00:00+01:00", closesAt: "2026-10-16T23:59:00+01:00" },

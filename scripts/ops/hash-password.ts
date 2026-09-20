@@ -1,4 +1,4 @@
-import "./load-env";
+import "../lib/load-env";
 import bcrypt from "bcryptjs";
 
 const password = process.argv[2];

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CONFERENCE } from "@/lib/conference";
 
 export default async function RegisterSuccessPage({
   searchParams,
@@ -17,7 +18,7 @@ export default async function RegisterSuccessPage({
           {ref && <p className="ref" style={{ marginTop: "0.75rem" }}>{ref}</p>}
           <p style={{ marginTop: "0.75rem", color: "var(--text-muted)", fontSize: "0.9375rem" }}>
             A receipt has been emailed and texted to you. Bring this reference, or the email, to the
-            registration desk at the Jelili Omotola Halls.
+            registration desk at the {CONFERENCE.venue}.
           </p>
         </div>
         <p style={{ marginTop: "2rem" }}>

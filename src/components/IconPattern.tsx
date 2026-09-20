@@ -1,7 +1,7 @@
 // The repeating academic motif.
 //
 // Rather than dropping single decorative icons here and there, the site uses a
-// tiled pattern built from the same glyph family as `AcademicIcons` — a book, a
+// tiled pattern built from the same glyph family as `AcademicIcons`: a book, a
 // laurel, a flask, a quill, an atom and a graduation cap on a staggered grid.
 // It sits behind mastheads and feature bands at low opacity, which is what
 // carries the "academic" feel across pages without competing with the text.

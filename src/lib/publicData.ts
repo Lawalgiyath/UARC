@@ -79,7 +79,7 @@ export interface PublicDelegate {
  * Only delegates who both paid and ticked the consent box appear. No email
  * address, phone number, fee category or amount is selected, so nothing on
  * this list can be traced back to what someone paid or how to contact them
- * privately — a register of names and institutions, which is what a conference
+ * privately. It is a register of names and institutions, which is what a conference
  * programme has always printed, and nothing more.
  */
 export async function getPublicDelegates(): Promise<PublicDelegate[]> {

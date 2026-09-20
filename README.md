@@ -1,10 +1,10 @@
-# 19th UNILAG Annual Research Conference
+# 19th UNILAG Annual Research Conference and Fair
 
 Public site, abstract submission portal, registration and payment, sponsorship
 and exhibition sales, automatic certificates, and an admin panel for the
 Secretariat. Built with Next.js (App Router), Prisma and Postgres, Cloudinary
 for file storage, Remita for payment (the route the university actually uses),
-and SendGrid and Twilio for confirmation email and SMS.
+and SMTP for confirmation email.
 
 ## What is real here versus what needs your accounts
 
@@ -61,7 +61,7 @@ the Secretariat will use.
 > at the first sign in attempt rather than failing silently.
 
 Sign in is limited to five attempts per address per fifteen minutes. If the
-Secretariat locks itself out, `npm run rate-limit -- --clear` clears the
+Secretariat locks itself out, `npm run check:rate-limit -- --clear` clears the
 counter without waiting.
 
 ### Demo data
@@ -274,48 +274,91 @@ close, without waiting for the real date or changing the real deadline.
 
 These files are plain data, edited without touching any component:
 
-- `src/lib/conference.ts` — phone numbers, email, address, social handles, and
+- `src/lib/conference.ts`: the dates, venue, theme, phone numbers, email, address, social handles, and
   the breaking news item shown at the top of the home page.
-- `src/lib/university.ts` — the "about the university" block, the promises made
+- `src/lib/university.ts`: the "about the university" block, the promises made
   to authors, and the visibility channels.
-- `src/lib/tracks.ts` — the eight subtheme tracks with their descriptions,
+- `src/lib/tracks.ts`: the eight subtheme tracks with their descriptions,
   topic areas and disciplines. The submission form reads its options from here.
-- `src/lib/sponsorship.ts` and `src/lib/exhibition.ts` — tiers, packages,
+- `src/lib/sponsorship.ts` and `src/lib/exhibition.ts`: tiers, packages,
   prices and what each one includes.
-- `src/lib/remita.ts` — the payment portal steps, the payment item name, the
+- `src/lib/remita.ts`: the payment portal steps, the payment item name, the
   WhatsApp help line and how long verification takes.
-- `src/lib/accommodation.ts` — the hotel list. **Every entry carries a
-  `confirmed` flag, and only the on-campus guest house is currently set to
-  true**, because its numbers come from its own official site. Ring the other
-  hotels, agree a delegate rate, fill in `phone` and `rateFrom`, and set
-  `confirmed: true`.
-- `src/lib/media.ts` — campus photography, with an optional `crop` per photo.
+- `src/lib/accommodation.ts`: the nine hotels on the Research Management
+  Office's official list, with the room classifications and rates each one
+  quoted. Phone numbers, websites and email addresses were each checked before
+  publishing; where a check failed, the entry carries a `verification` note
+  explaining what a delegate should do instead. Do not add a hotel that is not
+  on the university's list.
+- `src/lib/media.ts`: campus photography, with an optional `crop` per photo.
   To swap in official university photography, drop a file in `public/` and
   point `src` at it; nothing else reads image paths.
 
 ## Project layout
 
-- `src/app` - pages and API routes (App Router)
-- `src/components` - the public site's sections, the shared icon system and
-  the admin dashboard
-- `src/components/icons/AcademicIcons.tsx` - one 24 grid, 1.5 stroke icon
-  family used everywhere, plus `IconPattern.tsx`, the tiled watermark built
-  from the same glyphs
-- `src/lib` - content data files, Cloudinary signing, Paystack, SendGrid,
-  Twilio, admin session, rate limiting, certificates and fee schedule logic,
-  kept as plain `fetch` calls rather than SDKs so the integration code stays
-  easy to read and swap out
-- `prisma/schema.prisma` - `Submission`, `Registration`, `Sponsor`,
-  `Exhibitor`, `Certificate`, `RateLimit` and `Setting`
+- `src/app`: pages and API routes (App Router). `(site)` is the public site,
+  `admin` is the Secretariat dashboard, `api` is everything the forms post to.
+- `src/components`: the public site's sections, the shared icon system and the
+  admin dashboard.
+- `src/components/icons/AcademicIcons.tsx`: one 24 grid, 1.5 stroke icon family
+  used everywhere, plus `IconPattern.tsx`, the tiled watermark built from the
+  same glyphs.
+- `src/lib`: content data files, Cloudinary signing, Remita, email, admin
+  session, rate limiting, certificates and fee schedule logic, kept as plain
+  `fetch` calls rather than SDKs so the integration code stays easy to read.
+- `prisma/schema.prisma`: `Submission`, `Registration`, `Sponsor`,
+  `Exhibitor`, `Certificate`, `RateLimit` and `Setting`.
+- `scripts/dev`: the local Postgres cluster and the demo data seeder.
+- `scripts/checks`: one-command checks that talk to the real services, for
+  accessibility, responsive layout, email, storage, Remita, photo licences and
+  the rate limiter.
+- `scripts/ops`: password hashing and the Vercel mirror's configuration.
+- `scripts/lib`: shared helpers, currently only the `.env` loader.
+- `deploy`: the scripts that put a release on the university's server.
 
 ## Deploying
 
-The app is a standard Next.js project, so it deploys to Vercel by pushing
-this repository and importing it there, then pasting the same environment
-variables into the Vercel project settings. Point `DATABASE_URL` at a
-production Postgres instance and run `npm run prisma:deploy` once against it
-(Vercel's build step can do this automatically if you add
-`prisma migrate deploy` to the build command). Set `NEXT_PUBLIC_SITE_URL` to
-the real domain once you have one: Paystack uses it to send delegates back to
-the right success or failure page, the certificate emails link to it, and the
-same-origin check reads it.
+The site runs on the university's own server at `conference.unilag.edu.ng`.
+Vercel is kept as a mirror, not as the live site.
+
+### The university server
+
+`deploy/unilag-server-setup.sh` prepares a bare Ubuntu machine once: it creates
+the `uarc` service user, installs Node and nginx, writes the systemd unit and
+obtains the TLS certificate. After that, every release goes out with:
+
+    deploy/deploy.sh <bundle.tar.gz> <commit>
+
+That script never builds in place. Each release is unpacked into a fresh
+directory, built there from nothing, and swapped in only once the build has
+passed and the new server has answered a request on port 3000. The release it
+replaces is kept next to it, so a bad deploy is undone with one command:
+
+    deploy/rollback.sh
+
+Two things are worth knowing about that machine, because both have bitten us:
+
+1. `shared.env` sets `NODE_ENV=production`, and with that set `npm ci` skips
+   devDependencies. TypeScript is one of them, and without it Next.js cannot
+   read the `@/` path aliases out of `tsconfig.json`, so every import fails to
+   resolve and the build dies with "Module not found". The deploy script
+   installs dev dependencies explicitly and refuses to build without
+   TypeScript, rather than failing confusingly. Do not remove that guard, and
+   never add `npm prune --omit=dev`.
+2. In September 2026 the live directory was found hand-edited by someone other
+   than the deploy script, with type errors and linting switched off. The site
+   was serving a build from three weeks earlier. If the site ever shows stale
+   content again, check `cat /opt/uarc/app/RELEASE` against `git log` first.
+
+### The Vercel mirror
+
+The app is a standard Next.js project, so it also deploys to Vercel by
+importing this repository and pasting the same environment variables into the
+project settings. `vercel.json` pins the functions to `fra1`, which is the
+region the database is in; leaving it unset puts them in Washington DC and
+sends every query across the Atlantic and back.
+
+Wherever it runs, point `DATABASE_URL` at a production Postgres instance, run
+`npm run prisma:deploy` once against it, and set `NEXT_PUBLIC_SITE_URL` to the
+real domain: the certificate emails link to it and the same-origin check reads
+it.

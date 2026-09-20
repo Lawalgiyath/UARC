@@ -13,7 +13,7 @@ interface HeldCertificate {
   url: string;
 }
 
-/** "Where is my certificate?" — email address plus the reference already held. */
+/** "Where is my certificate?", email address plus the reference already held. */
 export function CertificateLookup() {
   const [email, setEmail] = useState("");
   const [reference, setReference] = useState("");

@@ -1,4 +1,4 @@
-import "./load-env";
+import "../lib/load-env";
 
 /**
  * Attaches conference.unilag.edu.ng to the Vercel project and reports exactly

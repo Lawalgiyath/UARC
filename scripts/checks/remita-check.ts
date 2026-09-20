@@ -7,7 +7,7 @@
  * it answers a status query, and what it does with a repeated order. Those are
  * the parts that go wrong.
  *
- *   npm run remita-check
+ *   npm run check:remita
  *
  * The credentials below are Remita's own sandbox values, published in their
  * integration samples. They point at demo.remita.net and move no real money.
@@ -21,7 +21,7 @@ process.env.REMITA_ENV = "demo";
 
 async function main() {
   const { generateRrr, checkRrrStatus, remitaApiConfigured, DUPLICATE_ORDER } = await import(
-    "../src/lib/remitaApi"
+    "../../src/lib/remitaApi"
   );
 
   console.log("Remita integration check (sandbox)\n");

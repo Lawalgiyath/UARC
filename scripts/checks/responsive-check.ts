@@ -1,4 +1,4 @@
-import "./load-env";
+import "../lib/load-env";
 
 /**
  * Measures whether any page scrolls sideways, at the widths people actually use.
@@ -9,8 +9,8 @@ import "./load-env";
  * each width and compares the document's scroll width against the viewport,
  * then names the widest element responsible so the fix is one rule, not a hunt.
  *
- *   npm run responsive-check                    (against localhost:3000)
- *   npm run responsive-check -- https://...     (against anything else)
+ *   npm run check:responsive                    (against localhost:3000)
+ *   npm run check:responsive -- https://...     (against anything else)
  *
  * 360px is a common Android phone, 390px an iPhone, 768px a tablet portrait.
  */

@@ -5,11 +5,11 @@
  * out of /admin by mistyping the password five times, this clears the counter
  * without waiting fifteen minutes.
  *
- *   npm run rate-limit           show every live bucket
- *   npm run rate-limit -- --clear  clear them all
+ *   npm run check:rate-limit           show every live bucket
+ *   npm run check:rate-limit -- --clear  clear them all
  */
 
-import "./load-env";
+import "../lib/load-env";
 import { PrismaClient } from "@prisma/client";
 
 const db = new PrismaClient();

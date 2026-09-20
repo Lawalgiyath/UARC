@@ -260,7 +260,7 @@ export function SponsorApply() {
               {definition.custom
                 ? customValue > 0
                   ? formatAmount(customValue, definition.currency)
-                  : "—"
+                  : "Not set"
                 : formatAmount(definition.amount, definition.currency)}
             </span>
           </div>

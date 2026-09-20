@@ -2,7 +2,7 @@
  * Puts .env into process.env for the command line scripts.
  *
  * Next.js does this for the app, but a script run through tsx gets nothing,
- * which is why `npm run test-email` reported no mail route configured while
+ * which is why `npm run check:email` reported no mail route configured while
  * the site itself sent mail perfectly well. There is no dotenv in this project
  * and it does not need one: the file is a few lines of key=value.
  *
@@ -14,7 +14,7 @@
  *
  * Import it for its side effect, before anything that reads process.env:
  *
- *     import "./load-env";
+ *     import "../lib/load-env";
  */
 
 import { readFileSync } from "node:fs";

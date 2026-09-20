@@ -17,8 +17,10 @@ import { CONFERENCE } from "@/lib/conference";
 
 export const VENUE = {
   name: CONFERENCE.venue,
+  // The hall is signposted on campus under both names, so both are given: a
+  // delegate asking for directions may be pointed to "the Multipurpose Hall".
   addressLines: [
-    CONFERENCE.venue,
+    `${CONFERENCE.venue} (${CONFERENCE.venueParenthetical})`,
     "University of Lagos",
     "University Road, Akoka, Yaba",
     "Lagos, Nigeria",

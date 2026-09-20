@@ -55,7 +55,7 @@ export function Hero({ abstractDeadlineIso }: { abstractDeadlineIso: string }) {
             </div>
             <div>
               <span className="k">Venue</span>
-              <span className="v">Omotola Halls, UNILAG</span>
+              <span className="v">{CONFERENCE.venueShort}</span>
             </div>
             <div>
               <span className="k">Starts</span>

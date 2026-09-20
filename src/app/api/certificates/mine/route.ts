@@ -4,7 +4,7 @@ import { certificatesForHolder, CERTIFICATE_LABELS } from "@/lib/certificates";
 import { clientIp, isSameOrigin, forbidden, tooManyRequests } from "@/lib/security";
 import { consumeRateLimit } from "@/lib/rateLimit";
 
-// "Where is my certificate?" — answered with the email address and the
+// "Where is my certificate?", answered with the email address and the
 // reference code the holder already has. Both are required: an email address
 // on its own would let anyone pull another delegate's records.
 

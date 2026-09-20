@@ -6,7 +6,7 @@ import { TRACKS } from "@/lib/tracks";
 //
 // The Secretariat asked for "more info for each theme", so each track now
 // carries a paragraph on what it is actually looking for, the topic areas that
-// belong in it, and the disciplines the panel expects to hear from — enough
+// belong in it, and the disciplines the panel expects to hear from, enough
 // for an author to tell, without writing to ask, whether their paper belongs
 // here or in the track next door.
 

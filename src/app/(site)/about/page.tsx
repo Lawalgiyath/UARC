@@ -7,7 +7,7 @@ import { IconPattern } from "@/components/IconPattern";
 import { AcademicIcon } from "@/components/icons/AcademicIcons";
 import { CAMPUS_PHOTOS } from "@/lib/media";
 import { AUTHOR_PROMISES, VISIBILITY_CHANNELS } from "@/lib/university";
-import { CONFERENCE, HIGHLIGHTS } from "@/lib/conference";
+import { CONFERENCE, HIGHLIGHTS, FEATURING, PUBLICATION_NOTE } from "@/lib/conference";
 
 export const metadata: Metadata = {
   title: "Theme and Subthemes | 19th UNILAG Annual Research Conference",
@@ -163,6 +163,16 @@ export default function AboutPage() {
               </article>
             ))}
           </div>
+
+          <div className="featuring-strip">
+            <span className="k">Also featuring</span>
+            <ul>
+              {FEATURING.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+          <p className="publication-note">{PUBLICATION_NOTE}</p>
         </div>
       </section>
 

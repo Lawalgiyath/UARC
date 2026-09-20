@@ -6,21 +6,30 @@
 export const CONFERENCE = {
   edition: "19th",
   editionOrdinal: 19,
-  name: "University of Lagos Annual Research Conference",
-  shortName: "UNILAG Annual Research Conference",
+  name: "University of Lagos Annual Research Conference and Fair",
+  shortName: "UNILAG Annual Research Conference and Fair",
   subtitle: "An International Conference of the Sciences and Humanities",
+  // Wording taken from the Secretariat's flyer of 18 September 2026, which
+  // reads "for Combating" where the August announcement read "to Combat".
   theme:
-    "Sustainable Frontiers: Integrating Systems for Food Security, Health, Housing, and Humanity to Combat Global Challenges",
+    "Sustainable Frontiers: Integrating Systems for Food Security, Health, Housing and Humanity for Combating Global Challenges",
   themeShort: "Sustainable Frontiers",
   /** Sits directly under the "19th Edition" line, per the Secretariat's brief. */
   editionCaption:
     "Three days of plenaries, parallel sessions and a research fair, convened by the Central Research Committee of the University of Lagos and open to researchers within and outside Nigeria.",
-  dates: "October 14 – 16, 2026",
-  datesShort: "Oct 14–16, 2026",
+  dates: "October 14 to 16, 2026",
+  datesShort: "Oct 14 to 16, 2026",
   /** Sessions run from nine each morning, per the Secretariat's notice. */
   dailyStart: "9:00 a.m. daily",
-  venue: "Jelili Omotola Halls",
-  venueFull: "Jelili Omotola Halls, University of Lagos, Akoka, Yaba, Lagos, Nigeria",
+  // Named as the Secretariat's flyer of 18 September 2026 names it. Earlier
+  // versions of this site said "Jelili Omotola Halls"; the flyer gives the
+  // fuller form, with the middle name and the hall's other name in brackets.
+  venue: "Jelili Adebisi Omotola Hall",
+  venueParenthetical: "Multipurpose Hall",
+  /** Where space is tight, as in the hero ledger. */
+  venueShort: "Omotola Hall, UNILAG",
+  venueFull:
+    "The Jelili Adebisi Omotola Hall (Multipurpose Hall), University of Lagos, Akoka, Yaba, Lagos, Nigeria",
   abstractDeadlineLabel: "Monday, 14 September 2026",
   /** Who it is open to, quoted from the Secretariat's announcement. */
   openTo:
@@ -47,7 +56,7 @@ export interface Highlight {
 
 export const HIGHLIGHTS: Highlight[] = [
   {
-    title: "Academia–Industry Forum",
+    title: "Academia and Industry Forum",
     body: "Where the research meets the people who can use it. Industry is in the room to hear what the university is working on, and to say what it needs.",
     icon: "handshake",
   },
@@ -62,6 +71,25 @@ export const HIGHLIGHTS: Highlight[] = [
     icon: "booth",
   },
 ];
+
+/**
+ * The session formats listed under "Featuring" on the Secretariat's flyer of
+ * 18 September 2026. These sit alongside the paper sessions rather than
+ * replacing them, and were not described anywhere on the site before.
+ */
+export const FEATURING: string[] = [
+  "Postgraduate sessions",
+  "PhD colloquium",
+  "Open mic discussion",
+];
+
+/**
+ * What happens to a paper after the conference, as the flyer states it. The
+ * indexing claim is the university's own; it is repeated here rather than
+ * asserted independently.
+ */
+export const PUBLICATION_NOTE =
+  "Accepted manuscripts are published after the conference in the UNILAG journals, which are indexed in Crossref and Google Scholar.";
 
 export const CRC = {
   abbr: "CRC",

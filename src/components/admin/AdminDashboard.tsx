@@ -447,7 +447,7 @@ export function AdminDashboard({
                       <dl className="payment-card-facts">
                         <div>
                           <dt>RRR</dt>
-                          <dd className="mono">{row.rrr ?? "—"}</dd>
+                          <dd className="mono">{row.rrr ?? "Not given"}</dd>
                         </div>
                         <div>
                           <dt>Payer says paid</dt>
@@ -457,7 +457,7 @@ export function AdminDashboard({
                                 {money(row.declaredAmount, row.currency)}
                               </span>
                             ) : (
-                              "—"
+                              "Not given"
                             )}
                           </dd>
                         </div>
@@ -470,12 +470,12 @@ export function AdminDashboard({
                                   month: "short",
                                   year: "numeric",
                                 })
-                              : "—"}
+                              : "Not given"}
                           </dd>
                         </div>
                         <div>
                           <dt>Paid via</dt>
-                          <dd>{row.paidVia ?? "—"}</dd>
+                          <dd>{row.paidVia ?? "Not given"}</dd>
                         </div>
                         <div>
                           <dt>Declared</dt>
@@ -486,7 +486,7 @@ export function AdminDashboard({
                                   month: "short",
                                   year: "numeric",
                                 })
-                              : "—"}
+                              : "Not given"}
                           </dd>
                         </div>
                         <div>
@@ -704,8 +704,8 @@ export function AdminDashboard({
                           <td className="mono">{r.reference}</td>
                           <td>{r.fullName}</td>
                           <td>{r.institution}</td>
-                          <td className="mono">{r.studentIdNumber ?? "—"}</td>
-                          <td>{r.studentInstitutionEmail ?? "—"}</td>
+                          <td className="mono">{r.studentIdNumber ?? "Not given"}</td>
+                          <td>{r.studentInstitutionEmail ?? "Not given"}</td>
                           <td>
                             <select
                               value={r.verification}

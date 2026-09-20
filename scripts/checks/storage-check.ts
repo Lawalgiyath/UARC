@@ -1,4 +1,4 @@
-import "./load-env";
+import "../lib/load-env";
 
 /**
  * Proves receipts upload privately and can still be read back by us.
@@ -9,7 +9,7 @@ import "./load-env";
  * to the public while the signed one works for the Secretariat. Getting that
  * backwards means every receipt is readable by anyone holding a link.
  *
- *   npm run storage-check
+ *   npm run check:storage
  *
  * It uploads a small placeholder to uarc/receipts, tests it both ways, and
  * deletes it again.
@@ -23,7 +23,7 @@ import {
   resourceTypeFromUrl,
   formatFromUrl,
   stripSignature,
-} from "../src/lib/cloudinary";
+} from "../../src/lib/cloudinary";
 
 // A 1x1 PNG, so nothing real is uploaded.
 const PIXEL =

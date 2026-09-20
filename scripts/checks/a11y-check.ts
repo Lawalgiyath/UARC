@@ -1,4 +1,4 @@
-import "./load-env";
+import "../lib/load-env";
 
 /**
  * Checks the accessibility basics on every page.
@@ -10,8 +10,8 @@ import "./load-env";
  * make a site unusable with a screen reader or a keyboard, which for a
  * research conference means a delegate who cannot register at all.
  *
- *   npm run a11y-check                    (against localhost:3000)
- *   npm run a11y-check -- https://...
+ *   npm run check:a11y                    (against localhost:3000)
+ *   npm run check:a11y -- https://...
  *
  * It checks what can be checked mechanically and honestly. Colour contrast and
  * reading order need a person; these do not.

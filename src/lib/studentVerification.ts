@@ -7,7 +7,7 @@ import type { FeeCategory } from "@/lib/pricing";
 // the night before the deadline. The compromise: an institutional email
 // address and a student number are required at the point of registration, an
 // address on a recognisably academic domain clears automatically, and anything
-// else goes to the Secretariat for a look. Nobody is turned away by the form —
+// else goes to the Secretariat for a look. Nobody is turned away by the form:
 // they are queued.
 //
 // Physical ID is still checked at the registration desk. This system exists to

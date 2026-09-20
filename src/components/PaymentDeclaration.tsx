@@ -5,7 +5,7 @@ import Link from "next/link";
 import { AcademicIcon } from "@/components/icons/AcademicIcons";
 import { REMITA, normaliseRrr } from "@/lib/remita";
 
-// "I have paid" — the step that replaces the Google Form.
+// "I have paid", the step that replaces the Google Form.
 //
 // Two things go in: the RRR from the payment slip, and a photograph of the
 // receipt. The RRR is checked for shape before the request leaves the browser,
