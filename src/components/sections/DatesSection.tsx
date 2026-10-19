@@ -33,7 +33,7 @@ export function DatesSection({ abstractOpensAt, abstractClosesAt }: { abstractOp
           })}
         </div>
         <p className="fee-note">
-          Provisional dates for early bird and regular registration cutoffs are shown above and should be
+          Provisional dates for regular registration cutoffs are shown above and should be
           confirmed by the Secretariat before launch.
         </p>
       </div>

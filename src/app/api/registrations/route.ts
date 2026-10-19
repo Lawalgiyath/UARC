@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { generateUniqueReference } from "@/lib/reference";
-import { initializeTransaction } from "@/lib/paystack";
 import { FEE_SCHEDULE, isFeeCategory } from "@/lib/pricing";
 
 const registrationSchema = z.object({
@@ -36,26 +35,8 @@ export async function POST(request: Request) {
       category: fee.label,
       amount: fee.amount,
       currency: fee.currency,
-      paystackRef: reference,
     },
   });
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
-
-  try {
-    const { authorizationUrl } = await initializeTransaction({
-      email: data.email,
-      amountMajorUnits: fee.amount,
-      currency: fee.currency,
-      reference,
-      callbackUrl: `${siteUrl}/api/registrations/verify`,
-    });
-    return NextResponse.json({ authorizationUrl });
-  } catch (err) {
-    console.error("[registrations] Paystack initialize failed", err);
-    return NextResponse.json(
-      { error: "Could not start payment. Please try again shortly." },
-      { status: 502 }
-    );
-  }
+  return NextResponse.json({ reference });
 }

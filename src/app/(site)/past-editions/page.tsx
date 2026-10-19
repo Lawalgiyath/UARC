@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { Metadata } from "next";
 import { AcademicVine } from "@/components/AcademicVine";
 import { CAMPUS_PHOTOS } from "@/lib/media";
@@ -82,8 +83,11 @@ export default function PastEditionsPage() {
             ))}
           </div>
           <p className="archive-note">
-            The 19th edition will be added to this archive after the conference concludes in October 2026,
-            drawing on the same submissions and registrations recorded through this site.
+            The 19th edition is featured in our new{" "}
+            <Link href="/gallery" style={{ fontWeight: 600 }}>
+              19th Edition Official Photo Gallery (26 Photos)
+            </Link>
+            , documenting the plenary lectures and deliberations at Jelili Adebisi Omotola Hall.
           </p>
         </div>
         <AcademicVine variant="corner" className="vine-corner bottom-right" />

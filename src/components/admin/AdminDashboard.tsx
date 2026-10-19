@@ -20,7 +20,8 @@ interface RegistrationRow {
   category: string;
   amount: number;
   currency: string;
-  status: "PENDING" | "PAID" | "FAILED";
+  status: "PENDING" | "DECLARED" | "PAID" | "FAILED";
+  receiptUrl?: string | null;
   createdAt: string;
 }
 
@@ -36,7 +37,7 @@ export function AdminDashboard({
   const router = useRouter();
   const [tab, setTab] = useState<"submissions" | "registrations">("submissions");
   const [submissions, setSubmissions] = useState(initialSubmissions);
-  const [registrations] = useState(initialRegistrations);
+  const [registrations, setRegistrations] = useState(initialRegistrations);
   const [deadline, setDeadline] = useState(abstractDeadlineIso);
   const [deadlineDraft, setDeadlineDraft] = useState(abstractDeadlineIso.slice(0, 16));
   const [savingDeadline, setSavingDeadline] = useState(false);
@@ -58,6 +59,15 @@ export function AdminDashboard({
   async function updateStatus(id: string, status: SubmissionRow["status"]) {
     setSubmissions((prev) => prev.map((s) => (s.id === id ? { ...s, status } : s)));
     await fetch("/api/admin/submissions", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, status }),
+    });
+  }
+
+  async function updateRegistrationStatus(id: string, status: RegistrationRow["status"]) {
+    setRegistrations((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
+    await fetch("/api/admin/registrations", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, status }),
@@ -167,7 +177,7 @@ export function AdminDashboard({
             <div className="admin-table-wrap">
               <table className="admin-table">
                 <thead>
-                  <tr><th>Reference</th><th>Name</th><th>Category</th><th>Amount</th><th>Status</th></tr>
+                  <tr><th>Reference</th><th>Name</th><th>Category</th><th>Amount</th><th>Receipt</th><th>Status</th></tr>
                 </thead>
                 <tbody>
                   {registrations.map((r) => (
@@ -176,7 +186,27 @@ export function AdminDashboard({
                       <td>{r.fullName}</td>
                       <td>{r.category}</td>
                       <td className="tnum">{r.currency === "USD" ? "$" : "₦"}{r.amount.toLocaleString("en-NG")}</td>
-                      <td><span className={`pill-status ${r.status.toLowerCase()}`}>{r.status}</span></td>
+                      <td>
+                        {r.receiptUrl ? (
+                          <a href={r.receiptUrl} target="_blank" rel="noreferrer" style={{ textDecoration: "underline", color: "var(--brand-blue)" }}>
+                            View Receipt
+                          </a>
+                        ) : (
+                          <span style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>None</span>
+                        )}
+                      </td>
+                      <td>
+                        <select
+                          value={r.status}
+                          onChange={(e) => updateRegistrationStatus(r.id, e.target.value as RegistrationRow["status"])}
+                          style={{ fontSize: "0.8125rem", padding: "0.3rem 0.5rem" }}
+                        >
+                          <option value="PENDING">Pending</option>
+                          <option value="DECLARED">Declared</option>
+                          <option value="PAID">Paid</option>
+                          <option value="FAILED">Failed</option>
+                        </select>
+                      </td>
                     </tr>
                   ))}
                   {registrations.length === 0 && (

@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { href: "/about", label: "Theme" },
   { href: "/about#subthemes", label: "Subthemes" },
   { href: "/dates-and-fees", label: "Dates & Fees" },
+  { href: "/gallery", label: "Gallery" },
   { href: "/past-editions", label: "Past Editions" },
   { href: "/committee", label: "Committee" },
   { href: "/faq", label: "FAQ" },

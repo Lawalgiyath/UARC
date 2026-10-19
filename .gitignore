@@ -10,3 +10,9 @@ build
 
 .vercel
 .env*
+update.tar.gz
+update.zip
+temp_page.html
+article_images.json
+downloaded_images.json
+temp/

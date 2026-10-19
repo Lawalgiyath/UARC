@@ -30,7 +30,8 @@ export default async function AdminPage() {
         category: r.category,
         amount: r.amount,
         currency: r.currency,
-        status: r.status,
+        status: r.status as "PENDING" | "PAID" | "FAILED",
+        receiptUrl: r.receiptUrl ?? null,
         createdAt: r.createdAt.toISOString(),
       }))}
       abstractDeadlineIso={deadline.toISOString()}

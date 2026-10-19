@@ -8,9 +8,10 @@ const TOC = [
   { num: "IV", label: "Registration Fees", pg: "Pricing", href: "/dates-and-fees#fees" },
   { num: "V", label: "Submit an Abstract", pg: "Portal", href: "/submit" },
   { num: "VI", label: "Register & Pay", pg: "Portal", href: "/register" },
-  { num: "VII", label: "Past Editions", pg: "Archive", href: "/past-editions" },
-  { num: "VIII", label: "Committee", pg: "Roles", href: "/committee" },
-  { num: "IX", label: "Questions", pg: "FAQ", href: "/faq" },
+  { num: "VII", label: "Photo Gallery", pg: "26 Photos", href: "/gallery" },
+  { num: "VIII", label: "Past Editions", pg: "Archive", href: "/past-editions" },
+  { num: "IX", label: "Committee", pg: "Roles", href: "/committee" },
+  { num: "X", label: "Questions", pg: "FAQ", href: "/faq" },
 ];
 
 export function Hero({ abstractDeadlineIso }: { abstractDeadlineIso: string }) {

@@ -15,6 +15,7 @@ enum SubmissionStatus {
 
 enum RegistrationStatus {
   PENDING
+  DECLARED
   PAID
   FAILED
 }
@@ -41,19 +42,21 @@ model Submission {
 }
 
 model Registration {
-  id           String              @id @default(cuid())
-  reference    String              @unique
-  fullName     String
-  email        String
-  phone        String
-  institution  String
-  category     String
-  amount       Int
-  currency     String
-  paystackRef  String?             @unique
-  status       RegistrationStatus  @default(PENDING)
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @updatedAt
+  id               String              @id @default(cuid())
+  reference        String              @unique
+  fullName         String
+  email            String
+  phone            String
+  institution      String
+  category         String
+  amount           Int
+  currency         String
+  paystackRef      String?             @unique
+  receiptUrl       String?
+  receiptPublicId  String?
+  status           RegistrationStatus  @default(PENDING)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
 
   @@index([email])
   @@index([status])

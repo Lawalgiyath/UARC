@@ -18,6 +18,7 @@ export function SiteFooter() {
             <Link href="/about">Theme</Link>
             <Link href="/about#subthemes">Subthemes</Link>
             <Link href="/dates-and-fees">Dates &amp; fees</Link>
+            <Link href="/gallery">Photo Gallery</Link>
             <Link href="/committee">Committee</Link>
           </div>
           <div>
@@ -37,7 +38,7 @@ export function SiteFooter() {
           <span>&copy; {new Date().getFullYear()} University of Lagos. All abstracts accepted for oral presentation will be considered for publication in the Unilag Journals.</span>
         </div>
         <p className="photo-credit-list" style={{ marginTop: "1.25rem" }}>
-          Campus photography via Wikimedia Commons, licensed CC BY-SA 4.0:{" "}
+          19th Conference photography by Michael Joshua / UNILAG Communication Unit. Campus photography via Wikimedia Commons, licensed CC BY-SA 4.0:{" "}
           {credits.map((c, i) => (
             <span key={c.sourceUrl}>
               <a href={c.sourceUrl}>{c.credit}</a>
